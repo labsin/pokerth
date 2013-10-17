@@ -1,4 +1,6 @@
 # QMake pro-file for PokerTH
+linux-*:exists(/usr/bin/ccache):QMAKE_CXX=ccache g++
+macx:exists(/usr/bin/ccache):QMAKE_CXX=ccache g++
 
 TEMPLATE = subdirs
 SUBDIRS = pokerth_protocol.pro pokerth_db.pro pokerth_lib.pro pokerth_game.pro
