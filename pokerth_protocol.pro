@@ -7,6 +7,7 @@ CONFIG += staticlib \
 	rtti \
 	stl \
 	warn_on
+CONFIG += PROTOC
 UI_DIR = uics
 TARGET = lib/pokerth_protocol
 QMAKE_CLEAN += ./lib/libpokerth_protocol.a
@@ -33,10 +34,12 @@ win32 {
 	DEFINES += _WIN32_WINNT=0x0501
 }
 unix : !mac {
-        INCLUDEPATH += $${PREFIX}/include
-	system(protoc pokerth.proto --cpp_out=src/third_party/protobuf)
-	system(protoc chatcleaner.proto --cpp_out=src/third_party/protobuf)
-	system(protoc pokerth.proto --java_out=tests/src)
+    INCLUDEPATH += $${PREFIX}/include
+    PROTOC {
+        system(protoc pokerth.proto --cpp_out=src/third_party/protobuf)
+        system(protoc chatcleaner.proto --cpp_out=src/third_party/protobuf)
+	    system(protoc pokerth.proto --java_out=tests/src)
+    }
 }
 mac { 
         # make it x86_64 only
