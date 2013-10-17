@@ -1,9 +1,17 @@
 # QMake pro-file for PokerTH
 linux-*:exists(/usr/bin/ccache):QMAKE_CXX=ccache g++
 macx:exists(/usr/bin/ccache):QMAKE_CXX=ccache g++
+# CONFIG += QML
 
 TEMPLATE = subdirs
-SUBDIRS = pokerth_protocol.pro pokerth_db.pro pokerth_lib.pro pokerth_game.pro
+SUBDIRS = pokerth_protocol.pro pokerth_db.pro pokerth_lib.pro
+
+QML {
+    SUBDIRS += pokerth_qml.pro
+} else {
+    SUBDIRS += pokerth_game.pro
+}
+
 !mac:!gui_800x480:!client {
 	SUBDIRS += pokerth_server.pro chatcleaner.pro
 }
