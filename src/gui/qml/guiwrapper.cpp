@@ -144,6 +144,10 @@ void GuiWrapper::refreshPlayerAvatar() const
 void GuiWrapper::refreshChangePlayer() const
 {
     qDebug()<<"refreshChangePlayer()";
+    refreshSet();
+    refreshActions();
+    refreshCash();
+
 }
 void GuiWrapper::refreshAll() const
 {
