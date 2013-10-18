@@ -75,3 +75,12 @@ void StorePlayers::resetActiveList()
     if(changed)
         emit activeListChanged();
 }
+
+void StorePlayers::cardsToDefault()
+{
+    QMap<int, Player*>::iterator it;
+    bool changed = false;
+    for (it = m_players.begin(); it != m_players.end(); ++it){
+        it.value()->initCards();
+    }
+}

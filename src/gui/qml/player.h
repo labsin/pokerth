@@ -294,6 +294,8 @@ public:
         }
     }
 
+    void initCards();
+
 signals:
 
     void guidChanged(QString arg);

@@ -177,6 +177,7 @@ PlayerModel *QmlGame::getPlayerModel() const
 void QmlGame::setflopCard1(QmlCard *arg)
 {
     if (m_flopCard1 != arg) {
+        delete m_flopCard1;
         m_flopCard1 = arg;
         emit flopCard1Changed(arg);
     }
@@ -185,6 +186,7 @@ void QmlGame::setflopCard1(QmlCard *arg)
 void QmlGame::setflopCard2(QmlCard *arg)
 {
     if (m_flopCard2 != arg) {
+        delete m_flopCard2;
         m_flopCard2 = arg;
         emit flopCard2Changed(arg);
     }
@@ -193,6 +195,7 @@ void QmlGame::setflopCard2(QmlCard *arg)
 void QmlGame::setflopCard3(QmlCard *arg)
 {
     if (m_flopCard3 != arg) {
+        delete m_flopCard3;
         m_flopCard3 = arg;
         emit flopCard3Changed(arg);
     }
@@ -201,6 +204,7 @@ void QmlGame::setflopCard3(QmlCard *arg)
 void QmlGame::setturnCard(QmlCard *arg)
 {
     if (m_turnCard != arg) {
+        delete m_turnCard;
         m_turnCard = arg;
         emit turnCardChanged(arg);
     }
@@ -209,6 +213,7 @@ void QmlGame::setturnCard(QmlCard *arg)
 void QmlGame::setriverCard(QmlCard *arg)
 {
     if (m_riverCard != arg) {
+        delete m_riverCard;
         m_riverCard = arg;
         emit riverCardChanged(arg);
     }
@@ -216,7 +221,14 @@ void QmlGame::setriverCard(QmlCard *arg)
 
 void QmlGame::nextRoundCleanGui()
 {
+    myPlayerModel->nextRound();
     setblinkStartButton(false);
+    setflopCard1(new QmlCard());
+    setflopCard2(new QmlCard());
+    setflopCard3(new QmlCard());
+    setturnCard(new QmlCard());
+    setriverCard(new QmlCard());
+    setbuttonsCheckable(false);
 }
 
 bool QmlGame::check()

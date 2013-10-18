@@ -28,6 +28,8 @@ public:
         return m_storePlayers;
     }
 
+    void nextRound();
+
 signals:
 
 public slots:

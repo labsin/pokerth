@@ -54,6 +54,7 @@ public:
         return at(i);
     }
     void resetActiveList();
+    void cardsToDefault();
 
 signals:
     void activeListShouldReset();

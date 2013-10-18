@@ -36,6 +36,18 @@ QList<QObject *> Player::getCards() const {
     return myCards;
 }
 
+void Player::initCards()
+{
+    getCard(0)->setcard(-1);
+    getCard(1)->setcard(-1);
+
+    getCard(0)->setdealt(false);
+    getCard(1)->setdealt(false);
+
+    getCard(0)->setflipped(false);
+    getCard(1)->setflipped(false);
+}
+
 void Player::setFlip(bool flipped) {
     for(int i=0; i<2; i++) {
         getCard(i)->setflipped(flipped);

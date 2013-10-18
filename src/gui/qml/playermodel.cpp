@@ -87,6 +87,11 @@ Player * const &PlayerModel::at(int index)
     return m_storePlayers->at(index);
 }
 
+void PlayerModel::nextRound()
+{
+    m_storePlayers->cardsToDefault();
+}
+
 void PlayerModel::resetModel()
 {
     beginResetModel();
