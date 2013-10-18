@@ -61,7 +61,7 @@ RESOURCES = src/gui/qml/resources/pokerth.qrc
 INCLUDEPATH += . \
 	src \
 	src/engine \
-	src/gui \
+        src/gui \
         src/qt/qttools \
 	src/net \
 	src/engine/local_engine \
@@ -126,8 +126,8 @@ HEADERS += src/engine/game.h \
 	src/engine/network_engine/clienthand.h \
 	src/engine/network_engine/clientplayer.h \
         src/engine/network_engine/clientbero.h \
-	src/gui/qttoolsinterface.h \
-	src/gui/qt/qttools/qttoolswrapper.h \
+        src/gui/qttoolsinterface.h \
+        src/gui/qt/qttools/qttoolswrapper.h \
         src/gui/qt/qttools/qthelper/qthelper.h \
         src/gui/generic/serverguiwrapper.h \
         src/engine/local_engine/replay.h \
@@ -147,7 +147,7 @@ HEADERS += src/engine/game.h \
 
 SOURCES += src/pokerth_qml.cpp \
         src/gui/qttoolsinterface.h \
-	src/gui/qt/qttools/qttoolswrapper.cpp \
+        src/gui/qt/qttools/qttoolswrapper.cpp \
         src/gui/qt/qttools/qthelper/qthelper.cpp \
 	src/net/common/net_helper_client.cpp \
         src/core/common/loghelper_client.cpp \
