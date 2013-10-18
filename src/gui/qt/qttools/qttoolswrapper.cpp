@@ -29,7 +29,7 @@
  * as that of the covered work.                                              *
  *****************************************************************************/
 #include "qttoolswrapper.h"
-#include <qthelper/qthelper.h>
+#include "qthelper/qthelper.h"
 
 using namespace std;
 
