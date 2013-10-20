@@ -593,6 +593,21 @@ void QmlGame::dealRiverCards2()
 
 void QmlGame::nextPlayerAnimation()
 {
+    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+
+    myManager->getGui()->refreshSet();
+
+    PlayerListConstIterator it_c;
+    PlayerList seatsList = currentHand->getSeatsList();
+    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        if((*it_c)->getMyID() == currentHand->getPreviousPlayerID()) break;
+    }
+
+    if(currentHand->getPreviousPlayerID() != -1) {
+        myManager->getGui()->refreshAction(currentHand->getPreviousPlayerID(), (*it_c)->getMyAction());
+    }
+    myManager->getGui()->refreshCash();
+    updateMyButtonsState();
     nextPlayerAnimationTimer->start(nextPlayerSpeed1);
 }
 
