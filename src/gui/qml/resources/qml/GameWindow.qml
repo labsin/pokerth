@@ -209,6 +209,12 @@ ApplicationWindow {
                             return "Turn"
                         case Game.QML_GAME_STATE_RIVER:
                             return "River"
+                        case Game.QML_GAME_STATE_PREFLOP_SMALL_BLIND:
+                            return "Preflop SB"
+                        case Game.QML_GAME_STATE_PREFLOP_BIG_BLIND:
+                            return "Preflop BB"
+                        default:
+                            return "--ERROR--"
                         }
                     }
                 }
