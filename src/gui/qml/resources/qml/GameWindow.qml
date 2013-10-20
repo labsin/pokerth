@@ -280,6 +280,11 @@ ApplicationWindow {
             property bool checking: betting
             property bool calling: !checking
             property int stepSize: 50
+
+            ExclusiveGroup {
+                id: actionButtons
+            }
+
             RowLayout {
                 id: row_raiseSpinBox
                 anchors.left: parent.left
@@ -306,7 +311,7 @@ ApplicationWindow {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     checkable: thisGame.buttonsCheckable
-                    checked: thisGame.checkedButton==Game.AllInButton
+                    exclusiveGroup: actionButtons
                     onClicked: {
                         if(thisGame.buttonsCheckable) {
                             if(thisGame.checkedButton==Game.AllInButton) {
@@ -340,7 +345,7 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.top: slider_raise.bottom
                 checkable: thisGame.buttonsCheckable
-                checked: thisGame.checkedButton==Game.BetRaiseButton
+                exclusiveGroup: actionButtons
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.BetRaiseButton) {
@@ -362,11 +367,7 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.top: button_betRaise.bottom
                 checkable: thisGame.buttonsCheckable
-                checked: thisGame.checkedButton==Game.CallButton
-                onCheckableChanged: {
-                    print("checkable: "+checkable)
-                }
-
+                exclusiveGroup: actionButtons
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.CallButton) {
@@ -393,9 +394,8 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.top: button_call.bottom
                 checkable: thisGame.buttonsCheckable
-                checked: thisGame.checkedButton==Game.FoldButton
+                exclusiveGroup: actionButtons
                 onClicked: {
-                    print("buttons checkable: "+thisGame.buttonsCheckable)
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.FoldButton) {
                             thisGame.checkedButton=Game.NoButton
@@ -410,6 +410,29 @@ ApplicationWindow {
                 }
                 text: "Fold"
             }
+            Connections {
+                target: thisGame
+                onCheckedButtonChanged: {
+                    switch(thisGame.checkedButton) {
+                    case Game.NoButton:
+                        actionButtons.current.checked=false;
+                        break;
+                    case Game.BetRaiseButton:
+                        button_betRaise.checked=true;
+                        break;
+                    case Game.CallButton:
+                        button_call.checked=true;
+                        break;
+                    case Game.FoldButton:
+                        button_fold.checked=true;
+                        break;
+                    case Game.AllInButton:
+                        button_allIn.checked=true
+                        break;
+                    }
+                }
+            }
+
             function setFromSpin(spin) {
                 //var tmpSpin = roundOnStep(spin);
                 var tmpSpin = spin;
