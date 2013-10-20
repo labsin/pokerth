@@ -229,6 +229,7 @@ void QmlGame::nextRoundCleanGui()
     setturnCard(new QmlCard());
     setriverCard(new QmlCard());
     setbuttonsCheckable(false);
+    setbets(0);
 }
 
 bool QmlGame::check()
@@ -407,6 +408,7 @@ void QmlGame::myActionDone()
 
     setmyTurn(false);
     setbuttonsCheckable(false);
+    setbets(0);
 
     if (!myManager->getSession()->isNetworkClientRunning())
         nextPlayerAnimation();
