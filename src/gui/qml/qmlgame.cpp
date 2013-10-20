@@ -405,6 +405,7 @@ void QmlGame::myActionDone()
     // to transfer the action to the server.
     myManager->getSession()->sendClientPlayerAction();
 
+    setmyTurn(false);
     setbuttonsCheckable(false);
 
     if (!myManager->getSession()->isNetworkClientRunning())
@@ -1023,8 +1024,12 @@ void QmlGame::provideMyActions(int mode)
     setminimumRaise(currentHand->getCurrentBeRo()->getMinimumRaise());
     setsmallBlind(currentHand->getSmallBlind());
 
+    if(humanPlayer == myManager->getSession()->getCurrentGame()->getCurrentPlayer()) {
+        setbuttonsCheckable(false);
+        setmyTurn(true);
+    }
     //really disabled buttons if human player is fold/all-in or server-autofold... and not called from dealberocards
-    if(/*pushButton_BetRaise->isCheckable() && */(mode != 0 && (humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN || humanPlayer->getMyAction() == PLAYER_ACTION_FOLD || (humanPlayer->getMySet() == currentHand->getCurrentBeRo()->getHighestSet() && (humanPlayer->getMyAction() != PLAYER_ACTION_NONE)))) || !humanPlayer->isSessionActive() /*server-autofold*/) {
+    else if(/*pushButton_BetRaise->isCheckable() && */(mode != 0 && (humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN || humanPlayer->getMyAction() == PLAYER_ACTION_FOLD || (humanPlayer->getMySet() == currentHand->getCurrentBeRo()->getHighestSet() && (humanPlayer->getMyAction() != PLAYER_ACTION_NONE)))) || !humanPlayer->isSessionActive() /*server-autofold*/) {
         setbuttonsCheckable(false);
     } else {
         setbuttonsCheckable(true);

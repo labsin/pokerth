@@ -39,6 +39,7 @@ class QmlGame : public QObject
     Q_PROPERTY(QmlGameState gameState READ gameState WRITE setgameState NOTIFY gameStateChanged)
     Q_PROPERTY(bool buttonsCheckable READ buttonsCheckable WRITE setbuttonsCheckable NOTIFY buttonsCheckableChanged)
     Q_PROPERTY(bool fullBetRule READ fullBetRule WRITE setfullBetRule NOTIFY fullBetRuleChanged)
+    Q_PROPERTY(bool myTurn READ myTurn WRITE setmyTurn NOTIFY myTurnChanged)
 
 public:
     explicit QmlGame(QObject *parent = 0);
@@ -246,6 +247,11 @@ public:
         return m_gameState;
     }
 
+    bool myTurn() const
+    {
+        return m_myTurn;
+    }
+
 public slots:
 
     void dealBeRoCards(int myBeRoID);
@@ -412,6 +418,14 @@ public slots:
         }
     }
 
+    void setmyTurn(bool arg)
+    {
+        if (m_myTurn != arg) {
+            m_myTurn = arg;
+            emit myTurnChanged(arg);
+        }
+    }
+
 signals:
     void guiInitiated(int speed);
 
@@ -462,6 +476,8 @@ signals:
     void smallBlindChanged(int arg);
 
     void gameStateChanged(QmlGameState arg);
+
+    void myTurnChanged(bool arg);
 
 private:
     PlayerModel* myPlayerModel;
@@ -545,6 +561,7 @@ private:
     bool m_fullBetRule;
     int m_smallBlind;
     QmlGameState m_gameState;
+    bool m_myTurn;
 };
 
 #endif // QMLGAME_H
