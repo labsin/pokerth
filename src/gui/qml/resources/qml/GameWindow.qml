@@ -136,8 +136,10 @@ ApplicationWindow {
                 id: image_flop1
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard1.implicitWidth
+                height: flopCard1.implicitHeight
                 CardObj {
                     id: flopCard1
+                    anchors.fill: parent
                     cardObj: thisGame.flopCard1
                     visible: thisGame.flopCard1.dealt
                 }
@@ -145,8 +147,10 @@ ApplicationWindow {
             Image {
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard2.implicitWidth
+                height: flopCard2.implicitHeight
                 CardObj {
                     id: flopCard2
+                    anchors.fill: parent
                     cardObj: thisGame.flopCard2
                     visible: thisGame.flopCard2.dealt
                 }
@@ -154,8 +158,10 @@ ApplicationWindow {
             Image {
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard3.implicitWidth
+                height: flopCard3.implicitHeight
                 CardObj {
                     id: flopCard3
+                    anchors.fill: parent
                     cardObj: thisGame.flopCard3
                     visible: thisGame.flopCard3.dealt
                 }
@@ -163,8 +169,10 @@ ApplicationWindow {
             Image {
                 source: "image://PokerTH/table/cardholder_turn.png"
                 width: turnCard.implicitWidth
+                height: turnCard.implicitHeight
                 CardObj {
                     id: turnCard
+                    anchors.fill: parent
                     cardObj: thisGame.turnCard
                     visible: thisGame.turnCard.dealt
                 }
@@ -172,8 +180,10 @@ ApplicationWindow {
             Image {
                 source: "image://PokerTH/table/cardholder_river.png"
                 width: riverCard.implicitWidth
+                height: riverCard.implicitHeight
                 CardObj {
                     id: riverCard
+                    anchors.fill: parent
                     cardObj: thisGame.riverCard
                     visible: thisGame.riverCard.dealt
                 }
