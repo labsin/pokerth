@@ -193,12 +193,24 @@ ApplicationWindow {
                 spacing: 10
                 Label {
                     id: label_textStatus
-                    text: ""
+                    text: gameStateString(thisGame.gameState)
                     font.pointSize: 18
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     width: parent.width
                     height: 30
+                    function gameStateString(gameState) {
+                        switch(gameState) {
+                        case Game.QML_GAME_STATE_PREFLOP:
+                            return "Preflop"
+                        case Game.QML_GAME_STATE_FLOP:
+                            return "Flop"
+                        case Game.QML_GAME_STATE_TURN:
+                            return "Turn"
+                        case Game.QML_GAME_STATE_RIVER:
+                            return "River"
+                        }
+                    }
                 }
                 Item {
                     width: parent.width
