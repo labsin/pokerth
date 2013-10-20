@@ -45,7 +45,6 @@ Item {
         ColumnLayout {
             id: leftColumn
             spacing: 4
-            Layout.fillHeight: true
             Image {
                 id: image_Avatar
                 source: player.avatar==""?"image://PokerTH/table/genereticAvatar.png":player.avatar
@@ -83,7 +82,6 @@ Item {
             id: rightColumn
             rowSpacing: 4
             columns:1
-            Layout.fillHeight: true
             Label {
                 id: label_PlayerName
                 text: player.name
