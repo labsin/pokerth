@@ -14,6 +14,7 @@ class QmlGame : public QObject
 {
     Q_OBJECT
     Q_ENUMS(Buttons)
+    Q_ENUMS(QmlGameState)
     Q_PROPERTY(QString title READ title WRITE settitle NOTIFY titleChanged)
     Q_PROPERTY(int pot READ pot NOTIFY potChanged)
     Q_PROPERTY(int bets READ bets WRITE setbets NOTIFY betsChanged)
@@ -34,12 +35,13 @@ class QmlGame : public QObject
     Q_PROPERTY(bool breakAfterCurrentHand READ breakAfterCurrentHand WRITE setbreakAfterCurrentHand NOTIFY breakAfterCurrentHandChanged)
     Q_PROPERTY(Buttons checkedButton READ checkedButton WRITE setcheckedButton NOTIFY checkedButtonChanged)
     Q_PROPERTY(PlayingMode playingMode READ playingMode WRITE setplayingMode NOTIFY playingModeChanged)
+    Q_PROPERTY(QmlGameState gameState READ gameState WRITE setgameState NOTIFY gameStateChanged)
     Q_PROPERTY(bool buttonsCheckable READ buttonsCheckable WRITE setbuttonsCheckable NOTIFY buttonsCheckableChanged)
     Q_PROPERTY(bool fullBetRule READ fullBetRule WRITE setfullBetRule NOTIFY fullBetRuleChanged)
 
 public:
     explicit QmlGame(QObject *parent = 0);
-     ~QmlGame();
+    ~QmlGame();
 
     enum Buttons {
         NoButton = 0,
@@ -53,6 +55,16 @@ public:
         ManualMode = 0,
         AutoCheckCallMode,
         AutoCheckFoldMode
+    };
+
+    enum QmlGameState {
+        QML_GAME_STATE_PREFLOP = 0,
+        QML_GAME_STATE_FLOP,
+        QML_GAME_STATE_TURN,
+        QML_GAME_STATE_RIVER,
+        QML_GAME_STATE_POST_RIVER,
+        QML_GAME_STATE_PREFLOP_SMALL_BLIND = 0xF0,
+        QML_GAME_STATE_PREFLOP_BIG_BLIND = 0xF1
     };
 
     static void registerType();
@@ -228,6 +240,11 @@ public:
         return m_smallBlind;
     }
 
+    QmlGameState gameState() const
+    {
+        return m_gameState;
+    }
+
 public slots:
 
     void dealBeRoCards(int myBeRoID);
@@ -384,6 +401,14 @@ public slots:
         }
     }
 
+    void setgameState(QmlGameState arg)
+    {
+        if (m_gameState != arg) {
+            m_gameState = arg;
+            emit gameStateChanged(arg);
+        }
+    }
+
 signals:
     void guiInitiated(int speed);
 
@@ -432,6 +457,8 @@ signals:
     void fullBetRuleChanged(bool arg);
 
     void smallBlindChanged(int arg);
+
+    void gameStateChanged(QmlGameState arg);
 
 private:
     PlayerModel* myPlayerModel;
@@ -514,6 +541,7 @@ private:
     int m_minimumRaise;
     bool m_fullBetRule;
     int m_smallBlind;
+    QmlGameState m_gameState;
 };
 
 #endif // QMLGAME_H

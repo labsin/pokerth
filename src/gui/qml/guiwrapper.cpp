@@ -250,9 +250,13 @@ void GuiWrapper::refreshButton() const
         myGame->getPlayerModel()->at((*it_c)->getMyID())->setButton((*it_c)->getMyButton());
     }
 }
-void GuiWrapper::refreshGameLabels(GameState state) const
+void GuiWrapper::refreshGameLabels(GameState gameState) const
 {
     qDebug()<<"refreshGameLabels()";
+    myGame->setgameState(static_cast<QmlGame::QmlGameState>(gameState));
+
+    myGame->sethandNr(myManager->getSession()->getCurrentGame()->getCurrentHand()->getMyID());
+    myGame->setgameNr(myManager->getSession()->getCurrentGame()->getMyGameID());
 }
 
 void GuiWrapper::refreshStatus(boost::shared_ptr<PlayerInterface> player) const

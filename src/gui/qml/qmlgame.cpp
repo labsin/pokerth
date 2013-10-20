@@ -23,7 +23,7 @@ QmlGame::QmlGame(QObject *parent) :
   , currentGameOver(false), m_breakAfterCurrentHand(false)
   , m_blinkStartButton(false), m_checkedButton(NoButton), m_playingMode(ManualMode)
   , m_buttonsCheckable(false), m_highestSet(0), m_minimumRaise(0), m_fullBetRule(false)
-  , m_smallBlind(0)
+  , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP)
 {
     myPlayerModel = new PlayerModel();
     myManager = ManagerSingleton::Instance();
