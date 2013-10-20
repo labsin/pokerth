@@ -335,6 +335,7 @@ public slots:
 
     void setcheckedButton(Buttons arg)
     {
+        qDebug() << "change button to " << arg ;
         if (m_checkedButton != arg) {
             m_checkedButton = arg;
             emit checkedButtonChanged(arg);

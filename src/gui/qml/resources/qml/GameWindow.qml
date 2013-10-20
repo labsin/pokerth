@@ -363,6 +363,10 @@ ApplicationWindow {
                 anchors.top: button_betRaise.bottom
                 checkable: thisGame.buttonsCheckable
                 checked: thisGame.checkedButton==Game.CallButton
+                onCheckableChanged: {
+                    print("checkable: "+checkable)
+                }
+
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.CallButton) {
@@ -391,6 +395,7 @@ ApplicationWindow {
                 checkable: thisGame.buttonsCheckable
                 checked: thisGame.checkedButton==Game.FoldButton
                 onClicked: {
+                    print("buttons checkable: "+thisGame.buttonsCheckable)
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.FoldButton) {
                             thisGame.checkedButton=Game.NoButton
