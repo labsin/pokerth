@@ -121,7 +121,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_bets
-                        text: thisGame.highestSet
+                        text: thisGame.set
                         anchors.left: label_textBets.right
                         anchors.right: parent.right
                         anchors.top: parent.top
