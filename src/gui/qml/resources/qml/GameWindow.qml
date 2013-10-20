@@ -272,14 +272,11 @@ ApplicationWindow {
             height: childrenRect.height
             width: 200
             property int cash: 5000
-            property int minimumRaiseDiff: 16
-            property int minimumRaise: thisGame.highestSet+minimumRaiseDiff
-            property int firstNotPossibleStep: Math.floor(minimumRaise/stepSize)*stepSize
             property bool betting: thisGame.highestSet ==0;
             property bool raising: !betting
             property bool checking: betting
             property bool calling: !checking
-            property bool actionButtonsEnabled: thisGame.checkedButton || thisGame.myTurn
+            property bool actionButtonsEnabled: thisGame.buttonsCheckable || thisGame.myTurn
             property int stepSize: 50
 
             ExclusiveGroup {
@@ -295,9 +292,10 @@ ApplicationWindow {
                     value: thisGame.bets
                     Layout.fillWidth: true
                     maximumValue: thisGame.myPlayer?thisGame.myPlayer.cash:minimumValue
-                    minimumValue: buttonContainer.raising?
-                                      thisGame.highestSet-thisGame.myPlayer.set + thisGame.minimumRaise
-                                    : thisGame.smallBlind*2
+                    minimumValue: thisGame.myPlayer?(buttonContainer.raising?
+                                                         thisGame.highestSet-thisGame.myPlayer.set + thisGame.smallBlind
+                                                       : thisGame.smallBlind*2
+                                                     ):0
                     stepSize: buttonContainer.stepSize
                     anchors.left: parent.left
                     anchors.top: parent.top
@@ -452,15 +450,13 @@ ApplicationWindow {
             }
 
             function fromSliderToSpin(slider) {
-                var tmp = firstNotPossibleStep
-                        + slider*(cash-firstNotPossibleStep)
+                var tmp = spinBox_raise.minimumValue
+                        + slider*(spinBox_raise.maximumValue-spinBox_raise.minimumValue)
                 //             tmp = roundOnStep(tmp)
-                if(tmp<minimumRaise)
-                    return minimumRaise;
                 return tmp;
             }
             function fromSpinToSlider(spin) {
-                return (spin - firstNotPossibleStep)/(cash-firstNotPossibleStep)
+                return (spin - spinBox_raise.minimumValue)/(spinBox_raise.maximumValue-spinBox_raise.minimumValue)
             }
         }
     }
