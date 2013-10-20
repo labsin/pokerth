@@ -933,6 +933,7 @@ void QmlGame::startNewHand()
 
 void QmlGame::meInAction()
 {
+    bool needAction = false;
     switch(m_playingMode) {
     case AutoCheckCallMode:
         break;
@@ -959,17 +960,18 @@ void QmlGame::meInAction()
                 allIn();
                 break;
             default:
+                needAction = true;
                 break;
             }
         }
+        else {
+            needAction = true;
+        }
         break;
     }
-
-    if(m_checkedButton != NoButton) {
-
+    if(needAction) {
+        provideMyActions();
     }
-    provideMyActions();
-    setbuttonsCheckable(false);
 }
 
 void QmlGame::flipHolecardsAllIn()
