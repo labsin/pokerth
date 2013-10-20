@@ -938,17 +938,28 @@ void QmlGame::meInAction()
     case AutoCheckFoldMode:
         break;
     default:
-        switch(m_checkedButton) {
-        case BetRaiseButton:
-            break;
-        case CallButton:
-            break;
-        case FoldButton:
-            break;
-        case AllInButton:
-            break;
-        default:
-            break;
+        if(m_buttonsCheckable) {
+            switch(m_checkedButton) {
+            case BetRaiseButton:
+                set();
+                break;
+            case CallButton:
+                if(m_highestSet != 0) {
+                    call();
+                }
+                else {
+                    check();
+                }
+                break;
+            case FoldButton:
+                fold();
+                break;
+            case AllInButton:
+                allIn();
+                break;
+            default:
+                break;
+            }
         }
         break;
     }
