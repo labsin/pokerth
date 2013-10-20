@@ -110,6 +110,7 @@ Item {
                     text: getLabelForAction(player.action)
                     color: "white"
                     font.bold: true
+                    style: Text.Outline; styleColor: "black"
                     anchors.bottom: item_cards.bottom
                     anchors.horizontalCenter: item_cards.horizontalCenter
                     anchors.bottomMargin: 14
