@@ -357,6 +357,7 @@ public slots:
     {
         if (m_buttonsCheckable != arg) {
             m_buttonsCheckable = arg;
+            setcheckedButton(NoButton);
             emit buttonsCheckableChanged(arg);
         }
     }
