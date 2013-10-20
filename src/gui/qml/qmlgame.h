@@ -495,6 +495,8 @@ signals:
 
     void boardSetChanged(int arg);
 
+    void nextRound();
+
 private:
     PlayerModel* myPlayerModel;
     Manager* myManager;

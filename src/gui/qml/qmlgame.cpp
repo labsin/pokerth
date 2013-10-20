@@ -230,6 +230,7 @@ void QmlGame::nextRoundCleanGui()
     setriverCard(new QmlCard());
     setbuttonsCheckable(false);
     setbets(0);
+    emit nextRound();
 }
 
 bool QmlGame::check()
