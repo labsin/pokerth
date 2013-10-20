@@ -279,6 +279,7 @@ ApplicationWindow {
             property bool raising: !betting
             property bool checking: betting
             property bool calling: !checking
+            property bool actionButtonsEnabled: thisGame.checkedButton || thisGame.myTurn
             property int stepSize: 50
 
             ExclusiveGroup {
@@ -310,6 +311,7 @@ ApplicationWindow {
                     anchors.left: spinBox_raise.right
                     anchors.right: parent.right
                     anchors.top: parent.top
+                    enabled: buttonContainer.actionButtonsEnabled
                     checkable: thisGame.buttonsCheckable
                     exclusiveGroup: actionButtons
                     onClicked: {
@@ -346,6 +348,7 @@ ApplicationWindow {
                 anchors.top: slider_raise.bottom
                 checkable: thisGame.buttonsCheckable
                 exclusiveGroup: actionButtons
+                enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.BetRaiseButton) {
@@ -368,6 +371,7 @@ ApplicationWindow {
                 anchors.top: button_betRaise.bottom
                 checkable: thisGame.buttonsCheckable
                 exclusiveGroup: actionButtons
+                enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.CallButton) {
@@ -395,6 +399,7 @@ ApplicationWindow {
                 anchors.top: button_call.bottom
                 checkable: thisGame.buttonsCheckable
                 exclusiveGroup: actionButtons
+                enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(thisGame.buttonsCheckable) {
                         if(thisGame.checkedButton==Game.FoldButton) {
