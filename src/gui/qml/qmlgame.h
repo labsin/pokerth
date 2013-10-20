@@ -15,6 +15,7 @@ class QmlGame : public QObject
     Q_OBJECT
     Q_ENUMS(Buttons)
     Q_ENUMS(QmlGameState)
+    Q_ENUMS(PlayingMode)
     Q_PROPERTY(QString title READ title WRITE settitle NOTIFY titleChanged)
     Q_PROPERTY(int pot READ pot NOTIFY potChanged)
     Q_PROPERTY(int bets READ bets WRITE setbets NOTIFY betsChanged)
