@@ -165,7 +165,7 @@ void GuiWrapper::refreshPot() const
     qDebug()<<"refreshPot()";
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
 
-    myGame->setbets(currentHand->getBoard()->getSets());
+    myGame->setboardSet(currentHand->getBoard()->getSets());
     myGame->setpot(currentHand->getBoard()->getPot());
 }
 void GuiWrapper::refreshGroupbox(int playerID, int status) const

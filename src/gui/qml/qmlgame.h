@@ -21,6 +21,7 @@ class QmlGame : public QObject
     Q_PROPERTY(int bets READ bets WRITE setbets NOTIFY betsChanged)
     Q_PROPERTY(QObject * myPlayer READ myPlayer NOTIFY myPlayerChanged)
     Q_PROPERTY(int highestSet READ highestSet WRITE sethighestSet NOTIFY highestSetChanged)
+    Q_PROPERTY(int set READ boardSet WRITE setboardSet NOTIFY boardSetChanged)
     Q_PROPERTY(int minimumRaise READ minimumRaise WRITE setminimumRaise NOTIFY minimumRaiseChanged)
     Q_PROPERTY(int smallBlind READ smallBlind WRITE setsmallBlind NOTIFY smallBlindChanged)
     Q_PROPERTY(int gameNr READ gameNr NOTIFY gameNrChanged)
@@ -252,6 +253,11 @@ public:
         return m_myTurn;
     }
 
+    int boardSet() const
+    {
+        return m_boardSet;
+    }
+
 public slots:
 
     void dealBeRoCards(int myBeRoID);
@@ -426,6 +432,14 @@ public slots:
         }
     }
 
+    void setboardSet(int arg)
+    {
+        if (m_boardSet != arg) {
+            m_boardSet = arg;
+            emit boardSetChanged(arg);
+        }
+    }
+
 signals:
     void guiInitiated(int speed);
 
@@ -478,6 +492,8 @@ signals:
     void gameStateChanged(QmlGameState arg);
 
     void myTurnChanged(bool arg);
+
+    void boardSetChanged(int arg);
 
 private:
     PlayerModel* myPlayerModel;
@@ -562,6 +578,7 @@ private:
     int m_smallBlind;
     QmlGameState m_gameState;
     bool m_myTurn;
+    int m_boardSet;
 };
 
 #endif // QMLGAME_H
