@@ -1005,9 +1005,11 @@ void QmlGame::flipHolecardsAllIn()
 
 void QmlGame::updateMyButtonsState(int mode)
 {
+    qDebug() << "updateMyButtonsState";
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
 
     if(currentHand->getPreviousPlayerID() == 0) {
+        qDebug() << "previous was me";
         setbuttonsCheckable(false);
     } else {
         if(currentHand->getSeatsList()->front()->getMyAction() != PLAYER_ACTION_ALLIN) { // dont show pre-actions after flip cards when allin
@@ -1019,6 +1021,7 @@ void QmlGame::updateMyButtonsState(int mode)
 
 void QmlGame::provideMyActions(int mode)
 {
+    qDebug() << "provideMyActions";
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
     boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
     PlayerList activePlayerList = currentHand->getActivePlayerList();
@@ -1030,17 +1033,20 @@ void QmlGame::provideMyActions(int mode)
     setsmallBlind(currentHand->getSmallBlind());
 
     if(humanPlayer == myManager->getSession()->getCurrentGame()->getCurrentPlayer()) {
+        qDebug() << "I'm current";
         setbuttonsCheckable(false);
         setmyTurn(true);
     }
     //really disabled buttons if human player is fold/all-in or server-autofold... and not called from dealberocards
     else if(/*pushButton_BetRaise->isCheckable() && */(mode != 0 && (humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN || humanPlayer->getMyAction() == PLAYER_ACTION_FOLD || (humanPlayer->getMySet() == currentHand->getCurrentBeRo()->getHighestSet() && (humanPlayer->getMyAction() != PLAYER_ACTION_NONE)))) || !humanPlayer->isSessionActive() /*server-autofold*/) {
+        qDebug() << "Fold/All-int or I have highest set";
         setbuttonsCheckable(false);
     } else {
         setbuttonsCheckable(true);
 
         if(mode == 0) {
             if( humanPlayer->getMyAction() == PLAYER_ACTION_FOLD ) {
+                qDebug() << "All in from dealberocards";
                 setbuttonsCheckable(false);
             }
         }

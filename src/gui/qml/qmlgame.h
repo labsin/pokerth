@@ -368,6 +368,7 @@ public slots:
 
     void setbuttonsCheckable(bool arg)
     {
+        qDebug() << "setbuttonsCheckable " << arg ;
         if (m_buttonsCheckable != arg) {
             m_buttonsCheckable = arg;
             setcheckedButton(NoButton);
