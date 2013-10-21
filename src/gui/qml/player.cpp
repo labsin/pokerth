@@ -46,6 +46,9 @@ void Player::initCards()
 
     getCard(0)->setflipped(false);
     getCard(1)->setflipped(false);
+
+    getCard(0)->setblur(false);
+    getCard(1)->setblur(false);
 }
 
 void Player::setFlip(bool flipped) {

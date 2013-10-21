@@ -9,6 +9,7 @@ class QmlCard : public QObject
     Q_PROPERTY(int card READ card WRITE setcard NOTIFY cardChanged)
     Q_PROPERTY(bool flipped READ flipped WRITE setflipped NOTIFY flippedChanged)
     Q_PROPERTY(bool dealt READ dealt WRITE setdealt NOTIFY dealtChanged)
+    Q_PROPERTY(bool blur READ blur WRITE setblur NOTIFY blurChanged)
 
 public:
     explicit QmlCard(QObject *parent = 0);
@@ -28,6 +29,11 @@ public:
         return m_dealt;
     }
 
+    bool blur() const
+    {
+        return m_blur;
+    }
+
     static void registerType();
 
 signals:
@@ -37,6 +43,8 @@ signals:
     void flippedChanged(bool arg);
 
     void dealtChanged(bool arg);
+
+    void blurChanged(bool arg);
 
 public slots:
 
@@ -63,11 +71,20 @@ public slots:
         }
     }
 
+    void setblur(bool arg)
+    {
+        if (m_blur != arg) {
+            m_blur = arg;
+            emit blurChanged(arg);
+        }
+    }
+
 public:
 
     int m_card;
     bool m_flipped;
     bool m_dealt;
+    bool m_blur;
 };
 
 #endif // QMLCARD_H

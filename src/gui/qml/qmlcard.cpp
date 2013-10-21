@@ -2,7 +2,8 @@
 #include <QtQml>
 
 QmlCard::QmlCard(QObject *parent) :
-    QObject(parent), m_card(-1), m_flipped(false), m_dealt(false)
+    QObject(parent), m_card(-1), m_flipped(false)
+  , m_dealt(false), m_blur(false)
 {
 }
 

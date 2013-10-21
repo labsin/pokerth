@@ -11,6 +11,7 @@
 #include "boardinterface.h"
 #include "handinterface.h"
 #include "game.h"
+#include "configfile.h"
 #include "session.h"
 #include "cardsvalue.h"
 
@@ -793,8 +794,90 @@ void QmlGame::postRiverRunAnimation3()
             //Show "Winner" label
             myPlayerModel->at((*it_c)->getMyID())->setAction(Player::WonAction);
 
+
+            //show winnercards if more than one player is active TODO
+            if ( nonfoldPlayerCounter != 1 && myManager->getConfig()->readConfigInt("ShowFadeOutCardsAnimation")) {
+
+                int j;
+                int bestHandPos[5];
+                (*it_c)->getMyBestHandPosition(bestHandPos);
+
+                bool index0 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 0 ) {
+                        index0 = false;
+                    }
+                }
+                if (index0) {
+                    myPlayerModel->at((*it_c)->getMyID())->getCard(0)->setblur(true);
+                }
+                //index 1 testen
+                bool index1 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 1 ) {
+                        index1 = false;
+                    }
+                }
+                if (index1) {
+                    myPlayerModel->at((*it_c)->getMyID())->getCard(1)->setblur(true);
+                }
+                //index 2 testen
+                bool index2 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 2 ) {
+                        index2 = false;
+                    }
+                }
+                if (index2) {
+                    m_flopCard1->setblur(true);
+                }
+                //index 3 testen
+                bool index3 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 3 ) {
+                        index3 = false;
+                    }
+                }
+                if (index3) {
+                    m_flopCard2->setblur(true);
+                }
+                //index 4 testen
+                bool index4 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 4 ) {
+                        index4 = false;
+                    }
+                }
+                if (index4) {
+                    m_flopCard3->setblur(true);
+                }
+                //index 5 testen
+                bool index5 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 5 ) {
+                        index5 = false;
+                    }
+                }
+                if (index5) {
+                    m_turnCard->setblur(true);
+                }
+                //index 6 testen
+                bool index6 = true;
+                for(j=0; j<5; j++) {
+                    if (bestHandPos[j] == 6 ) {
+                        index6 = false;
+                    }
+                }
+                if (index6) {
+                    m_riverCard->setblur(true);
+                }
+            }
         } else {
 
+            if( activePlayerList->size() != 1 && (*it_c)->getMyAction() != PLAYER_ACTION_FOLD && myManager->getConfig()->readConfigInt("ShowFadeOutCardsAnimation") ) {
+                myPlayerModel->at((*it_c)->getMyID())->getCard(0)->setblur(true);
+                myPlayerModel->at((*it_c)->getMyID())->getCard(1)->setblur(true);
+            }
         }
     }
 
