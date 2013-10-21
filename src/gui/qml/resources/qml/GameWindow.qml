@@ -466,6 +466,16 @@ ApplicationWindow {
                 return (spin - spinBox_raise.minimumValue)/(spinBox_raise.maximumValue-spinBox_raise.minimumValue)
             }
         }
-    }
+        Slider {
+            id: slider_speed
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
 
+            value: thisGame.gameSpeed
+            onValueChanged: thisGame.gameSpeed = value
+            maximumValue: 11
+            minimumValue: 1
+            stepSize: 1
+        }
+    }
 }
