@@ -26,6 +26,7 @@ Item {
         }
     }
 
+    //TODO: look at RectangularGlow
     Glow {
         id: glow
         anchors.fill: backgroundContainer
