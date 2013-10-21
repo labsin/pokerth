@@ -44,6 +44,7 @@ class PlayerModel;
 class PlayerInterface;
 class Game;
 class QmlGame;
+class QmlServer;
 
 class GuiWrapper : public QObject, public GuiInterface
 {
@@ -70,6 +71,10 @@ public:
 
     QmlGame* getGame() const {
         return myGame;
+    }
+
+    QmlServer *getServer() const {
+        return myServer;
     }
 
 	void refreshSet() const;
@@ -209,6 +214,7 @@ public slots:
 
 private:
     QmlGame *myGame;
+    QmlServer *myServer;
     ConfigFile *myConfig;
     Manager* myManager;
 };

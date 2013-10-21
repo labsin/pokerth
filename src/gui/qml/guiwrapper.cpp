@@ -42,6 +42,7 @@
 #include "game_defs.h"
 #include "player.h"
 #include "qmlgame.h"
+#include "qmlserver.h"
 #include "storeplayers.h"
 #include <net/socket_msg.h>
 
@@ -53,12 +54,14 @@ GuiWrapper::GuiWrapper()
     myManager = ManagerSingleton::Instance();
     myConfig = myManager->getConfig();
     myGame = new QmlGame();
+    myServer = new QmlServer();
 }
 
 
 GuiWrapper::~GuiWrapper()
 {
     delete myGame;
+    delete myServer;
 }
 
 void GuiWrapper::initGui(int speed)
@@ -513,6 +516,7 @@ void GuiWrapper::flushLogAtHand()
 void GuiWrapper::SignalNetClientConnect(int actionID)
 {
     qDebug()<<"SignalNetClientConnect()";
+    myServer->setconnectAction(actionID);
 }
 void GuiWrapper::SignalNetClientServerListAdd(unsigned serverId)
 {
@@ -525,6 +529,7 @@ void GuiWrapper::SignalNetClientServerListShow()
 void GuiWrapper::SignalNetClientLoginShow()
 {
     qDebug()<<"SignalNetClientLoginShow()";
+    emit myServer->signalLoginNeeded();
 }
 void GuiWrapper::SignalNetClientRejoinPossible(unsigned gameId)
 {

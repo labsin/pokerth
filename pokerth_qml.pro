@@ -143,7 +143,8 @@ HEADERS += src/engine/game.h \
     src/gui/qml/playermodel.h \
     src/gui/qml/storeplayers.h \
     src/gui/qml/qmlgame.h \
-    src/gui/qml/qmlcard.h
+    src/gui/qml/qmlcard.h \
+    src/gui/qml/qmlserver.h
 
 SOURCES += src/pokerth_qml.cpp \
         src/gui/qttoolsinterface.h \
@@ -164,7 +165,8 @@ SOURCES += src/pokerth_qml.cpp \
     src/gui/qml/playermodel.cpp \
     src/gui/qml/storeplayers.cpp \
     src/gui/qml/qmlgame.cpp \
-    src/gui/qml/qmlcard.cpp
+    src/gui/qml/qmlcard.cpp \
+    src/gui/qml/qmlserver.cpp
 
 TRANSLATIONS = ts/pokerth_af.ts \
 	ts/pokerth_bg.ts \

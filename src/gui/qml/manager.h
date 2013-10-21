@@ -14,6 +14,7 @@ class GuiWrapper;
 class Session;
 class Game;
 class QmlGame;
+class QmlServer;
 
 class ConfigFile;
 
@@ -44,6 +45,7 @@ public:
 
     Q_INVOKABLE void startGame(QObject *obj);
     Q_INVOKABLE QmlGame *getGame();
+    Q_INVOKABLE QmlServer *getServer();
 
     GuiWrapper* getGui();
 

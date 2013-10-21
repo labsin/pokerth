@@ -12,6 +12,7 @@
 #include "guiwrapper.h"
 #include "configfile.h"
 #include "configwrapper.h"
+#include "qmlserver.h"
 
 void Manager::Init(ConfigFile *c, Log *l)
 {
@@ -29,6 +30,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     Player::registerType();
     QmlCard::registerType();
     QmlGame::registerType();
+    QmlServer::registerType();
 }
 
 void Manager::startGame(QObject* obj)
@@ -58,6 +60,11 @@ void Manager::startGame(QObject* obj)
 QmlGame *Manager::getGame()
 {
     return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getGame();
+}
+
+QmlServer *Manager::getServer()
+{
+    return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getServer();
 }
 
 GuiWrapper *Manager::getGui() {
