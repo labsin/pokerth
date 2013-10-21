@@ -67,6 +67,7 @@ GuiWrapper::~GuiWrapper()
 void GuiWrapper::initGui(int speed)
 {
     qDebug()<<"initGui()";
+    myGame->stopTimer();
     assert(myManager->getSession());
     //set WindowTitle dynamically
     QString titleString = "";

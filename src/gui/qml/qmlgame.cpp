@@ -234,6 +234,41 @@ void QmlGame::nextRoundCleanGui()
     emit nextRound();
 }
 
+void QmlGame::stopTimer()
+{
+    dealFlopCards0Timer->stop();
+    dealFlopCards1Timer->stop();
+    dealFlopCards2Timer->stop();
+    dealFlopCards3Timer->stop();
+    dealFlopCards4Timer->stop();
+    dealFlopCards5Timer->stop();
+    dealFlopCards6Timer->stop();
+    dealTurnCards0Timer->stop();
+    dealTurnCards1Timer->stop();
+    dealTurnCards2Timer->stop();
+    dealRiverCards0Timer->stop();
+    dealRiverCards1Timer->stop();
+    dealRiverCards2Timer->stop();
+
+    nextPlayerAnimationTimer->stop();
+    preflopAnimation1Timer->stop();
+    preflopAnimation2Timer->stop();
+    flopAnimation1Timer->stop();
+    flopAnimation2Timer->stop();
+    turnAnimation1Timer->stop();
+    turnAnimation2Timer->stop();
+    riverAnimation1Timer->stop();
+    riverAnimation2Timer->stop();
+
+    postRiverAnimation1Timer->stop();
+    postRiverRunAnimation1Timer->stop();
+    postRiverRunAnimation2Timer->stop();
+    postRiverRunAnimation3Timer->stop();
+    postRiverRunAnimation5Timer->stop();
+    postRiverRunAnimation6Timer->stop();
+    potDistributeTimer->stop();
+}
+
 bool QmlGame::check()
 {
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();

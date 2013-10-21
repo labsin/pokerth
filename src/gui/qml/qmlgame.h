@@ -181,6 +181,8 @@ public:
 
     void nextRoundCleanGui();
 
+    void stopTimer();
+
     bool breakAfterCurrentHand() const
     {
         return m_breakAfterCurrentHand;
