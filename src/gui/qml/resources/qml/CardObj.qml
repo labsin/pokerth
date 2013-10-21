@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import PokerTH 1.0
 
 Flipable {
@@ -33,16 +34,23 @@ Flipable {
 
     MouseArea { anchors.fill: parent; onClicked: container.clicked() }
 
-    Behavior on opacity {
-        PropertyAnimation { duration: 800 }
+    ColorOverlay {
+        id: blurObj
+        anchors.fill: parent
+        source: parent
+        color: "#000000"
+        opacity: 0.0
+        Behavior on opacity {
+            NumberAnimation { duration: 800 }
+        }
     }
 
     onBlurredChanged: {
         if(blurred) {
-            opacity = 0.30
+            blurObj.opacity = 0.4
         }
         else {
-            opacity = 1.0
+            blurObj.opacity = 0.0
         }
     }
 
