@@ -235,7 +235,6 @@ ApplicationWindow {
     Connections {
         target: Manager
         onGuiInitiated: {
-            createAndShowWindow("GameWindow.qml",true);
             window.close()
         }
     }
