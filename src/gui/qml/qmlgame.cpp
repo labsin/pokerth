@@ -344,7 +344,7 @@ bool QmlGame::allIn()
     return false;
 }
 
-bool QmlGame::set()
+bool QmlGame::betRaise()
 {
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
     boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
@@ -1029,7 +1029,7 @@ void QmlGame::meInAction()
         if(m_buttonsCheckable) {
             switch(m_checkedButton) {
             case BetRaiseButton:
-                set();
+                betRaise();
                 break;
             case CallButton:
                 if(m_highestSet != 0) {

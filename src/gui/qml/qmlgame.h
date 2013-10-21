@@ -234,7 +234,7 @@ public:
     Q_INVOKABLE bool call();
     Q_INVOKABLE bool fold();
     Q_INVOKABLE bool allIn();
-    Q_INVOKABLE bool set();
+    Q_INVOKABLE bool betRaise();
 
     void myActionDone();
 

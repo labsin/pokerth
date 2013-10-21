@@ -363,7 +363,7 @@ ApplicationWindow {
                         }
                     }
                     else {
-                        thisGame.set()
+                        thisGame.betRaise()
                     }
                 }
                 text: buttonContainer.betting?"Bet":"Raise"
