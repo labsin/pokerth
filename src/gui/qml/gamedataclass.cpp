@@ -12,7 +12,7 @@ GameDataClass::GameDataClass(QObject *parent) :
 }
 
 GameDataClass::GameDataClass(GameData gameData, QObject *parent) :
-    QObject(parent), gd(gameData)
+    QObject(parent), gd(gameData), m_defaultBlinds(true)
 {
 }
 
@@ -35,6 +35,7 @@ void GameDataClass::setToDefault()
     //Speeds
     setguiSpeed(myConfig->readConfigInt("GameSpeed"));
 
+    setdefaultBlinds(true);
     resetBlinds();
 }
 
@@ -187,9 +188,9 @@ void GameDataClass::setplayerActionTimeoutSec(int arg)
 
 void GameDataClass::setdefaultBlinds(bool arg)
 {
-    m_defaultBlinds = arg;
-    if(m_defaultBlinds) {
-        resetBlinds();
+    if(m_defaultBlinds!=arg) {
+        m_defaultBlinds = arg;
+        emit defaultBlindsChanged(arg);
     }
 }
 

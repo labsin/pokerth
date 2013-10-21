@@ -37,6 +37,9 @@ void Manager::startGame(QObject* obj)
         mySession->terminateNetworkClient();
 
         // Set dealer pos.
+        if(gameData->defaultBlinds()) {
+            gameData->resetBlinds();
+        }
         GameData gd = gameData->getGameData();
         StartData startData;
         int tmpDealerPos = 0;
