@@ -27,6 +27,10 @@ Window {
         }
     }
 
+    GameData {
+        id: gameData
+    }
+
     GroupBox {
         id: box
         title: qsTr("Local Game Settings")
@@ -425,7 +429,7 @@ Window {
                 text: "Cancel"
                 iconSource: "../gfx/dialog_close.png"
                 onClicked: {
-                    radioButton_savedBlinds.enabled = true
+                    radioButton_savedBlinds.checked = true
                     blindsWindow.close()
                 }
             }
@@ -435,13 +439,10 @@ Window {
                 text: "OK"
                 iconSource: "../gfx/dialog_ok_apply.png"
                 onClicked: {
-                    radioButton_changedBlinds.enabled = true
+                    radioButton_changedBlinds.checked = true
                     blindsWindow.close()
                 }
             }
         }
-    }
-    GameData {
-        id: gameData
     }
 }
