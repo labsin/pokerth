@@ -6,6 +6,7 @@ Flipable {
 
     property int card: cardObj.card
     property bool flipped: cardObj.flipped
+    property bool blurred: cardObj.blur
     property int xAxis: 0
     property int yAxis: 1
     property int angle: 0
@@ -32,11 +33,26 @@ Flipable {
 
     MouseArea { anchors.fill: parent; onClicked: container.clicked() }
 
-    transform: Rotation {
-        id: rotation; origin.x: container.width / 2; origin.y: container.height / 2
-        axis.x: container.xAxis; axis.y: container.yAxis; axis.z: 0
-        angle: container.angle
+    Behavior on opacity {
+        PropertyAnimation { duration: 800 }
     }
+
+    onBlurredChanged: {
+        if(blurred) {
+            opacity = 0.30
+        }
+        else {
+            opacity = 1.0
+        }
+    }
+
+    transform: [
+        Rotation {
+            id: rotation; origin.x: container.width / 2; origin.y: container.height / 2
+            axis.x: container.xAxis; axis.y: container.yAxis; axis.z: 0
+            angle: container.angle
+        }
+    ]
 
     states: [
         State {
@@ -58,4 +74,5 @@ Flipable {
             }
         }
     }
+
 }
