@@ -175,7 +175,7 @@ public:
     void setAction(Action theValue) {
         if(myAction !=theValue){
             myAction = theValue;
-            emit starsChanged(myAction);
+            emit actionChanged(myAction);
         }
     }
     Action getAction() const	{
