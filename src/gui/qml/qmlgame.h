@@ -31,7 +31,7 @@ class QmlGame : public QObject
     Q_PROPERTY(QmlCard* flopCard3 READ flopCard3 NOTIFY flopCard3Changed)
     Q_PROPERTY(QmlCard* turnCard READ turnCard NOTIFY turnCardChanged)
     Q_PROPERTY(QmlCard* riverCard READ riverCard NOTIFY riverCardChanged)
-    Q_PROPERTY(int gameSpeed READ getGameSpeed NOTIFY gameSpeedChanged)
+    Q_PROPERTY(int gameSpeed READ getGameSpeed WRITE setgameSpeed NOTIFY gameSpeedChanged)
     Q_PROPERTY(QObject* model READ getModel NOTIFY modelChanged)
     Q_PROPERTY(bool blinkStartButton READ blinkStartButton WRITE setblinkStartButton NOTIFY blinkStartButtonChanged)
     Q_PROPERTY(bool breakAfterCurrentHand READ breakAfterCurrentHand WRITE setbreakAfterCurrentHand NOTIFY breakAfterCurrentHandChanged)
@@ -137,15 +137,6 @@ public:
         if (m_title != arg) {
             m_title = arg;
             emit titleChanged(arg);
-        }
-    }
-
-    void setgameSpeed(int arg)
-    {
-        if (guiGameSpeed != arg) {
-            guiGameSpeed = arg;
-            setSpeeds();
-            emit gameSpeedChanged(arg);
         }
     }
 
@@ -359,6 +350,15 @@ public slots:
         if (m_playingMode != arg) {
             m_playingMode = arg;
             emit playingModeChanged(arg);
+        }
+    }
+
+    void setgameSpeed(int arg)
+    {
+        if (guiGameSpeed != arg) {
+            guiGameSpeed = arg;
+            setSpeeds();
+            emit gameSpeedChanged(arg);
         }
     }
 
