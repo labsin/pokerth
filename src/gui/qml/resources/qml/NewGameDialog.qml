@@ -192,7 +192,7 @@ Window {
         minimumHeight: 350
         maximumWidth: initialWidth>minimumHeight+150?initialWidth: minimumHeight+150
         maximumHeight: initialHeight>minimumHeight+30?initialHeight: minimumHeight+30
-        flags: Qt.Window
+        flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint
         objectName: "newGameDialog"
 
         modality: Qt.WindowModal
