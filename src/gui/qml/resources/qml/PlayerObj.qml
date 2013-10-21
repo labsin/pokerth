@@ -125,8 +125,6 @@ Item {
     }
     function getLabelForAction(action) {
         switch(action) {
-        case Player.NoAction:
-            return ""
         case Player.FoldAction:
             return "Folded"
         case Player.CheckAction:
@@ -139,6 +137,11 @@ Item {
             return "Raised"
         case Player.AllInAction:
             return "All-In"
+        case Player.WonAction:
+            return "Winner"
+        case Player.NoAction:
+        default:
+            return ""
         }
     }
     function getLabelForButton(button) {
