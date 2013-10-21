@@ -207,6 +207,7 @@ ApplicationWindow {
                             return "Flop"
                         case Game.QML_GAME_STATE_TURN:
                             return "Turn"
+                        case Game.QML_GAME_STATE_POST_RIVER:
                         case Game.QML_GAME_STATE_RIVER:
                             return "River"
                         case Game.QML_GAME_STATE_PREFLOP_SMALL_BLIND:
