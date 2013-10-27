@@ -8,6 +8,7 @@ class QmlServer : public QObject
     Q_OBJECT
     Q_ENUMS(ConnectAction)
     Q_PROPERTY(ConnectAction connectAction READ connectAction WRITE setconnectAction NOTIFY connectActionChanged)
+    Q_PROPERTY(float connectProgress READ connectProgress WRITE setconnectProgress NOTIFY connectProgressChanged)
 
 public:
     explicit QmlServer(QObject *parent = 0);
@@ -33,11 +34,18 @@ public:
 
     static void registerType();
 
+    float connectProgress() const
+    {
+        return m_connectProgress;
+    }
+
 signals:
     void connectingToServer();
     void connectedToServer();
     void signalLoginNeeded();
     void connectActionChanged(ConnectAction arg);
+
+    void connectProgressChanged(float arg);
 
 public slots:
 
@@ -48,9 +56,18 @@ public slots:
 
     void connectedToServerTimeout();
 
+    void setconnectProgress(float arg)
+    {
+        if (m_connectProgress != arg) {
+            m_connectProgress = arg;
+            emit connectProgressChanged(arg);
+        }
+    }
+
 private:
 
     int m_connectAction;
+    float m_connectProgress;
 };
 
 #endif // QMLSERVER_H
