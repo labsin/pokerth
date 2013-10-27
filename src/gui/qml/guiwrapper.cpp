@@ -530,7 +530,7 @@ void GuiWrapper::SignalNetClientServerListShow()
 void GuiWrapper::SignalNetClientLoginShow()
 {
     qDebug()<<"SignalNetClientLoginShow()";
-    emit myServer->signalLoginNeeded();
+    emit myServer->loginNeeded();
 }
 void GuiWrapper::SignalNetClientRejoinPossible(unsigned gameId)
 {

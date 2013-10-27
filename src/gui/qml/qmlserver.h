@@ -42,7 +42,7 @@ public:
 signals:
     void connectingToServer();
     void connectedToServer();
-    void signalLoginNeeded();
+    void loginNeeded();
     void connectActionChanged(ConnectAction arg);
 
     void connectProgressChanged(float arg);
