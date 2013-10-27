@@ -13,6 +13,7 @@
 #include "gui/qml/guiwrapper.h"
 #include "gui/qml/imageprovider.h"
 #include "gui/qml/qmlgame.h"
+#include "gui/qml/qmlserver.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("rscPath",rscPath);
     engine.rootContext()->setContextProperty("Manager",ManagerSingleton::Instance());
     engine.rootContext()->setContextProperty("CurrentGame",ManagerSingleton::Instance()->getGame());
+    engine.rootContext()->setContextProperty("CurrentServer",ManagerSingleton::Instance()->getServer());
     engine.addImageProvider("PokerTH",new ImageProvider);
 #ifdef NO_RESOURCES
     QUrl url = QUrl::fromLocalFile("resources/qml/Main.qml");
