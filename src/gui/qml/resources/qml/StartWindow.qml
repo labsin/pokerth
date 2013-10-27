@@ -183,6 +183,9 @@ ApplicationWindow {
                         case "srtLocGame":
                             startNewLocalGame()
                             return
+                        case "srtIntGame":
+                            startInternetGame()
+                            return
                         }
                     }
                     if(dialog) {
@@ -206,6 +209,7 @@ ApplicationWindow {
             ListElement {
                 title: "Internet Game"
                 icon: "swbuttoninternetgame.png"
+                name: "srtIntGame"
             }
             ListElement {
                 title: "Create Network Game"
