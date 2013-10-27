@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.0
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
 import PokerTH 1.0 as PokerTH
+import "createComponent.js" as Create
 
 ApplicationWindow {
     id: window
@@ -232,10 +233,10 @@ ApplicationWindow {
         }
     }
 
-    Connections {
-        target: Manager
-        onGuiInitiated: {
-            window.close()
+    onVisibilityChanged: {
+        if(visibility == Window.Hidden) {
+            if(Create.dialogWindow)
+                Create.dialogWindow.hide();
         }
     }
 
@@ -244,38 +245,12 @@ ApplicationWindow {
     }
 
     function startNewLocalGame() {
-        if(Config.readConfigInt("ShowGameSettingsDialogOnNewGame")===1) {
-            createAndShowWindow("NewGameDialog.qml")
+        if(PokerTH.Config.readConfigInt("ShowGameSettingsDialogOnNewGame")===1) {
+            Create.createAndShowWindow("NewGameDialog.qml", window)
         }
     }
 
-    function createAndShowWindow(src, force) {
-        force = typeof force == 'undefined'?false:true
-        print("Create Dialog for " + src)
-        var comp = Qt.createComponent(src)
-        if(comp.status == Component.Ready){
-            var tmpDialogWindow = comp.createObject(window)
-            if (tmpDialogWindow == null) {
-                // Error Handling
-                console.log("Error creating object");
-            } else {
-                if(dialogWindow) {
-                    print("Dialog already exists")
-                    if(!force && dialogWindow.objectName == tmpDialogWindow.objectName) {
-                        print("Opening exisiting")
-                        dialogWindow.show()
-                        dialogWindow.raise()
-                        return
-                    }
-                    print("Closing existing")
-                    dialogWindow.close()
-                }
-                delete dialogWindow
-                dialogWindow = tmpDialogWindow
-                dialogWindow.show()
-            }
-        } else if (comp.status == Component.Error) {
-            print("Error loading component:", comp.errorString());
-        }
+    function startInternetGame() {
+        Manager.joinGameLobby()
     }
 }
