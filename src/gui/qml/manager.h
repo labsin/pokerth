@@ -44,6 +44,8 @@ public:
     }
 
     Q_INVOKABLE void startGame(QObject *obj);
+    Q_INVOKABLE void joinGameLobby();
+    Q_INVOKABLE void cancelConnect();
     Q_INVOKABLE QmlGame *getGame();
     Q_INVOKABLE QmlServer *getServer();
 

@@ -57,6 +57,25 @@ void Manager::startGame(QObject* obj)
     }
 }
 
+void Manager::joinGameLobby()
+{
+    cancelConnect();
+
+    //start internet client with config values for user and pw TODO
+    mySession->startInternetClient();
+    emit getServer()->connectingToServer();
+}
+
+void Manager::cancelConnect()
+{
+    dynamic_cast<GuiWrapper *>(myGuiInterface.get())->getGame()->stopTimer();
+    mySession->terminateNetworkClient();
+    if (myServerGuiInterface)
+        myServerGuiInterface->getSession()->terminateNetworkServer();
+
+    emit getServer()->stopConnecting();
+}
+
 QmlGame *Manager::getGame()
 {
     return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getGame();
