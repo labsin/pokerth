@@ -22,4 +22,23 @@ Item {
             }
         }
     }
+
+    Connections {
+        target: CurrentServer
+        onConnectingToServer: {
+            print("Connecting to Server")
+            loadingWindow = Create.createObject("LoadingWindow.qml",main)
+            if(loadingWindow) {
+                loadingWindow.show()
+                startWindow.hide();
+            }
+        }
+        onStopConnecting: {
+            print("Stop Connecting")
+            if(loadingWindow) {
+                loadingWindow.hide();
+            }
+            startWindow.show();
+        }
+    }
 }
