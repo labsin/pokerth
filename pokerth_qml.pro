@@ -477,11 +477,7 @@ mac {
 	INCLUDEPATH += /Library/Frameworks/SDL.framework/Headers
 	INCLUDEPATH += /Library/Frameworks/SDL_mixer.framework/Headers
 }
-OTHER_FILES += docs/infomessage-id-desc.txt \
-    src/gui/qml/resources/qml/Main.qml \
-    src/gui/qml/resources/qml/GameWindow.qml \
-    src/gui/qml/resources/qml/PlayerObj.qml \
-    src/gui/qml/resources/qml/CardObj.qml
+OTHER_FILES += docs/infomessage-id-desc.txt
 official_server {
 	LIBPATH += pkth_stat/daemon_lib/lib
 	LIBS += -lpokerth_closed \
