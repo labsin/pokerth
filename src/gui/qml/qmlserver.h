@@ -43,6 +43,7 @@ signals:
     void connectingToServer();
     void connectedToServer();
     void loginNeeded();
+    void stopConnecting();
     void connectActionChanged(ConnectAction arg);
 
     void connectProgressChanged(float arg);
