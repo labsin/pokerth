@@ -4,7 +4,7 @@
 #include <QObject>
 #include "manager.h"
 #include "guiwrapper.h"
-#include "player.h"
+#include "qmlplayer.h"
 
 class PlayerModel;
 class QmlCard;
@@ -378,7 +378,7 @@ public slots:
         }
     }
 
-    void setmyPlayer(Player * arg)
+    void setmyPlayer(QmlPlayer * arg)
     {
         QObject * tmpObj = dynamic_cast<QObject *>(arg);
         if (m_myPlayer != tmpObj) {

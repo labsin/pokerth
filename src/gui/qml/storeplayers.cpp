@@ -1,5 +1,5 @@
 #include "storeplayers.h"
-#include "player.h"
+#include "qmlplayer.h"
 #include "QtCore"
 #include "QObject"
 
@@ -10,14 +10,14 @@ StorePlayers::StorePlayers(QObject* parent)
 
 StorePlayers::~StorePlayers()
 {
-    QMap<int, Player*>::iterator it;
+    QMap<int, QmlPlayer*>::iterator it;
     for (it = m_players.begin(); it != m_players.end(); ++it){
         delete it.value();
     }
     m_players.clear();
 }
 
-void StorePlayers::add(Player *player) {
+void StorePlayers::add(QmlPlayer *player) {
     QObject::connect(player,SIGNAL(activeStatusChanged(bool)),this,SIGNAL(activeListShouldReset()));
     m_players.insert(player->getId(),player);
     if(player->getActiveStatus()) {
@@ -58,7 +58,7 @@ bool StorePlayers::setInActive(int id)
 
 void StorePlayers::resetActiveList()
 {
-    QMap<int, Player*>::iterator it;
+    QMap<int, QmlPlayer*>::iterator it;
     bool changed = false;
     for (it = m_players.begin(); it != m_players.end(); ++it){
         if(it.value()->getActiveStatus()) {
@@ -78,7 +78,7 @@ void StorePlayers::resetActiveList()
 
 void StorePlayers::cardsToDefault()
 {
-    QMap<int, Player*>::iterator it;
+    QMap<int, QmlPlayer*>::iterator it;
     bool changed = false;
     for (it = m_players.begin(); it != m_players.end(); ++it){
         it.value()->initCards();

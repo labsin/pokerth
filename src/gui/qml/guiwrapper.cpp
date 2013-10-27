@@ -40,7 +40,7 @@
 #include "session.h"
 #include "playermodel.h"
 #include "game_defs.h"
-#include "player.h"
+#include "qmlplayer.h"
 #include "qmlgame.h"
 #include "qmlserver.h"
 #include "storeplayers.h"
@@ -183,13 +183,13 @@ void GuiWrapper::refreshGroupbox(int playerID, int status) const
         PlayerListConstIterator it_c;
         PlayerList seatsList = currentGame->getSeatsList();
         for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-            Player *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
+            QmlPlayer *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
 
             tmp->setTurn((*it_c)->getMyTurn());
             tmp->setActiveStatus((*it_c)->getMyActiveStatus());
         }
     } else {
-        Player *tmp = myGame->getPlayerModel()->at(playerID);
+        QmlPlayer *tmp = myGame->getPlayerModel()->at(playerID);
         switch(status) {
 
             //inactive
@@ -231,7 +231,7 @@ void GuiWrapper::refreshPlayerName() const
     PlayerListConstIterator it_c;
     PlayerList seatsList = currentGame->getSeatsList();
     for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        Player *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
+        QmlPlayer *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
         QString name = QString::fromUtf8((*it_c)->getMyName().c_str());
         QString guid = QString::fromUtf8((*it_c)->getMyGuid().c_str());
         qDebug()<<"Name: "<<name<<" Guid: "<<guid;
@@ -266,7 +266,7 @@ void GuiWrapper::refreshGameLabels(GameState gameState) const
 void GuiWrapper::refreshStatus(boost::shared_ptr<PlayerInterface> player) const
 {
     qDebug()<<"refreshStatus()";
-    Player *tmp = myGame->getPlayerModel()->at(player->getMyID());
+    QmlPlayer *tmp = myGame->getPlayerModel()->at(player->getMyID());
     tmp->setActiveStatus(player->getMyActiveStatus());
     tmp->setStayOnTableStatus(player->getMyStayOnTableStatus());
     tmp->setIsSessionActive(player->isSessionActive());
@@ -282,7 +282,7 @@ void GuiWrapper::setPlayerAvatar(int myUniqueID, const std::string &myAvatar) co
     qDebug()<<"Avatar: "<<myTmpAvatar;
     if (tmpPlayer.get()) {
         QString countryString(QString(myManager->getSession()->getClientPlayerInfo(myUniqueID).countryCode.c_str()).toLower());
-        Player* tmp = myGame->getPlayerModel()->at(tmpPlayer->getMyID());
+        QmlPlayer* tmp = myGame->getPlayerModel()->at(tmpPlayer->getMyID());
         tmp->setCountry(countryString);
 
         QFile myAvatarFile(myTmpAvatar);

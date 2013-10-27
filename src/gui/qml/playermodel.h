@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 
-class Player;
+class QmlPlayer;
 class StorePlayers;
 
 class PlayerModel : public QAbstractListModel
@@ -19,10 +19,10 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 
-    bool addPlayer(int index, Player* player);
-    bool addPlayer(Player* player);
+    bool addPlayer(int index, QmlPlayer* player);
+    bool addPlayer(QmlPlayer* player);
 
-    Player * const &at(int index);
+    QmlPlayer * const &at(int index);
 
     StorePlayers* getStorePlayer() {
         return m_storePlayers;

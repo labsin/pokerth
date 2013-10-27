@@ -4,7 +4,7 @@
 #include <QList>
 #include <QDebug>
 
-class Player;
+class QmlPlayer;
 
 class StorePlayers : public QObject
 {
@@ -34,23 +34,23 @@ public:
             return false;
     }
 
-    void add(Player* player);
+    void add(QmlPlayer* player);
 
     void removeAt(int index);
 
-    Player * const &at(int i) {
+    QmlPlayer * const &at(int i) {
         Q_ASSERT(validIndex(i));
         return m_players[i];
     }
 
-    Player * const &activeAt(int i) {
+    QmlPlayer * const &activeAt(int i) {
         Q_ASSERT(validActiveIndex(i));
         int index = m_activePlayers[i];
         Q_ASSERT(validIndex(index));
         return m_players[index];
     }
 
-    Player * const &operator[](int i) {
+    QmlPlayer * const &operator[](int i) {
         return at(i);
     }
     void resetActiveList();
@@ -61,7 +61,7 @@ signals:
     void activeListChanged();
 
 private:
-    QMap<int,Player*> m_players;
+    QMap<int,QmlPlayer*> m_players;
     QList<int> m_activePlayers;
 
     bool setActive(int id);

@@ -1,6 +1,6 @@
 #include "playermodel.h"
 #include <QDebug>
-#include "player.h"
+#include "qmlplayer.h"
 #include "storeplayers.h"
 
 PlayerModel::PlayerModel(QObject *parent) :
@@ -29,14 +29,14 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const
     }
 
     if(role == PlayerRole) {
-        Player *returnObj = (*m_storePlayers).activeAt(index.row());
+        QmlPlayer *returnObj = (*m_storePlayers).activeAt(index.row());
         if(returnObj)
-            return QVariant::fromValue<Player*>(returnObj);
+            return QVariant::fromValue<QmlPlayer*>(returnObj);
     }
     return QVariant();
 }
 
-bool PlayerModel::addPlayer(int index, Player* player)
+bool PlayerModel::addPlayer(int index, QmlPlayer* player)
 {
     qDebug()<<"add player at "<<index;
     if(player) {
@@ -62,7 +62,7 @@ bool PlayerModel::addPlayer(int index, Player* player)
     }
 }
 
-bool PlayerModel::addPlayer(Player* player)
+bool PlayerModel::addPlayer(QmlPlayer* player)
 {
     qDebug()<<"add player";
     if(player) {
@@ -79,10 +79,10 @@ bool PlayerModel::addPlayer(Player* player)
     }
 }
 
-Player * const &PlayerModel::at(int index)
+QmlPlayer * const &PlayerModel::at(int index)
 {
     if(!m_storePlayers->validIndex(index)) {
-        addPlayer(index,new Player());
+        addPlayer(index,new QmlPlayer());
     }
     return m_storePlayers->at(index);
 }

@@ -827,7 +827,7 @@ void QmlGame::postRiverRunAnimation3()
         if((*it_c)->getMyAction() != PLAYER_ACTION_FOLD && (*it_c)->getMyCardsValueInt() == currentHand->getCurrentBeRo()->getHighestCardsValue() ) {
 
             //Show "Winner" label
-            myPlayerModel->at((*it_c)->getMyID())->setAction(Player::WonAction);
+            myPlayerModel->at((*it_c)->getMyID())->setAction(QmlPlayer::WonAction);
 
 
             //show winnercards if more than one player is active TODO

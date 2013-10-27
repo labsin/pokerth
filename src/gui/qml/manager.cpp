@@ -8,7 +8,7 @@
 #include "game.h"
 #include "qmlgame.h"
 #include "qmlcard.h"
-#include "player.h"
+#include "qmlplayer.h"
 #include "guiwrapper.h"
 #include "configfile.h"
 #include "configwrapper.h"
@@ -27,7 +27,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     }
     ConfigWrapper::registerType();
     GameDataClass::registerType();
-    Player::registerType();
+    QmlPlayer::registerType();
     QmlCard::registerType();
     QmlGame::registerType();
     QmlServer::registerType();

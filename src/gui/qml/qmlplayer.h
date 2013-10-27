@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef QMLPLAYER_H
+#define QMLPLAYER_H
 
 #include <QObject>
 #include <QImage>
@@ -11,7 +11,7 @@ class ConfigFile;
 class HandInterface;
 class QmlCard;
 
-class Player : public QObject
+class QmlPlayer : public QObject
 {
     Q_OBJECT
     Q_ENUMS(Action)
@@ -63,8 +63,8 @@ public:
         PLAYER_TYPE_HUMAN
     };
 
-    explicit Player(QObject *parent = 0);
-    ~Player();
+    explicit QmlPlayer(QObject *parent = 0);
+    ~QmlPlayer();
 
     static void registerType();
 
@@ -367,4 +367,4 @@ private:
     bool m_cardsDealt;
 };
 
-#endif // PLAYER_H
+#endif // QMLPLAYER_H
