@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
-import PokerTH 1.0
+import PokerTH 1.0 as PokerTH
 
 Flipable {
     id: container
@@ -11,7 +11,7 @@ Flipable {
     property int xAxis: 0
     property int yAxis: 1
     property int angle: 0
-    property Card cardObj: Card {}
+    property variant cardObj: PokerTH.Card {}
 
     signal clicked()
     height: backImage.implicitHeight

@@ -2,7 +2,7 @@ import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Window 2.1
 import QtQuick.Layouts 1.0
-import PokerTH 1.0
+import PokerTH 1.0 as PokerTH
 
 ApplicationWindow {
     id: window
@@ -12,8 +12,6 @@ ApplicationWindow {
     minimumHeight: 600
     maximumWidth: 1920
     maximumHeight: 1280
-    title: thisGame.title
-    property Game thisGame: CurrentGame
 
     Image {
         id: background
@@ -27,7 +25,7 @@ ApplicationWindow {
 
         PathView {
             id: pathVieuw
-            model: thisGame.model
+            model: CurrentGame.model
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.left: parent.left
@@ -61,7 +59,7 @@ ApplicationWindow {
                     id: path3
                     x: path.startX; y: path.startY}
             }
-            delegate: PlayerObj {
+            delegate: Player {
                 player: model.player
             }
         }
@@ -96,7 +94,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_potTotal
-                        text: thisGame.pot
+                        text: CurrentGame.pot
                         anchors.left: label_textTotal.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -121,7 +119,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_bets
-                        text: thisGame.set
+                        text: CurrentGame.set
                         anchors.left: label_textBets.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -137,55 +135,55 @@ ApplicationWindow {
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard1.implicitWidth
                 height: flopCard1.implicitHeight
-                CardObj {
+                Card {
                     id: flopCard1
                     anchors.fill: parent
-                    cardObj: thisGame.flopCard1
-                    visible: thisGame.flopCard1.dealt
+                    cardObj: CurrentGame.flopCard1
+                    visible: CurrentGame.flopCard1.dealt
                 }
             }
             Image {
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard2.implicitWidth
                 height: flopCard2.implicitHeight
-                CardObj {
+                Card {
                     id: flopCard2
                     anchors.fill: parent
-                    cardObj: thisGame.flopCard2
-                    visible: thisGame.flopCard2.dealt
+                    cardObj: CurrentGame.flopCard2
+                    visible: CurrentGame.flopCard2.dealt
                 }
             }
             Image {
                 source: "image://PokerTH/table/cardholder_flop.png"
                 width: flopCard3.implicitWidth
                 height: flopCard3.implicitHeight
-                CardObj {
+                Card {
                     id: flopCard3
                     anchors.fill: parent
-                    cardObj: thisGame.flopCard3
-                    visible: thisGame.flopCard3.dealt
+                    cardObj: CurrentGame.flopCard3
+                    visible: CurrentGame.flopCard3.dealt
                 }
             }
             Image {
                 source: "image://PokerTH/table/cardholder_turn.png"
                 width: turnCard.implicitWidth
                 height: turnCard.implicitHeight
-                CardObj {
+                Card {
                     id: turnCard
                     anchors.fill: parent
-                    cardObj: thisGame.turnCard
-                    visible: thisGame.turnCard.dealt
+                    cardObj: CurrentGame.turnCard
+                    visible: CurrentGame.turnCard.dealt
                 }
             }
             Image {
                 source: "image://PokerTH/table/cardholder_river.png"
                 width: riverCard.implicitWidth
                 height: riverCard.implicitHeight
-                CardObj {
+                Card {
                     id: riverCard
                     anchors.fill: parent
-                    cardObj: thisGame.riverCard
-                    visible: thisGame.riverCard.dealt
+                    cardObj: CurrentGame.riverCard
+                    visible: CurrentGame.riverCard.dealt
                 }
             }
             Column {
@@ -193,7 +191,7 @@ ApplicationWindow {
                 spacing: 10
                 Label {
                     id: label_textStatus
-                    text: gameStateString(thisGame.gameState)
+                    text: gameStateString(CurrentGame.gameState)
                     font.pointSize: 18
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -201,18 +199,18 @@ ApplicationWindow {
                     height: 30
                     function gameStateString(gameState) {
                         switch(gameState) {
-                        case Game.QML_GAME_STATE_PREFLOP:
+                        case PokerTH.Game.QML_GAME_STATE_PREFLOP:
                             return "Preflop"
-                        case Game.QML_GAME_STATE_FLOP:
+                        case PokerTH.Game.QML_GAME_STATE_FLOP:
                             return "Flop"
-                        case Game.QML_GAME_STATE_TURN:
+                        case PokerTH.Game.QML_GAME_STATE_TURN:
                             return "Turn"
-                        case Game.QML_GAME_STATE_POST_RIVER:
-                        case Game.QML_GAME_STATE_RIVER:
+                        case PokerTH.Game.QML_GAME_STATE_POST_RIVER:
+                        case PokerTH.Game.QML_GAME_STATE_RIVER:
                             return "River"
-                        case Game.QML_GAME_STATE_PREFLOP_SMALL_BLIND:
+                        case PokerTH.Game.QML_GAME_STATE_PREFLOP_SMALL_BLIND:
                             return "Preflop SB"
-                        case Game.QML_GAME_STATE_PREFLOP_BIG_BLIND:
+                        case PokerTH.Game.QML_GAME_STATE_PREFLOP_BIG_BLIND:
                             return "Preflop BB"
                         default:
                             return "--ERROR--"
@@ -234,7 +232,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_game
-                        text: thisGame.gameNr
+                        text: CurrentGame.gameNr
                         anchors.left: label_textGame.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -259,7 +257,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_hand
-                        text: thisGame.handNr
+                        text: CurrentGame.handNr
                         anchors.left: label_textHand.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -279,11 +277,11 @@ ApplicationWindow {
             height: childrenRect.height
             width: 200
             property int cash: 5000
-            property bool betting: thisGame.highestSet ==0;
+            property bool betting: CurrentGame.highestSet ==0;
             property bool raising: !betting
             property bool checking: betting
             property bool calling: !checking
-            property bool actionButtonsEnabled: thisGame.buttonsCheckable || thisGame.myTurn
+            property bool actionButtonsEnabled: CurrentGame.buttonsCheckable || CurrentGame.myTurn
             property int stepSize: 50
 
             ExclusiveGroup {
@@ -296,12 +294,12 @@ ApplicationWindow {
                 anchors.right: parent.right
                 SpinBox {
                     id: spinBox_raise
-                    value: thisGame.bets
+                    value: CurrentGame.bets
                     Layout.fillWidth: true
-                    maximumValue: thisGame.myPlayer?thisGame.myPlayer.cash:minimumValue
-                    minimumValue: thisGame.myPlayer?(buttonContainer.raising?
-                                                         thisGame.highestSet-thisGame.myPlayer.set + thisGame.smallBlind
-                                                       : thisGame.smallBlind*2
+                    maximumValue: CurrentGame.myPlayer?CurrentGame.myPlayer.cash:minimumValue
+                    minimumValue: CurrentGame.myPlayer?(buttonContainer.raising?
+                                                         CurrentGame.highestSet-CurrentGame.myPlayer.set + CurrentGame.smallBlind
+                                                       : CurrentGame.smallBlind*2
                                                      ):0
                     stepSize: buttonContainer.stepSize
                     anchors.left: parent.left
@@ -317,19 +315,19 @@ ApplicationWindow {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     enabled: buttonContainer.actionButtonsEnabled
-                    checkable: thisGame.buttonsCheckable
+                    checkable: CurrentGame.buttonsCheckable
                     exclusiveGroup: actionButtons
                     onClicked: {
-                        if(thisGame.buttonsCheckable) {
-                            if(thisGame.checkedButton==Game.AllInButton) {
-                                thisGame.checkedButton=Game.NoButton
+                        if(CurrentGame.buttonsCheckable) {
+                            if(CurrentGame.checkedButton==Game.AllInButton) {
+                                CurrentGame.checkedButton=Game.NoButton
                             }
                             else {
-                                thisGame.checkedButton=Game.AllInButton
+                                CurrentGame.checkedButton=Game.AllInButton
                             }
                         }
                         else {
-                            thisGame.allIn()
+                            CurrentGame.allIn()
                         }
                     }
 
@@ -338,7 +336,7 @@ ApplicationWindow {
             }
             Slider {
                 id: slider_raise
-                value: buttonContainer.fromSpinToSlider(thisGame.bets)
+                value: buttonContainer.fromSpinToSlider(CurrentGame.bets)
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: row_raiseSpinBox.bottom
@@ -351,20 +349,20 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: slider_raise.bottom
-                checkable: thisGame.buttonsCheckable
+                checkable: CurrentGame.buttonsCheckable
                 exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(thisGame.buttonsCheckable) {
-                        if(thisGame.checkedButton==Game.BetRaiseButton) {
-                            thisGame.checkedButton=Game.NoButton
+                    if(CurrentGame.buttonsCheckable) {
+                        if(CurrentGame.checkedButton==Game.BetRaiseButton) {
+                            CurrentGame.checkedButton=Game.NoButton
                         }
                         else {
-                            thisGame.checkedButton=Game.BetRaiseButton
+                            CurrentGame.checkedButton=Game.BetRaiseButton
                         }
                     }
                     else {
-                        thisGame.betRaise()
+                        CurrentGame.betRaise()
                     }
                 }
                 text: buttonContainer.betting?"Bet":"Raise"
@@ -374,24 +372,24 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_betRaise.bottom
-                checkable: thisGame.buttonsCheckable
+                checkable: CurrentGame.buttonsCheckable
                 exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(thisGame.buttonsCheckable) {
-                        if(thisGame.checkedButton==Game.CallButton) {
-                            thisGame.checkedButton=Game.NoButton
+                    if(CurrentGame.buttonsCheckable) {
+                        if(CurrentGame.checkedButton==Game.CallButton) {
+                            CurrentGame.checkedButton=Game.NoButton
                         }
                         else {
-                            thisGame.checkedButton=Game.CallButton
+                            CurrentGame.checkedButton=Game.CallButton
                         }
                     }
                     else {
                         if(buttonContainer.calling) {
-                            thisGame.call()
+                            CurrentGame.call()
                         }
                         else {
-                            thisGame.check()
+                            CurrentGame.check()
                         }
                     }
                 }
@@ -402,41 +400,41 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_call.bottom
-                checkable: thisGame.buttonsCheckable
+                checkable: CurrentGame.buttonsCheckable
                 exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(thisGame.buttonsCheckable) {
-                        if(thisGame.checkedButton==Game.FoldButton) {
-                            thisGame.checkedButton=Game.NoButton
+                    if(CurrentGame.buttonsCheckable) {
+                        if(CurrentGame.checkedButton==Game.FoldButton) {
+                            CurrentGame.checkedButton=Game.NoButton
                         }
                         else {
-                            thisGame.checkedButton=Game.FoldButton
+                            CurrentGame.checkedButton=Game.FoldButton
                         }
                     }
                     else {
-                        thisGame.fold()
+                        CurrentGame.fold()
                     }
                 }
                 text: "Fold"
             }
             Connections {
-                target: thisGame
+                target: CurrentGame
                 onCheckedButtonChanged: {
-                    switch(thisGame.checkedButton) {
-                    case Game.NoButton:
+                    switch(CurrentGame.checkedButton) {
+                    case PokerTH.Game.NoButton:
                         actionButtons.current.checked=false;
                         break;
-                    case Game.BetRaiseButton:
+                    case PokerTH.Game.BetRaiseButton:
                         button_betRaise.checked=true;
                         break;
-                    case Game.CallButton:
+                    case PokerTH.Game.CallButton:
                         button_call.checked=true;
                         break;
-                    case Game.FoldButton:
+                    case PokerTH.Game.FoldButton:
                         button_fold.checked=true;
                         break;
-                    case Game.AllInButton:
+                    case PokerTH.Game.AllInButton:
                         button_allIn.checked=true
                         break;
                     }
@@ -446,7 +444,7 @@ ApplicationWindow {
             function setFromSpin(spin) {
                 //var tmpSpin = roundOnStep(spin);
                 var tmpSpin = spin;
-                thisGame.bets = tmpSpin;
+                CurrentGame.bets = tmpSpin;
             }
             function setFromSlider(slider) {
                 setFromSpin(fromSliderToSpin(slider));
@@ -471,8 +469,8 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
 
-            value: thisGame.gameSpeed
-            onValueChanged: thisGame.gameSpeed = value
+            value: CurrentGame.gameSpeed
+            onValueChanged: CurrentGame.gameSpeed = value
             maximumValue: 11
             minimumValue: 1
             stepSize: 1

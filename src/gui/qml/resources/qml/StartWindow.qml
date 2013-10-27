@@ -3,7 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
-import PokerTH 1.0
+import PokerTH 1.0 as PokerTH
 
 ApplicationWindow {
     id: window
@@ -185,7 +185,7 @@ ApplicationWindow {
                         }
                     }
                     if(dialog) {
-                        createAndShowWindow(dialog)
+                        Create.createAndShowWindow(dialog, window)
                     }
                     else {
                         print("No dialog specified")

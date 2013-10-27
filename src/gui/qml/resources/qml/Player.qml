@@ -2,12 +2,15 @@ import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import QtGraphicalEffects 1.0
-import PokerTH 1.0
+import PokerTH 1.0 as PokerTH
 
 Item {
     property bool alignBottom: false
 //    property bool highlight: true
-    property Player player: Player { }
+    property variant player: PokerTH.Player {
+
+    }
+
     visible: player.activeStatus
 
     width: rowlayout.width+12
@@ -126,34 +129,34 @@ Item {
     }
     function getLabelForAction(action) {
         switch(action) {
-        case Player.FoldAction:
+        case PokerTH.Player.FoldAction:
             return "Folded"
-        case Player.CheckAction:
+        case PokerTH.Player.CheckAction:
             return "Checked"
-        case Player.CallAction:
+        case PokerTH.Player.CallAction:
             return "Called"
-        case Player.BetAction:
+        case PokerTH.Player.BetAction:
             return "Bet"
-        case Player.RaiseAction:
+        case PokerTH.Player.RaiseAction:
             return "Raised"
-        case Player.AllInAction:
+        case PokerTH.Player.AllInAction:
             return "All-In"
-        case Player.WonAction:
+        case PokerTH.Player.WonAction:
             return "Winner"
-        case Player.NoAction:
+        case PokerTH.Player.NoAction:
         default:
             return ""
         }
     }
     function getLabelForButton(button) {
         switch(button) {
-        case Player.NoButton:
+        case PokerTH.Player.NoButton:
             return ""
-        case Player.DealerButton:
+        case PokerTH.Player.DealerButton:
             return "image://PokerTH/table/dealerPuck.png"
-        case Player.SmallBlindButton:
+        case PokerTH.Player.SmallBlindButton:
             return "image://PokerTH/table/smallblindPuck.png"
-        case Player.BigBlindButton:
+        case PokerTH.Player.BigBlindButton:
             return "image://PokerTH/table/bigblindPuck.png"
         default:
             return ""

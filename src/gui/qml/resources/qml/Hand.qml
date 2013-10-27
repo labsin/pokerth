@@ -1,11 +1,11 @@
 import QtQuick 2.0
-import PokerTH 1.0
+import PokerTH 1.0 as PokerTH
 
 Item {
-    property list<Card> cards: [Card {} , Card {}]
+    property variant cards
     implicitWidth: card1.implicitWidth*1.5
     implicitHeight: card1.implicitHeight
-    CardObj {
+    Card {
         id: card1
         cardObj: cards[0]
         anchors.left: parent.left
@@ -13,12 +13,15 @@ Item {
         anchors.bottom: parent.bottom
         visible: cards[0].dealt
     }
-    CardObj {
+    Card {
         id: card2
         cardObj: cards[1]
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         visible: cards[0].dealt
+    }
+    Component.onCompleted: {
+        console.assert(cards, "Hand needs cards property set");
     }
 }
