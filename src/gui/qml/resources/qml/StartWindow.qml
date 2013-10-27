@@ -203,7 +203,6 @@ ApplicationWindow {
             ListElement {
                 title: "Start Local Game"
                 icon: "swbuttonlocalgame.png"
-                dialog: "NewGameDialog.qml"
                 name: "srtLocGame"
             }
             ListElement {
