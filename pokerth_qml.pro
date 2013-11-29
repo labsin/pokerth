@@ -68,6 +68,7 @@ INCLUDEPATH += . \
 	src/engine/network_engine \
         src/config \
         src/core \
+        src/gui/qml
 
 DEPENDPATH += . \
 	src \
