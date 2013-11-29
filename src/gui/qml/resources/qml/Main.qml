@@ -15,7 +15,7 @@ Item {
         target: CurrentGame
         onGuiInitiated: {
             print("Starting Game")
-            gameWindow = Create.createObject("GameWindow.qml",main)
+            gameWindow = Create.createObject("GameWindow.qml",startWindow)
             if(gameWindow) {
                 gameWindow.show()
                 startWindow.hide();
@@ -27,11 +27,11 @@ Item {
         target: CurrentServer
         onConnectingToServer: {
             print("Connecting to Server")
-            loadingWindow = Create.createObject("LoadingWindow.qml",main)
-            if(loadingWindow) {
-                loadingWindow.show()
-                startWindow.hide();
-            }
+            if(!loadingWindow)
+                loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
+            if(loginWindow)
+                loginWindow.hide();
+            loadingWindow.show()
         }
         onStopConnecting: {
             print("Stop Connecting")
