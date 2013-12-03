@@ -12,7 +12,8 @@ Window {
     modality: Qt.WindowModal
 
     onClosing: {
-        CurrentServer.stopConnecting()
+        if(CurrentServer.ConnectAction !== PokerTH.Server.ConnectSessionDone)
+            CurrentServer.stopConnecting()
     }
     Item {
         anchors.fill: parent

@@ -38,7 +38,19 @@ Item {
             if(loadingWindow) {
                 loadingWindow.hide();
             }
+            if(loginWindow)
+                loginWindow.hide();
             startWindow.show();
+        }
+        onLoginNeeded: {
+            print("Login Needed")
+            if(!loginWindow)
+                if(loadingWindow)
+                    loginWindow = Create.createObject("LoginWindow.qml",loadingWindow)
+                else
+                    loginWindow = Create.createObject("LoginWindow.qml",startWindow)
+
+            loginWindow.show()
         }
     }
 }
