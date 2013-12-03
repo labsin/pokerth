@@ -1372,6 +1372,12 @@ void GameTableStyleReader::setCashLabelStyle(QLabel *cl)
 	cl->setStyleSheet("QLabel { "+ font2String +" font-size: "+cashFontSize+"px; font-weight: bold; color: #"+PlayerCashTextColor+"; }");
 }
 
+void GameTableStyleReader::setSpectatorNumberLabelStyle(QLabel *snl)
+{
+	snl->setStyleSheet("QLabel { "+ font2String +" font-size: 12px; font-weight: bold; color: #"+MenuTextColor+"; }");
+	snl->setAlignment(Qt::AlignHCenter);
+}
+
 void GameTableStyleReader::setSetLabelStyle(QLabel *sl)
 {
 	sl->setStyleSheet("QLabel { "+ font2String +" font-size: "+setLabelFontSize+"px; font-weight: bold; color: #"+PlayerBetTextColor+"; }");
@@ -1409,7 +1415,8 @@ void GameTableStyleReader::setCardHolderStyle(QLabel *l, int bero)
 
 void GameTableStyleReader::setMenuBarStyle(QMenuBar *mb)
 {
-	mb->setStyleSheet("QMenuBar { background-color: #"+MenuBgColor+"; font-size:12px; border-width: 0px;} QMenuBar::item { color: #"+MenuTextColor+"; }");
+	mb->setAttribute(Qt::WA_TranslucentBackground);
+	mb->setStyleSheet("QMenuBar { background-color: #"+MenuBgColor+"; font-size:12px; border-width: 0px;} QMenuBar::item { background: transparent; color: #"+MenuTextColor+"; } QMenuBar::item:selected { background: #"+MenuTextColor+"; color: #"+MenuBgColor+"; } QMenuBar::item:pressed { background: #"+MenuTextColor+"; color: #"+MenuBgColor+"; }");
 }
 
 void GameTableStyleReader::setBreakButtonStyle(QPushButton *bb, int state)

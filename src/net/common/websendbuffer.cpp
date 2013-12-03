@@ -29,11 +29,54 @@
  * as that of the covered work.                                              *
  *****************************************************************************/
 
-#include <net/serveraccepthelper.h>
+#include <net/websendbuffer.h>
+#include <net/websocketdata.h>
+#include <net/netpacket.h>
+#include <net/sessiondata.h>
+
+using namespace std;
 
 
-ServerAcceptInterface::~ServerAcceptInterface()
+WebSendBuffer::WebSendBuffer()
+	: closeAfterSend(false)
 {
 }
 
+void
+WebSendBuffer::SetCloseAfterSend()
+{
+	closeAfterSend = true;
+}
+
+void
+WebSendBuffer::HandleWrite(boost::shared_ptr<boost::asio::ip::tcp::socket> /*socket*/, const boost::system::error_code &/*error*/)
+{
+}
+
+void
+WebSendBuffer::AsyncSendNextPacket(boost::shared_ptr<SessionData> session)
+{
+	if (closeAfterSend) {
+		boost::system::error_code ec;
+		boost::shared_ptr<WebSocketData> webData = session->GetWebData();
+		webData->webSocketServer->close(webData->webHandle, websocketpp::close::status::normal, "PokerTH server closed the connection.", ec);
+	}
+}
+
+void
+WebSendBuffer::InternalStorePacket(boost::shared_ptr<SessionData> session, boost::shared_ptr<NetPacket> packet)
+{
+	uint32_t packetSize = packet->GetMsg()->ByteSize();
+	google::protobuf::uint8 *buf = new google::protobuf::uint8[packetSize];
+	packet->GetMsg()->SerializeWithCachedSizesToArray(buf);
+
+	boost::system::error_code ec;
+	boost::shared_ptr<WebSocketData> webData = session->GetWebData();
+	webData->webSocketServer->send(webData->webHandle, string((const char *)buf, packetSize), websocketpp::frame::opcode::BINARY, ec);
+	if (ec) {
+		SetCloseAfterSend();
+	}
+
+	delete[] buf;
+}
 

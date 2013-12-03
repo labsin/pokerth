@@ -199,6 +199,21 @@ ServerGame::RemoveAllSessions()
 }
 
 void
+ServerGame::MoveSpectatorsToLobby()
+{
+	PlayerIdList spectatorList = GetSpectatorIdList();
+	PlayerIdList::const_iterator i = spectatorList.begin();
+	PlayerIdList::const_iterator end = spectatorList.end();
+	while (i != end) {
+		boost::shared_ptr<SessionData> tmpSession = GetSessionManager().GetSessionByUniquePlayerId(*i);
+		// Only remove if the spectator was found.
+		if (tmpSession)
+			MoveSessionToLobby(tmpSession, NTF_NET_REMOVED_GAME_CLOSED);
+		++i;
+	}
+}
+
+void
 ServerGame::TimerVoteKick(const boost::system::error_code &ec)
 {
 	if (!ec && m_curState != &ServerGameStateFinal::Instance()) {
@@ -628,7 +643,7 @@ ServerGame::GetPlayerIdList() const
 PlayerIdList
 ServerGame::GetSpectatorIdList() const
 {
-	return GetSessionManager().GetPlayerIdList(SessionData::Spectating);
+	return GetSessionManager().GetPlayerIdList(SessionData::Spectating | SessionData::SpectatorWaiting);
 }
 
 bool
@@ -909,7 +924,7 @@ ServerGame::RemovePlayerData(boost::shared_ptr<PlayerData> player, int reason, b
 		netPlayerLeft->set_playerid(player->GetUniqueId());
 		netPlayerLeft->set_gameplayerleftreason(netReason);
 	}
-	GetSessionManager().SendToAllSessions(GetLobbyThread().GetSender(), thisPlayerLeft, SessionData::Game);
+	GetSessionManager().SendToAllSessions(GetLobbyThread().GetSender(), thisPlayerLeft, SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 
 	GetState().NotifySessionRemoved(shared_from_this());
 	if (spectateOnly) {
@@ -1129,7 +1144,8 @@ ServerGame::CheckSettings(const GameData &data, const string &password, ServerMo
 				|| (data.raiseIntervalMode != RAISE_ON_HANDNUMBER)
 				|| (data.raiseMode != DOUBLE_BLINDS)
 				|| (data.raiseSmallBlindEveryHandsValue != RANKING_GAME_RAISE_EVERY_HAND)
-				|| (!password.empty())) {
+				|| (!password.empty())
+				|| (!data.allowSpectators)) {
 			retVal = false;
 		}
 	}

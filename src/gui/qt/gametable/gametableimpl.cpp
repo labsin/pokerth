@@ -43,7 +43,6 @@
 #include "mynamelabel.h"
 #include "mychancelabel.h"
 #include "mytimeoutlabel.h"
-#include "mymenubar.h"
 #include "guilog.h"
 #include "chattools.h"
 
@@ -449,6 +448,9 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 
 	pushButton_showMyCards->hide();
 
+	spectatorIcon = new QLabel(this);
+	spectatorNumberLabel = new QLabel(this);
+
 	//style Game Table
 	refreshGameTableStyle();
 
@@ -644,6 +646,7 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	connect(this, SIGNAL(signalRefreshPlayerName()), this, SLOT(refreshPlayerName()));
 	connect(this, SIGNAL(signalRefreshButton()), this, SLOT(refreshButton()));
 	connect(this, SIGNAL(signalRefreshGameLabels(int)), this, SLOT(refreshGameLabels(int)));
+	connect(this, SIGNAL(signalRefreshSpectatorsDisplay()), this, SLOT(refreshSpectatorsDisplay()));
 	connect(this, SIGNAL(signalSetPlayerAvatar(int, QString)), this, SLOT(setPlayerAvatar(int, QString)));
 	connect(this, SIGNAL(signalGuiUpdateDone()), this, SLOT(guiUpdateDone()));
 	connect(this, SIGNAL(signalMeInAction()), this, SLOT(meInAction()));
@@ -674,9 +677,10 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	connect(this, SIGNAL(signalStartVoteOnKick(unsigned, unsigned, int, int)), this, SLOT(startVoteOnKick(unsigned, unsigned, int, int)));
 	connect(this, SIGNAL(signalChangeVoteOnKickButtonsState(bool)), this, SLOT(changeVoteOnKickButtonsState(bool)));
 	connect(this, SIGNAL(signalEndVoteOnKick()), this, SLOT(endVoteOnKick()));
-
 	connect(this, SIGNAL(signalNetClientPlayerLeft(unsigned)), this, SLOT(netClientPlayerLeft(unsigned)));
 	connect(this, SIGNAL(signalNetClientSpectatorLeft(unsigned)), this, SLOT(netClientSpectatorLeft(unsigned)));
+	connect(this, SIGNAL(signalNetClientSpectatorJoined(unsigned)), this, SLOT(netClientSpectatorJoined(unsigned)));
+
 
 #ifdef GUI_800x480
 	connect( tabsButton, SIGNAL( clicked() ), this, SLOT( tabsButtonClicked() ) );
@@ -1073,6 +1077,9 @@ void gameTableImpl::refreshPlayerAvatar()
 		PlayerListConstIterator it_c;
 		PlayerList seatsList = currentGame->getSeatsList();
 		for (it_c=seatsList->begin(), seatPlace=0; it_c!=seatsList->end(); ++it_c, seatPlace++) {
+
+			//set uniqueID
+			playerAvatarLabelArray[(*it_c)->getMyID()]->setMyUniqueId((*it_c)->getMyUniqueID());
 
 			//get CountryString
 			QString countryString(QString(myStartWindow->getSession()->getClientPlayerInfo((*it_c)->getMyUniqueID()).countryCode.c_str()).toLower());
@@ -3257,6 +3264,9 @@ bool gameTableImpl::eventFilter(QObject *obj, QEvent *event)
 		event->ignore();
 		closeGameTable();
 		return true;
+	} else if (event->type() == QEvent::Resize) {
+		refreshSpectatorsDisplay();
+		return true;
 	} else {
 		// pass the event on to the parent class
 		return QMainWindow::eventFilter(obj, event);
@@ -3534,6 +3544,7 @@ void gameTableImpl::localGameModification()
 
 	//let the SoundEventHandler know that there is a new game
 	mySoundEventHandler->newGameStarts();
+	spectatorIcon->hide();
 }
 
 void gameTableImpl::networkGameModification()
@@ -3583,6 +3594,9 @@ void gameTableImpl::networkGameModification()
 		myGameTableStyle->setBreakButtonStyle(pushButton_break,0);
 #endif
 		blinkingStartButtonAnimationTimer->stop();
+		spectatorIcon->show();
+		spectatorNumberLabel->show();
+		refreshSpectatorsDisplay();
 	}
 	if(myStartWindow->getSession()->getGameType() == Session::GAME_TYPE_NETWORK) {
 #ifdef GUI_800x480
@@ -3590,6 +3604,8 @@ void gameTableImpl::networkGameModification()
 #else
 		pushButton_break->hide();
 #endif
+		spectatorIcon->hide();
+		spectatorNumberLabel->hide();
 	}
 	//Set the playing mode to "manual"
 #ifdef GUI_800x480
@@ -4259,6 +4275,7 @@ void gameTableImpl::refreshGameTableStyle()
 	label_handNumber->setText(HandString+":");
 	label_gameNumber->setText(GameString+":");
 
+	myGameTableStyle->setSpectatorNumberLabelStyle(spectatorNumberLabel);
 }
 
 void gameTableImpl::saveGameTableGeometry()
@@ -4300,9 +4317,14 @@ void gameTableImpl::netClientPlayerLeft(unsigned /*playerId*/)
 	}
 }
 
+void gameTableImpl::netClientSpectatorJoined(unsigned /*playerId*/)
+{
+	refreshSpectatorsDisplay();
+}
+
 void gameTableImpl::netClientSpectatorLeft(unsigned /*playerId*/)
 {
-	// TODO
+	refreshSpectatorsDisplay();
 }
 
 void gameTableImpl::registeredUserMode()
@@ -4441,3 +4463,38 @@ void gameTableImpl::checkActionLabelPosition()
 	}
 #endif
 }
+
+void gameTableImpl::refreshSpectatorsDisplay()
+{
+	assert(myStartWindow->getSession());
+	GameInfo info(myStartWindow->getSession()->getClientGameInfo(myStartWindow->getSession()->getClientCurrentGameId()));
+	if(!info.spectatorsDuringGame.empty()) {
+		QPixmap spectatorPix(":/gfx/spectator.png");
+		int iconX = this->centralWidget()->geometry().width() - spectatorPix.width() - 1;
+		int iconY = 2;
+		spectatorIcon->move(iconX,iconY);
+		spectatorIcon->setPixmap(spectatorPix);
+		int labelX = this->centralWidget()->geometry().width() - spectatorPix.width() - 1;
+		int labelY = spectatorPix.height()+2;
+		spectatorNumberLabel->setGeometry(labelX, labelY, 32, 14);
+		spectatorNumberLabel->setText(QString("%1").arg(info.spectatorsDuringGame.size()));
+
+		QString spectatorList = QString("<b>"+tr("Spectators")+":</b><br>");
+		PlayerIdList::const_iterator i = info.spectatorsDuringGame.begin();
+		PlayerIdList::const_iterator end = info.spectatorsDuringGame.end();
+		while (i != end) {
+			PlayerInfo playerInfo(myStartWindow->getSession()->getClientPlayerInfo(*i));
+			spectatorList.append(QString::fromUtf8(playerInfo.playerName.c_str())+"<br>");
+			++i;
+		}
+		spectatorList.remove(spectatorList.size()-4,4);
+		spectatorIcon->setToolTip(spectatorList);
+		spectatorNumberLabel->setToolTip(spectatorList);
+	} else {
+		spectatorIcon->setToolTip("");
+		spectatorIcon->clear();
+		spectatorNumberLabel->setToolTip("");
+		spectatorNumberLabel->clear();
+	}
+}
+

@@ -1,6 +1,6 @@
 /*****************************************************************************
  * PokerTH - The open source texas holdem engine                             *
- * Copyright (C) 2006-2012 Felix Hammer, Florian Thauer, Lothar May          *
+ * Copyright (C) 2006-2013 Felix Hammer, Florian Thauer, Lothar May          *
  *                                                                           *
  * This program is free software: you can redistribute it and/or modify      *
  * it under the terms of the GNU Affero General Public License as            *
@@ -28,22 +28,45 @@
  * shall include the source code for the parts of OpenSSL used as well       *
  * as that of the covered work.                                              *
  *****************************************************************************/
-#ifndef MYMENUBAR_H
-#define MYMENUBAR_H
 
-#include <QtGui>
-#include <QtCore>
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
+#include <net/sessiondata.h>
+#include <net/webreceivebuffer.h>
+#include <core/loghelper.h>
 
-class MyMenuBar  : public QMenuBar
+using namespace std;
+
+
+WebReceiveBuffer::WebReceiveBuffer()
 {
-	Q_OBJECT
-public:
-	MyMenuBar(QMainWindow*);
+}
 
-	void paintEvent(QPaintEvent * event);
-};
+void
+WebReceiveBuffer::StartAsyncRead(boost::shared_ptr<SessionData> /*session*/)
+{
+	// Nothing to do. This is handled internally by websocketpp.
+}
 
-#endif
+void
+WebReceiveBuffer::HandleRead(boost::shared_ptr<SessionData> /*session*/, const boost::system::error_code &/*error*/, size_t /*bytesRead*/)
+{
+	LOG_ERROR("WebReceiveBuffer::HandleRead should never be called because Websocket I/O is message based.");
+}
+
+void
+WebReceiveBuffer::HandleMessage(boost::shared_ptr<SessionData> session, const string &msg)
+{
+	boost::shared_ptr<NetPacket> tmpPacket;
+	try {
+		tmpPacket = NetPacket::Create(msg.c_str(), msg.size());
+		if (!validator.IsValidPacket(*tmpPacket)) {
+			LOG_ERROR("Session " << session->GetId() << " - Invalid packet: " << tmpPacket->GetMsg()->messagetype());
+			tmpPacket.reset();
+		}
+	} catch (const exception &e) {
+		LOG_ERROR("Session " << session->GetId() << " - " << e.what());
+	}
+	if (tmpPacket) {
+		session->HandlePacket(tmpPacket);
+	}
+}
+

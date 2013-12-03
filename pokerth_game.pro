@@ -200,7 +200,6 @@ HEADERS += src/engine/game.h \
 	src/gui/generic/serverguiwrapper.h \
 	src/gui/qt/gametable/mychancelabel.h \
 	src/gui/qt/serverlistdialog/serverlistdialogimpl.h \
-	src/gui/qt/gametable/mymenubar.h \
 	src/gui/qt/gametable/mytimeoutlabel.h \
 	src/gui/qt/gametable/mynamelabel.h \
 	src/gui/qt/settingsdialog/mystylelistitem.h \
@@ -277,7 +276,6 @@ SOURCES += src/pokerth.cpp \
 	src/core/common/loghelper_client.cpp \
 	src/gui/qt/gametable/mychancelabel.cpp \
 	src/gui/qt/serverlistdialog/serverlistdialogimpl.cpp \
-	src/gui/qt/gametable/mymenubar.cpp \
 	src/gui/qt/gametable/mytimeoutlabel.cpp \
 	src/gui/qt/gametable/mynamelabel.cpp \
 	src/gui/qt/settingsdialog/mystylelistitem.cpp \
@@ -410,8 +408,7 @@ unix:!mac {
 		LIBPATH += $${PREFIX}/lib /opt/gsasl/lib
 		LIB_DIRS = $${PREFIX}/lib \
 			$${PREFIX}/lib64 \
-			$${PREFIX}/lib/x86_64-linux-gnu \
-			$${PREFIX}/lib/i386-linux-gnu
+			$$system(qmake -query QT_INSTALL_LIBS)
 	}
 	android{
 		LIBPATH += $${PREFIX}/lib/armv7
@@ -430,7 +427,7 @@ unix:!mac {
 	BOOST_RANDOM = boost_random \
 		boost_random-mt
 
-	# searching in $PREFIX/lib and $PREFIX/lib64
+	# searching in $PREFIX/lib, $PREFIX/lib64 and $$system(qmake -query QT_INSTALL_LIBS)
 	# to override the default '/usr' pass PREFIX
 	# variable to qmake.
 	for(dir, LIB_DIRS):exists($$dir) {
@@ -599,6 +596,7 @@ mac {
 	INCLUDEPATH += /Developer/SDKs/MacOSX10.6.sdk/usr/include/
 	INCLUDEPATH += /Library/Frameworks/SDL.framework/Headers
 	INCLUDEPATH += /Library/Frameworks/SDL_mixer.framework/Headers
+	INCLUDEPATH += /usr/local/include
 }
 OTHER_FILES += docs/infomessage-id-desc.txt
 official_server { 
@@ -638,6 +636,7 @@ gui_800x480 {
 android{
 	# Use old boost::filesystem, because the new version requires std::wstring.
 	DEFINES += BOOST_FILESYSTEM_VERSION=3
+	DEFINES += TIXML_USE_STL
 	# sqlite3 is included directly.
 	INCLUDEPATH += src/third_party/sqlite3
 

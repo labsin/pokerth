@@ -50,8 +50,6 @@ public:
 	SessionManager();
 	virtual ~SessionManager();
 
-	bool HasSessions() const;
-
 	void AddSession(boost::shared_ptr<SessionData> sessionData);
 	void SetSessionPlayerData(SessionId session, boost::shared_ptr<PlayerData> playerData);
 	bool RemoveSession(SessionId session);
@@ -61,6 +59,7 @@ public:
 	boost::shared_ptr<SessionData> GetSessionByUniquePlayerId(unsigned uniqueId, bool initSessions = false) const;
 
 	PlayerDataList GetPlayerDataList() const;
+	PlayerDataList GetSpectatorDataList() const;
 	PlayerIdList GetPlayerIdList(int state) const;
 	bool IsPlayerConnected(const std::string &playerName) const;
 	bool IsPlayerConnected(unsigned uniqueId) const;
@@ -72,8 +71,9 @@ public:
 	void ResetAllReadyFlags();
 
 	void Clear();
-	unsigned GetRawSessionCount();
-	unsigned GetSessionCountWithState(int state);
+	unsigned GetRawSessionCount() const;
+	unsigned GetSessionCountWithState(int state) const;
+	bool HasSessionWithState(int state) const;
 
 	void SendToAllSessions(SenderHelper &sender, boost::shared_ptr<NetPacket> packet, int state);
 	void SendLobbyMsgToAllSessions(SenderHelper &sender, boost::shared_ptr<NetPacket> packet, int state);

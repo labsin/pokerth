@@ -82,6 +82,7 @@ using namespace std;
 #define SERVER_GAME_FORCED_TIMEOUT_FACTOR			60
 #define SERVER_VOTE_KICK_TIMEOUT_SEC				30
 #define SERVER_LOOP_DELAY_MSEC						50
+#define SERVER_MAX_NUM_SPECTATORS_PER_GAME			100
 
 // Helper functions
 
@@ -286,7 +287,7 @@ AbstractServerGameStateReceiving::ProcessPacket(boost::shared_ptr<ServerGame> se
 					netChat->set_playerid(session->GetPlayerData()->GetUniqueId());
 					netChat->set_chattype(ChatMessage::chatTypeGame);
 					netChat->set_chattext(netChatRequest.chattext());
-					server->SendToAllPlayers(packet, SessionData::Game | SessionData::Spectating);
+					server->SendToAllPlayers(packet, SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 					chatSent = true;
 
 					// Send the message to the chat cleaner bot for ranking games.
@@ -438,6 +439,7 @@ AbstractServerGameStateReceiving::CreateNetPacketHandStart(const ServerGame &ser
 	}
 
 	netHandStart->set_smallblind(curGame.getCurrentHand()->getSmallBlind());
+	netHandStart->set_dealerplayerid(curGame.getCurrentHand()->getDealerPosition());
 	return notifyCards;
 }
 
@@ -459,11 +461,20 @@ AbstractServerGameStateReceiving::AcceptNewSession(boost::shared_ptr<ServerGame>
 		++player_i;
 	}
 
+	// Send notifications for connected spectators to client.
+	PlayerDataList tmpSpectatorList(server->GetSessionManager().GetSpectatorDataList());
+	PlayerDataList::iterator spectator_i = tmpSpectatorList.begin();
+	PlayerDataList::iterator spectator_end = tmpSpectatorList.end();
+	while (spectator_i != spectator_end) {
+		server->GetLobbyThread().GetSender().Send(session, CreateNetPacketSpectatorJoined(server->GetId(), *(*spectator_i)));
+		++spectator_i;
+	}
+
 	// Send "Player Joined"/"Spectator Joined" to other fully connected clients.
 	if (spectateOnly) {
-		server->SendToAllPlayers(CreateNetPacketSpectatorJoined(server->GetId(), *session->GetPlayerData()), SessionData::Game | SessionData::Spectating);
+		server->SendToAllPlayers(CreateNetPacketSpectatorJoined(server->GetId(), *session->GetPlayerData()), SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 	} else {
-		server->SendToAllPlayers(CreateNetPacketPlayerJoined(server->GetId(), *session->GetPlayerData()), SessionData::Game | SessionData::Spectating);
+		server->SendToAllPlayers(CreateNetPacketPlayerJoined(server->GetId(), *session->GetPlayerData()), SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 	}
 
 	// Accept session.
@@ -545,7 +556,11 @@ void
 ServerGameStateInit::HandleNewSpectator(boost::shared_ptr<ServerGame> server, boost::shared_ptr<SessionData> session)
 {
 	if (session && session->GetPlayerData()) {
-		AcceptNewSession(server, session, true);
+		if (server->GetSpectatorIdList().size() >= SERVER_MAX_NUM_SPECTATORS_PER_GAME) {
+			server->MoveSessionToLobby(session, NTF_NET_REMOVED_GAME_FULL);
+		} else {
+			AcceptNewSession(server, session, true);
+		}
 	}
 }
 
@@ -647,7 +662,7 @@ ServerGameStateInit::SendStartEvent(ServerGame &server, bool fillWithComputerPla
 			server.AddComputerPlayer(tmpPlayerData);
 
 			// Send "Player Joined" to other fully connected clients.
-			server.SendToAllPlayers(CreateNetPacketPlayerJoined(server.GetId(), *tmpPlayerData), SessionData::Game | SessionData::Spectating);
+			server.SendToAllPlayers(CreateNetPacketPlayerJoined(server.GetId(), *tmpPlayerData), SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 
 			// Notify lobby.
 			server.GetLobbyThread().NotifyPlayerJoinedGame(server.GetId(), tmpPlayerData->GetUniqueId());
@@ -1420,7 +1435,7 @@ ServerGameStateHand::PerformRejoin(boost::shared_ptr<ServerGame> server, boost::
 		PlayerIdChangedMessage *netIdChanged = packet->GetMsg()->mutable_playeridchangedmessage();
 		netIdChanged->set_oldplayerid(rejoinPlayer->getMyUniqueID());
 		netIdChanged->set_newplayerid(session->GetPlayerData()->GetUniqueId());
-		server->SendToAllButOnePlayers(packet, session->GetId(), SessionData::Game | SessionData::Spectating);
+		server->SendToAllButOnePlayers(packet, session->GetId(), SessionData::Game | SessionData::Spectating | SessionData::SpectatorWaiting);
 
 		// Update the dealer, if necessary.
 		curGame.replaceDealer(rejoinPlayer->getMyUniqueID(), session->GetPlayerData()->GetUniqueId());

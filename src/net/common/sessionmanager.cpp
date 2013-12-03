@@ -46,13 +46,6 @@ SessionManager::~SessionManager()
 	Clear();
 }
 
-bool
-SessionManager::HasSessions() const
-{
-	boost::recursive_mutex::scoped_lock lock(m_sessionMapMutex);
-	return !m_sessionMap.empty();
-}
-
 void
 SessionManager::AddSession(boost::shared_ptr<SessionData> session)
 {
@@ -166,6 +159,28 @@ SessionManager::GetPlayerDataList() const
 		++session_i;
 	}
 	return playerList;
+}
+
+PlayerDataList
+SessionManager::GetSpectatorDataList() const
+{
+	PlayerDataList spectatorList;
+	boost::recursive_mutex::scoped_lock lock(m_sessionMapMutex);
+
+	SessionMap::const_iterator session_i = m_sessionMap.begin();
+	SessionMap::const_iterator session_end = m_sessionMap.end();
+
+	while (session_i != session_end) {
+		// Get all spectators of the game.
+		if (session_i->second->GetState() == SessionData::Spectating || session_i->second->GetState() == SessionData::SpectatorWaiting) {
+			boost::shared_ptr<PlayerData> tmpPlayer(session_i->second->GetPlayerData());
+			if (!tmpPlayer.get() || tmpPlayer->GetName().empty())
+				throw ServerException(__FILE__, __LINE__, ERR_NET_INVALID_SESSION, 0);
+			spectatorList.push_back(tmpPlayer);
+		}
+		++session_i;
+	}
+	return spectatorList;
 }
 
 PlayerIdList
@@ -288,21 +303,23 @@ SessionManager::Clear()
 
 	boost::system::error_code ec;
 	while (i != end) {
-		i->second->GetAsioSocket()->close(ec);
+		// Close all raw handles.
+		i->second->CloseSocketHandle();
+		i->second->CloseWebSocketHandle();
 		++i;
 	}
 	m_sessionMap.clear();
 }
 
 unsigned
-SessionManager::GetRawSessionCount()
+SessionManager::GetRawSessionCount() const
 {
 	boost::recursive_mutex::scoped_lock lock(m_sessionMapMutex);
 	return (unsigned)m_sessionMap.size();
 }
 
 unsigned
-SessionManager::GetSessionCountWithState(int state)
+SessionManager::GetSessionCountWithState(int state) const
 {
 	unsigned counter = 0;
 	boost::recursive_mutex::scoped_lock lock(m_sessionMapMutex);
@@ -316,6 +333,25 @@ SessionManager::GetSessionCountWithState(int state)
 		++i;
 	}
 	return counter;
+}
+
+bool
+SessionManager::HasSessionWithState(int state) const
+{
+	bool retVal = false;
+	boost::recursive_mutex::scoped_lock lock(m_sessionMapMutex);
+
+	SessionMap::const_iterator i = m_sessionMap.begin();
+	SessionMap::const_iterator end = m_sessionMap.end();
+
+	while (i != end) {
+		if ((i->second->GetState() & state) != 0) {
+			retVal = true;
+			break;
+		}
+		++i;
+	}
+	return retVal;
 }
 
 void

@@ -36,7 +36,7 @@
 #include <QtGui>
 #include <QtCore>
 #if QT_VERSION >= 0x050000
-	#include <QtWidgets>
+#include <QtWidgets>
 #endif
 
 class gameTableImpl;
@@ -54,6 +54,9 @@ public:
 	}
 	void setMyId ( int theValue ) {
 		myId = theValue;
+	}
+	void setMyUniqueId ( int theValue ) {
+		myUniqueId = theValue;
 	}
 	void contextMenuEvent ( QContextMenuEvent * event );
 	QString getPlayerTip(QString);
@@ -95,10 +98,12 @@ private:
 	QPixmap myPixmap;
 	QString myPath;
 
-	int myId;
 	bool myContextMenuEnabled;
 	bool voteRunning;
 	bool transparent;
+	int myId;
+	int myUniqueId;
 };
 
 #endif
+

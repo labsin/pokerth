@@ -39,6 +39,7 @@
 #include <net/clientexception.h>
 #include <net/socket_msg.h>
 #include <net/net_helper.h>
+#include <net/asioreceivebuffer.h>
 #include <core/avatarmanager.h>
 #include <core/loghelper.h>
 #include <clientenginefactory.h>
@@ -1451,6 +1452,48 @@ ClientThread::ModifyGameInfoRemoveSpectator(unsigned gameId, unsigned playerId)
 	}
 	if (playerRemoved)
 		GetCallback().SignalNetClientGameListSpectatorLeft(gameId, playerId);
+}
+
+void
+ClientThread::ModifyGameInfoClearSpectatorsDuringGame()
+{
+	boost::mutex::scoped_lock lock(m_gameInfoMapMutex);
+	GameInfoMap::iterator pos = m_gameInfoMap.find(GetGameId());
+	if (pos != m_gameInfoMap.end()) {
+		pos->second.spectatorsDuringGame.clear();
+	}
+}
+
+void
+ClientThread::ModifyGameInfoAddSpectatorDuringGame(unsigned playerId)
+{
+	bool spectatorAdded = false;
+	{
+		boost::mutex::scoped_lock lock(m_gameInfoMapMutex);
+		GameInfoMap::iterator pos = m_gameInfoMap.find(GetGameId());
+		if (pos != m_gameInfoMap.end()) {
+			pos->second.spectatorsDuringGame.push_back(playerId);
+			spectatorAdded = true;
+		}
+	}
+	if (spectatorAdded)
+		GetCallback().SignalNetClientSpectatorJoined(playerId, GetPlayerName(playerId));
+}
+
+void
+ClientThread::ModifyGameInfoRemoveSpectatorDuringGame(unsigned playerId, int removeReason)
+{
+	bool spectatorRemoved = false;
+	{
+		boost::mutex::scoped_lock lock(m_gameInfoMapMutex);
+		GameInfoMap::iterator pos = m_gameInfoMap.find(GetGameId());
+		if (pos != m_gameInfoMap.end()) {
+			pos->second.spectatorsDuringGame.remove(playerId);
+			spectatorRemoved = true;
+		}
+	}
+	if (spectatorRemoved)
+		GetCallback().SignalNetClientSpectatorLeft(playerId, GetPlayerName(playerId), removeReason);
 }
 
 void

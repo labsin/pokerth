@@ -286,10 +286,9 @@ unix:!mac {
 	QMAKE_LIBDIR += lib
 	!android{
 		LIBPATH += $${PREFIX}/lib /opt/gsasl/lib
-		LIB_DIRS = $${PREFIX}/lib \
+                LIB_DIRS = $${PREFIX}/lib \
                         $${PREFIX}/lib64 \
-                        $${PREFIX}/lib/x86_64-linux-gnu \
-                        $${PREFIX}/lib/i386-linux-gnu
+                        $$system(qmake -query QT_INSTALL_LIBS)
 	}
 	android{
 		LIBPATH += $${PREFIX}/lib/armv7

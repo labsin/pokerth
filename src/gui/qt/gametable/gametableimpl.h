@@ -48,7 +48,7 @@
 #include <QtGui>
 #include <QtCore>
 #if QT_VERSION >= 0x050000
-	#include <QtWidgets>
+#include <QtWidgets>
 #endif
 
 class guiLog;
@@ -133,6 +133,7 @@ signals:
 	void signalRefreshPlayerName();
 	void signalRefreshButton();
 	void signalRefreshGameLabels(int);
+	void signalRefreshSpectatorsDisplay();
 
 	void signalSetPlayerAvatar(int, QString);
 	void signalGuiUpdateDone();
@@ -173,6 +174,7 @@ signals:
 	void signalEndVoteOnKick();
 	void signalNetClientPlayerLeft(unsigned playerId);
 	void signalNetClientSpectatorLeft(unsigned playerId);
+	void signalNetClientSpectatorJoined(unsigned playerId);
 
 public slots:
 
@@ -355,6 +357,7 @@ public slots:
 
 	void netClientPlayerLeft(unsigned playerId);
 	void netClientSpectatorLeft(unsigned playerId);
+	void netClientSpectatorJoined(unsigned playerId);
 	void registeredUserMode();
 	void guestUserMode();
 
@@ -371,6 +374,7 @@ public slots:
 	void tabsButtonClicked();
 	void tabsButtonClose();
 #endif
+	void refreshSpectatorsDisplay();
 
 private:
 
@@ -437,6 +441,8 @@ private:
 
 	QLabel *playerTipLabelArray[MAX_NUMBER_OF_PLAYERS];
 	QPixmap flipside;
+	QLabel *spectatorIcon;
+	QLabel *spectatorNumberLabel;
 
 	// 	Dialogs
 	startWindowImpl *myStartWindow;

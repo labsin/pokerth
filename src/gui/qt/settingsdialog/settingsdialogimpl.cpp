@@ -257,7 +257,7 @@ void settingsDialogImpl::prepareDialog()
 		lineEdit_InternetGamePassword->setText(QString::fromUtf8(myConfig->readConfigString("InternetGamePassword").c_str()));
 	}
 	checkBox_UseLobbyChat->setChecked(myConfig->readConfigInt("UseLobbyChat"));
-	checkBox_InetGane_AutoLeaveTheTableAfterGameFinished->setChecked(myConfig->readConfigInt("NetAutoLeaveGameAfterFinish"));
+	checkBox_InetGame_AutoLeaveTheTableAfterGameFinished->setChecked(myConfig->readConfigInt("NetAutoLeaveGameAfterFinish"));
 	comboBox_internetGameType->setCurrentIndex(myConfig->readConfigInt("InternetGameType"));
 	lineEdit_internetGameName->setText(QString::fromUtf8(myConfig->readConfigString("InternetGameName").c_str()));
 	if(myConfig->readConfigInt("InternetServerConfigMode")) {
@@ -273,6 +273,7 @@ void settingsDialogImpl::prepareDialog()
 		QTreeWidgetItem *item = new QTreeWidgetItem(treeWidget_internetGameIgnoredPlayers);
 		item->setText(0, QString::fromUtf8(it5->c_str()));
 	}
+	checkBox_allowSpectators->setChecked(myConfig->readConfigInt("InternetGameAllowSpectators"));
 
 	//Interface
 	comboBox_switchLanguage->setCurrentIndex(comboBox_switchLanguage->findData(QString::fromUtf8(myConfig->readConfigString("Language").c_str()).section('_', 0, 0)));
@@ -711,7 +712,7 @@ void settingsDialogImpl::isAccepted()
 	myConfig->writeConfigInt("UseInternetGamePassword", checkBox_UseInternetGamePassword->isChecked());
 	myConfig->writeConfigString("InternetGamePassword", lineEdit_InternetGamePassword->text().toUtf8().constData());
 	myConfig->writeConfigInt("UseLobbyChat", checkBox_UseLobbyChat->isChecked());
-	myConfig->writeConfigInt("NetAutoLeaveGameAfterFinish", checkBox_InetGane_AutoLeaveTheTableAfterGameFinished->isChecked());
+	myConfig->writeConfigInt("NetAutoLeaveGameAfterFinish", checkBox_InetGame_AutoLeaveTheTableAfterGameFinished->isChecked());
 	myConfig->writeConfigInt("InternetGameType", comboBox_internetGameType->currentIndex());
 	myConfig->writeConfigString("InternetGameName", lineEdit_internetGameName->text().toUtf8().constData());
 
@@ -721,7 +722,7 @@ void settingsDialogImpl::isAccepted()
 		playerIgnoreList.push_back(QString("%1").arg(treeWidget_internetGameIgnoredPlayers->topLevelItem(k)->text(0)).toUtf8().constData());
 	}
 	myConfig->writeConfigStringList("PlayerIgnoreList", playerIgnoreList);
-
+	myConfig->writeConfigInt("InternetGameAllowSpectators", checkBox_allowSpectators->isChecked());
 
 	// 	Interface
 	myConfig->writeConfigString("Language", comboBox_switchLanguage->itemData(comboBox_switchLanguage->currentIndex()).toString().toUtf8().constData());

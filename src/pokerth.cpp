@@ -39,7 +39,9 @@
 #include <QtCore>
 
 #ifdef __APPLE__
+#if QT_VERSION < 0x050000
 #include <QMacStyle>
+#endif
 #endif
 
 #include <curl/curl.h>
@@ -85,20 +87,21 @@ int main( int argc, char **argv )
 	socket_startup();
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
+#ifdef __APPLE__
+	// The following needs to be done before the application is created, otherwise loading platforms plugin fails.
+	QDir dir(argv[0]);
+	dir.cdUp();
+	dir.cdUp();
+	dir.cd("plugins");
+	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+#endif
+
 	/////// can be removed for non-qt-guis ////////////
 	SharedTools::QtSingleApplication a( "PokerTH", argc, argv );
 
 	if (a.sendMessage("Wake up!")) {
 		return 0;
 	}
-
-#ifdef __APPLE__
-	// The following needs to be done directly after the application is created.
-	QDir dir(QApplication::applicationDirPath());
-	dir.cdUp();
-	dir.cd("plugins");
-	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-#endif
 
 	//create defaultconfig
 	ConfigFile *myConfig = new ConfigFile(argv[0], false);
@@ -208,8 +211,7 @@ int main( int argc, char **argv )
 	QPixmap pixmap;
 	if(customWelcomePokerTHFile.exists()) {
 		pixmap.load(QFileInfo(customWelcomePokerTHFile).absoluteFilePath());
-	}
-	else {
+	} else {
 		//if custom welcome pic could not be saved locally we need to scale it on the fly
 		pixmap.load(":/android/android-data/gfx/gui/misc/welcomepokerth10_mobile.png");
 		pixmap = pixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);

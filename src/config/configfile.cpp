@@ -64,7 +64,7 @@ ConfigFile::ConfigFile(char *argv0, bool readonly) : noWriteAccess(readonly)
 	myConfigState = OK;
 
 	// !!!! Revisionsnummer der Configdefaults !!!!!
-	configRev = 100;
+	configRev = 103;
 
 	//standard defaults
 	logOnOffDefault = "1";
@@ -220,7 +220,11 @@ ConfigFile::ConfigFile(char *argv0, bool readonly) : noWriteAccess(readonly)
 	configList.push_back(ConfigInfo("ServerPassword", CONFIG_TYPE_STRING, ""));
 	configList.push_back(ConfigInfo("ServerUseIpv6", CONFIG_TYPE_INT, "0"));
 	configList.push_back(ConfigInfo("ServerUseSctp", CONFIG_TYPE_INT, "0"));
+	configList.push_back(ConfigInfo("ServerUseWebSocket", CONFIG_TYPE_INT, "0"));
 	configList.push_back(ConfigInfo("ServerPort", CONFIG_TYPE_INT, "7234"));
+	configList.push_back(ConfigInfo("ServerWebSocketPort", CONFIG_TYPE_INT, "7233"));
+	configList.push_back(ConfigInfo("ServerWebSocketResource", CONFIG_TYPE_STRING, ""));
+	configList.push_back(ConfigInfo("ServerWebSocketOrigin", CONFIG_TYPE_STRING, ""));
 	configList.push_back(ConfigInfo("ServerUsePutAvatars", CONFIG_TYPE_INT, "0"));
 	configList.push_back(ConfigInfo("ServerPutAvatarsAddress", CONFIG_TYPE_STRING, ""));
 	configList.push_back(ConfigInfo("ServerPutAvatarsUser", CONFIG_TYPE_STRING, ""));
@@ -238,6 +242,7 @@ ConfigFile::ConfigFile(char *argv0, bool readonly) : noWriteAccess(readonly)
 	configList.push_back(ConfigInfo("InternetGamePassword", CONFIG_TYPE_STRING, ""));
 	configList.push_back(ConfigInfo("InternetGameType", CONFIG_TYPE_INT, "0"));
 	configList.push_back(ConfigInfo("InternetGameName", CONFIG_TYPE_STRING, "My Online Game"));
+	configList.push_back(ConfigInfo("InternetGameAllowSpectators", CONFIG_TYPE_INT, "1"));
 	configList.push_back(ConfigInfo("UseLobbyChat", CONFIG_TYPE_INT, "1"));
 	configList.push_back(ConfigInfo("UseAdminIRC", CONFIG_TYPE_INT, "0"));
 	configList.push_back(ConfigInfo("AdminIRCServerAddress", CONFIG_TYPE_STRING, "chat.freenode.net"));

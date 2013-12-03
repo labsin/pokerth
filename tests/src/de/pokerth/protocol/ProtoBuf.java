@@ -628,6 +628,16 @@ public final class ProtoBuf {
      * <code>repeated uint32 manualBlinds = 14 [packed = true];</code>
      */
     int getManualBlinds(int index);
+
+    // optional bool allowSpectators = 15 [default = true];
+    /**
+     * <code>optional bool allowSpectators = 15 [default = true];</code>
+     */
+    boolean hasAllowSpectators();
+    /**
+     * <code>optional bool allowSpectators = 15 [default = true];</code>
+     */
+    boolean getAllowSpectators();
   }
   /**
    * Protobuf type {@code NetGameInfo}
@@ -768,6 +778,11 @@ public final class ProtoBuf {
                 manualBlinds_.add(input.readUInt32());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 120: {
+              bitField0_ |= 0x00002000;
+              allowSpectators_ = input.readBool();
               break;
             }
           }
@@ -1270,6 +1285,22 @@ public final class ProtoBuf {
     }
     private int manualBlindsMemoizedSerializedSize = -1;
 
+    // optional bool allowSpectators = 15 [default = true];
+    public static final int ALLOWSPECTATORS_FIELD_NUMBER = 15;
+    private boolean allowSpectators_;
+    /**
+     * <code>optional bool allowSpectators = 15 [default = true];</code>
+     */
+    public boolean hasAllowSpectators() {
+      return ((bitField0_ & 0x00002000) == 0x00002000);
+    }
+    /**
+     * <code>optional bool allowSpectators = 15 [default = true];</code>
+     */
+    public boolean getAllowSpectators() {
+      return allowSpectators_;
+    }
+
     private void initFields() {
       gameName_ = "";
       netGameType_ = de.pokerth.protocol.ProtoBuf.NetGameInfo.NetGameType.normalGame;
@@ -1285,6 +1316,7 @@ public final class ProtoBuf {
       firstSmallBlind_ = 0;
       startMoney_ = 0;
       manualBlinds_ = java.util.Collections.emptyList();
+      allowSpectators_ = true;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1384,6 +1416,9 @@ public final class ProtoBuf {
       for (int i = 0; i < manualBlinds_.size(); i++) {
         output.writeUInt32NoTag(manualBlinds_.get(i));
       }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        output.writeBool(15, allowSpectators_);
+      }
     }
 
     private int memoizedSerializedSize = -1;
@@ -1457,6 +1492,10 @@ public final class ProtoBuf {
               .computeInt32SizeNoTag(dataSize);
         }
         manualBlindsMemoizedSerializedSize = dataSize;
+      }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(15, allowSpectators_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -1577,6 +1616,8 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00001000);
         manualBlinds_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00002000);
+        allowSpectators_ = true;
+        bitField0_ = (bitField0_ & ~0x00004000);
         return this;
       }
 
@@ -1657,6 +1698,10 @@ public final class ProtoBuf {
           bitField0_ = (bitField0_ & ~0x00002000);
         }
         result.manualBlinds_ = manualBlinds_;
+        if (((from_bitField0_ & 0x00004000) == 0x00004000)) {
+          to_bitField0_ |= 0x00002000;
+        }
+        result.allowSpectators_ = allowSpectators_;
         result.bitField0_ = to_bitField0_;
         return result;
       }
@@ -1713,6 +1758,9 @@ public final class ProtoBuf {
             manualBlinds_.addAll(other.manualBlinds_);
           }
           
+        }
+        if (other.hasAllowSpectators()) {
+          setAllowSpectators(other.getAllowSpectators());
         }
         return this;
       }
@@ -2353,6 +2401,39 @@ public final class ProtoBuf {
       public Builder clearManualBlinds() {
         manualBlinds_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00002000);
+        
+        return this;
+      }
+
+      // optional bool allowSpectators = 15 [default = true];
+      private boolean allowSpectators_ = true;
+      /**
+       * <code>optional bool allowSpectators = 15 [default = true];</code>
+       */
+      public boolean hasAllowSpectators() {
+        return ((bitField0_ & 0x00004000) == 0x00004000);
+      }
+      /**
+       * <code>optional bool allowSpectators = 15 [default = true];</code>
+       */
+      public boolean getAllowSpectators() {
+        return allowSpectators_;
+      }
+      /**
+       * <code>optional bool allowSpectators = 15 [default = true];</code>
+       */
+      public Builder setAllowSpectators(boolean value) {
+        bitField0_ |= 0x00004000;
+        allowSpectators_ = value;
+        
+        return this;
+      }
+      /**
+       * <code>optional bool allowSpectators = 15 [default = true];</code>
+       */
+      public Builder clearAllowSpectators() {
+        bitField0_ = (bitField0_ & ~0x00004000);
+        allowSpectators_ = true;
         
         return this;
       }
@@ -18913,6 +18994,10 @@ public final class ProtoBuf {
        * <code>rejoinFailed = 11;</code>
        */
       rejoinFailed(10, 11),
+      /**
+       * <code>noSpectatorsAllowed = 12;</code>
+       */
+      noSpectatorsAllowed(11, 12),
       ;
 
       /**
@@ -18959,6 +19044,10 @@ public final class ProtoBuf {
        * <code>rejoinFailed = 11;</code>
        */
       public static final int rejoinFailed_VALUE = 11;
+      /**
+       * <code>noSpectatorsAllowed = 12;</code>
+       */
+      public static final int noSpectatorsAllowed_VALUE = 12;
 
 
       public final int getNumber() { return value; }
@@ -18976,6 +19065,7 @@ public final class ProtoBuf {
           case 9: return invalidSettings;
           case 10: return ipAddressBlocked;
           case 11: return rejoinFailed;
+          case 12: return noSpectatorsAllowed;
           default: return null;
         }
       }
@@ -21967,6 +22057,10 @@ public final class ProtoBuf {
        * <code>removedStartFailed = 5;</code>
        */
       removedStartFailed(5, 5),
+      /**
+       * <code>gameClosed = 6;</code>
+       */
+      gameClosed(6, 6),
       ;
 
       /**
@@ -21997,6 +22091,10 @@ public final class ProtoBuf {
        * <code>removedStartFailed = 5;</code>
        */
       public static final int removedStartFailed_VALUE = 5;
+      /**
+       * <code>gameClosed = 6;</code>
+       */
+      public static final int gameClosed_VALUE = 6;
 
 
       public final int getNumber() { return value; }
@@ -22009,6 +22107,7 @@ public final class ProtoBuf {
           case 3: return gameIsRunning;
           case 4: return gameTimeout;
           case 5: return removedStartFailed;
+          case 6: return gameClosed;
           default: return null;
         }
       }
@@ -27845,6 +27944,16 @@ public final class ProtoBuf {
      * <code>repeated .NetPlayerState seatStates = 5;</code>
      */
     de.pokerth.protocol.ProtoBuf.NetPlayerState getSeatStates(int index);
+
+    // optional uint32 dealerPlayerId = 6;
+    /**
+     * <code>optional uint32 dealerPlayerId = 6;</code>
+     */
+    boolean hasDealerPlayerId();
+    /**
+     * <code>optional uint32 dealerPlayerId = 6;</code>
+     */
+    int getDealerPlayerId();
   }
   /**
    * Protobuf type {@code HandStartMessage}
@@ -27944,6 +28053,11 @@ public final class ProtoBuf {
                 }
               }
               input.popLimit(oldLimit);
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000010;
+              dealerPlayerId_ = input.readUInt32();
               break;
             }
           }
@@ -28492,12 +28606,29 @@ public final class ProtoBuf {
       return seatStates_.get(index);
     }
 
+    // optional uint32 dealerPlayerId = 6;
+    public static final int DEALERPLAYERID_FIELD_NUMBER = 6;
+    private int dealerPlayerId_;
+    /**
+     * <code>optional uint32 dealerPlayerId = 6;</code>
+     */
+    public boolean hasDealerPlayerId() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional uint32 dealerPlayerId = 6;</code>
+     */
+    public int getDealerPlayerId() {
+      return dealerPlayerId_;
+    }
+
     private void initFields() {
       gameId_ = 0;
       plainCards_ = de.pokerth.protocol.ProtoBuf.HandStartMessage.PlainCards.getDefaultInstance();
       encryptedCards_ = com.google.protobuf.ByteString.EMPTY;
       smallBlind_ = 0;
       seatStates_ = java.util.Collections.emptyList();
+      dealerPlayerId_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -28540,6 +28671,9 @@ public final class ProtoBuf {
       for (int i = 0; i < seatStates_.size(); i++) {
         output.writeEnum(5, seatStates_.get(i).getNumber());
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeUInt32(6, dealerPlayerId_);
+      }
     }
 
     private int memoizedSerializedSize = -1;
@@ -28572,6 +28706,10 @@ public final class ProtoBuf {
         }
         size += dataSize;
         size += 1 * seatStates_.size();
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(6, dealerPlayerId_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -28674,6 +28812,8 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000008);
         seatStates_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000010);
+        dealerPlayerId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -28718,6 +28858,10 @@ public final class ProtoBuf {
           bitField0_ = (bitField0_ & ~0x00000010);
         }
         result.seatStates_ = seatStates_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.dealerPlayerId_ = dealerPlayerId_;
         result.bitField0_ = to_bitField0_;
         return result;
       }
@@ -28745,6 +28889,9 @@ public final class ProtoBuf {
             seatStates_.addAll(other.seatStates_);
           }
           
+        }
+        if (other.hasDealerPlayerId()) {
+          setDealerPlayerId(other.getDealerPlayerId());
         }
         return this;
       }
@@ -29017,6 +29164,39 @@ public final class ProtoBuf {
       public Builder clearSeatStates() {
         seatStates_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000010);
+        
+        return this;
+      }
+
+      // optional uint32 dealerPlayerId = 6;
+      private int dealerPlayerId_ ;
+      /**
+       * <code>optional uint32 dealerPlayerId = 6;</code>
+       */
+      public boolean hasDealerPlayerId() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional uint32 dealerPlayerId = 6;</code>
+       */
+      public int getDealerPlayerId() {
+        return dealerPlayerId_;
+      }
+      /**
+       * <code>optional uint32 dealerPlayerId = 6;</code>
+       */
+      public Builder setDealerPlayerId(int value) {
+        bitField0_ |= 0x00000020;
+        dealerPlayerId_ = value;
+        
+        return this;
+      }
+      /**
+       * <code>optional uint32 dealerPlayerId = 6;</code>
+       */
+      public Builder clearDealerPlayerId() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        dealerPlayerId_ = 0;
         
         return this;
       }

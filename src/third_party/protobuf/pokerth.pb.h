@@ -201,11 +201,12 @@ enum JoinGameFailedMessage_JoinGameFailureReason {
   JoinGameFailedMessage_JoinGameFailureReason_badGameName = 8,
   JoinGameFailedMessage_JoinGameFailureReason_invalidSettings = 9,
   JoinGameFailedMessage_JoinGameFailureReason_ipAddressBlocked = 10,
-  JoinGameFailedMessage_JoinGameFailureReason_rejoinFailed = 11
+  JoinGameFailedMessage_JoinGameFailureReason_rejoinFailed = 11,
+  JoinGameFailedMessage_JoinGameFailureReason_noSpectatorsAllowed = 12
 };
 bool JoinGameFailedMessage_JoinGameFailureReason_IsValid(int value);
 const JoinGameFailedMessage_JoinGameFailureReason JoinGameFailedMessage_JoinGameFailureReason_JoinGameFailureReason_MIN = JoinGameFailedMessage_JoinGameFailureReason_invalidGame;
-const JoinGameFailedMessage_JoinGameFailureReason JoinGameFailedMessage_JoinGameFailureReason_JoinGameFailureReason_MAX = JoinGameFailedMessage_JoinGameFailureReason_rejoinFailed;
+const JoinGameFailedMessage_JoinGameFailureReason JoinGameFailedMessage_JoinGameFailureReason_JoinGameFailureReason_MAX = JoinGameFailedMessage_JoinGameFailureReason_noSpectatorsAllowed;
 const int JoinGameFailedMessage_JoinGameFailureReason_JoinGameFailureReason_ARRAYSIZE = JoinGameFailedMessage_JoinGameFailureReason_JoinGameFailureReason_MAX + 1;
 
 enum GamePlayerLeftMessage_GamePlayerLeftReason {
@@ -224,11 +225,12 @@ enum RemovedFromGameMessage_RemovedFromGameReason {
   RemovedFromGameMessage_RemovedFromGameReason_gameIsFull = 2,
   RemovedFromGameMessage_RemovedFromGameReason_gameIsRunning = 3,
   RemovedFromGameMessage_RemovedFromGameReason_gameTimeout = 4,
-  RemovedFromGameMessage_RemovedFromGameReason_removedStartFailed = 5
+  RemovedFromGameMessage_RemovedFromGameReason_removedStartFailed = 5,
+  RemovedFromGameMessage_RemovedFromGameReason_gameClosed = 6
 };
 bool RemovedFromGameMessage_RemovedFromGameReason_IsValid(int value);
 const RemovedFromGameMessage_RemovedFromGameReason RemovedFromGameMessage_RemovedFromGameReason_RemovedFromGameReason_MIN = RemovedFromGameMessage_RemovedFromGameReason_removedOnRequest;
-const RemovedFromGameMessage_RemovedFromGameReason RemovedFromGameMessage_RemovedFromGameReason_RemovedFromGameReason_MAX = RemovedFromGameMessage_RemovedFromGameReason_removedStartFailed;
+const RemovedFromGameMessage_RemovedFromGameReason RemovedFromGameMessage_RemovedFromGameReason_RemovedFromGameReason_MAX = RemovedFromGameMessage_RemovedFromGameReason_gameClosed;
 const int RemovedFromGameMessage_RemovedFromGameReason_RemovedFromGameReason_ARRAYSIZE = RemovedFromGameMessage_RemovedFromGameReason_RemovedFromGameReason_MAX + 1;
 
 enum RejectGameInvitationMessage_RejectGameInvReason {
@@ -745,6 +747,13 @@ class NetGameInfo : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_manualblinds();
 
+  // optional bool allowSpectators = 15 [default = true];
+  inline bool has_allowspectators() const;
+  inline void clear_allowspectators();
+  static const int kAllowSpectatorsFieldNumber = 15;
+  inline bool allowspectators() const;
+  inline void set_allowspectators(bool value);
+
   // @@protoc_insertion_point(class_scope:NetGameInfo)
  private:
   inline void set_has_gamename();
@@ -773,6 +782,8 @@ class NetGameInfo : public ::google::protobuf::MessageLite {
   inline void clear_has_firstsmallblind();
   inline void set_has_startmoney();
   inline void clear_has_startmoney();
+  inline void set_has_allowspectators();
+  inline void clear_has_allowspectators();
 
   ::std::string* gamename_;
   int netgametype_;
@@ -789,9 +800,10 @@ class NetGameInfo : public ::google::protobuf::MessageLite {
   ::google::protobuf::uint32 startmoney_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > manualblinds_;
   mutable int _manualblinds_cached_byte_size_;
+  bool allowspectators_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_pokerth_2eproto_impl();
@@ -4066,6 +4078,7 @@ class JoinGameFailedMessage : public ::google::protobuf::MessageLite {
   static const JoinGameFailureReason invalidSettings = JoinGameFailedMessage_JoinGameFailureReason_invalidSettings;
   static const JoinGameFailureReason ipAddressBlocked = JoinGameFailedMessage_JoinGameFailureReason_ipAddressBlocked;
   static const JoinGameFailureReason rejoinFailed = JoinGameFailedMessage_JoinGameFailureReason_rejoinFailed;
+  static const JoinGameFailureReason noSpectatorsAllowed = JoinGameFailedMessage_JoinGameFailureReason_noSpectatorsAllowed;
   static inline bool JoinGameFailureReason_IsValid(int value) {
     return JoinGameFailedMessage_JoinGameFailureReason_IsValid(value);
   }
@@ -4685,6 +4698,7 @@ class RemovedFromGameMessage : public ::google::protobuf::MessageLite {
   static const RemovedFromGameReason gameIsRunning = RemovedFromGameMessage_RemovedFromGameReason_gameIsRunning;
   static const RemovedFromGameReason gameTimeout = RemovedFromGameMessage_RemovedFromGameReason_gameTimeout;
   static const RemovedFromGameReason removedStartFailed = RemovedFromGameMessage_RemovedFromGameReason_removedStartFailed;
+  static const RemovedFromGameReason gameClosed = RemovedFromGameMessage_RemovedFromGameReason_gameClosed;
   static inline bool RemovedFromGameReason_IsValid(int value) {
     return RemovedFromGameMessage_RemovedFromGameReason_IsValid(value);
   }
@@ -6028,6 +6042,13 @@ class HandStartMessage : public ::google::protobuf::MessageLite {
   inline const ::google::protobuf::RepeatedField<int>& seatstates() const;
   inline ::google::protobuf::RepeatedField<int>* mutable_seatstates();
 
+  // optional uint32 dealerPlayerId = 6;
+  inline bool has_dealerplayerid() const;
+  inline void clear_dealerplayerid();
+  static const int kDealerPlayerIdFieldNumber = 6;
+  inline ::google::protobuf::uint32 dealerplayerid() const;
+  inline void set_dealerplayerid(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:HandStartMessage)
  private:
   inline void set_has_gameid();
@@ -6038,15 +6059,18 @@ class HandStartMessage : public ::google::protobuf::MessageLite {
   inline void clear_has_encryptedcards();
   inline void set_has_smallblind();
   inline void clear_has_smallblind();
+  inline void set_has_dealerplayerid();
+  inline void clear_has_dealerplayerid();
 
   ::HandStartMessage_PlainCards* plaincards_;
   ::google::protobuf::uint32 gameid_;
   ::google::protobuf::uint32 smallblind_;
   ::std::string* encryptedcards_;
   ::google::protobuf::RepeatedField<int> seatstates_;
+  ::google::protobuf::uint32 dealerplayerid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_pokerth_2eproto_impl();
@@ -11656,6 +11680,28 @@ NetGameInfo::mutable_manualblinds() {
   return &manualblinds_;
 }
 
+// optional bool allowSpectators = 15 [default = true];
+inline bool NetGameInfo::has_allowspectators() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void NetGameInfo::set_has_allowspectators() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void NetGameInfo::clear_has_allowspectators() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void NetGameInfo::clear_allowspectators() {
+  allowspectators_ = true;
+  clear_has_allowspectators();
+}
+inline bool NetGameInfo::allowspectators() const {
+  return allowspectators_;
+}
+inline void NetGameInfo::set_allowspectators(bool value) {
+  set_has_allowspectators();
+  allowspectators_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // PlayerResult
@@ -15863,6 +15909,28 @@ HandStartMessage::seatstates() const {
 inline ::google::protobuf::RepeatedField<int>*
 HandStartMessage::mutable_seatstates() {
   return &seatstates_;
+}
+
+// optional uint32 dealerPlayerId = 6;
+inline bool HandStartMessage::has_dealerplayerid() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void HandStartMessage::set_has_dealerplayerid() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void HandStartMessage::clear_has_dealerplayerid() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void HandStartMessage::clear_dealerplayerid() {
+  dealerplayerid_ = 0u;
+  clear_has_dealerplayerid();
+}
+inline ::google::protobuf::uint32 HandStartMessage::dealerplayerid() const {
+  return dealerplayerid_;
+}
+inline void HandStartMessage::set_dealerplayerid(::google::protobuf::uint32 value) {
+  set_has_dealerplayerid();
+  dealerplayerid_ = value;
 }
 
 // -------------------------------------------------------------------
