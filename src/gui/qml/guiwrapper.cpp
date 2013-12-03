@@ -551,6 +551,7 @@ void GuiWrapper::SignalNetClientGameInfo(int actionID)
 void GuiWrapper::SignalNetClientError(int errorID, int osErrorID)
 {
     qDebug()<<"SignalNetClientError()";
+    emit myManager->getServer()->serverError(errorID);
 }
 void GuiWrapper::SignalNetClientNotification(int notificationId)
 {

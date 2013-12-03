@@ -10,6 +10,7 @@
 QmlServer::QmlServer(QObject *parent) :
     QObject(parent), m_connectAction(ConnectActionNone)
 {
+    connect(this,SIGNAL(serverError(int)),this,SLOT(processError(int)));
 }
 
 void QmlServer::setconnectAction(int arg)
@@ -31,6 +32,7 @@ void QmlServer::registerType()
 {
     qmlRegisterType<QmlServer>("PokerTH",1, 0, "Server");
     qRegisterMetaType<QmlServer::ConnectAction>("ConnectAction");
+    qRegisterMetaType<QmlServer::ServerError>("ServerError");
 }
 
 void QmlServer::setLoginData(bool regUser, QString userName, QString password, bool rememberPassword)
@@ -67,4 +69,16 @@ void QmlServer::connectedToServerTimeout()
 {
     setconnectAction(0);
     emit connectedToServer();
+}
+
+void QmlServer::processError(int error)
+{
+    switch(static_cast<ServerError>(error)) {
+    case NetErrPlayerKicked:
+    case NetErrPlayerBanned:
+    case NetErrPlayerBlocked:
+    case NetErrSessionTimedOut:
+        ManagerSingleton::Instance()->getSession()->terminateNetworkClient();
+        break;
+    }
 }
