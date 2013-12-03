@@ -3,6 +3,9 @@
 #include <QTimer>
 #include <QtQml>
 #include "manager.h"
+#include "session.h"
+#include "configfile.h"
+#include "tools.h"
 
 QmlServer::QmlServer(QObject *parent) :
     QObject(parent), m_connectAction(ConnectActionNone)
@@ -15,7 +18,7 @@ void QmlServer::setconnectAction(int arg)
         return;
     if (m_connectAction != arg) {
         m_connectAction = arg;
-        emit connectActionChanged(connectAction());
+        emit connectActionChanged(arg);
         setconnectProgress(float(arg-static_cast<int>(ConnectActionFirst))/static_cast<int>(ConnectActionLast));
 
         if(arg==static_cast<int>(ConnectActionLast)) {
@@ -27,6 +30,37 @@ void QmlServer::setconnectAction(int arg)
 void QmlServer::registerType()
 {
     qmlRegisterType<QmlServer>("PokerTH",1, 0, "Server");
+    qRegisterMetaType<QmlServer::ConnectAction>("ConnectAction");
+}
+
+void QmlServer::setLoginData(bool regUser, QString userName, QString password, bool rememberPassword)
+{
+    if(regUser) {
+        ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetLoginMode", 0);
+        ManagerSingleton::Instance()->getConfig()->writeConfigString("MyName", userName.toUtf8().constData());
+        if(rememberPassword) {
+            ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetSavePassword", 1);
+            ManagerSingleton::Instance()->getConfig()->writeConfigString("InternetLoginPassword", password.toUtf8().toBase64().constData());
+        } else {
+            ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetSavePassword", 0);
+        }
+
+    } else {
+        ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetLoginMode", 1);
+        // Generate a valid guest name.
+        QString guestName;
+        int guestId;
+        Tools::GetRand(1, 99999, 1, &guestId);
+        guestName.sprintf("Guest%05d", guestId);
+        ManagerSingleton::Instance()->getConfig()->writeConfigString("MyName", guestName.toUtf8().constData());
+    }
+
+    ManagerSingleton::Instance()->getConfig()->writeBuffer();
+
+    ManagerSingleton::Instance()->getSession()->setLogin(
+                ManagerSingleton::Instance()->getConfig()->readConfigString("MyName"),
+                password.toUtf8().constData(),
+                !regUser);
 }
 
 void QmlServer::connectedToServerTimeout()

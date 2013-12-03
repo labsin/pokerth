@@ -7,7 +7,7 @@ class QmlServer : public QObject
 {
     Q_OBJECT
     Q_ENUMS(ConnectAction)
-    Q_PROPERTY(ConnectAction connectAction READ connectAction WRITE setconnectAction NOTIFY connectActionChanged)
+    Q_PROPERTY(int connectAction READ connectAction WRITE setconnectAction NOTIFY connectActionChanged)
     Q_PROPERTY(float connectProgress READ connectProgress WRITE setconnectProgress NOTIFY connectProgressChanged)
 
 public:
@@ -25,12 +25,12 @@ public:
         ConnectActionFirst = ConnectActionNone
     };
 
-    ConnectAction connectAction() const
+    int connectAction() const
     {
-        return static_cast<ConnectAction>(m_connectAction);
+        return m_connectAction;
     }
 
-    void setconnectAction(int arg);
+    Q_INVOKABLE void setLoginData(bool regUser, QString userName, QString password, bool rememberPassword);
 
     static void registerType();
 
@@ -44,16 +44,13 @@ signals:
     void connectedToServer();
     void loginNeeded();
     void stopConnecting();
-    void connectActionChanged(ConnectAction arg);
+    void connectActionChanged(int arg);
 
     void connectProgressChanged(float arg);
 
 public slots:
 
-    void setconnectAction(ConnectAction arg)
-    {
-        setconnectAction(static_cast<int>(arg));
-    }
+    void setconnectAction(int arg);
 
     void connectedToServerTimeout();
 
