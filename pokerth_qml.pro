@@ -285,10 +285,11 @@ unix:!mac {
 	INCLUDEPATH += $${PREFIX}/include
 	QMAKE_LIBDIR += lib
 	!android{
-		LIBPATH += $${PREFIX}/lib /opt/gsasl/lib
+                LIBPATH += $${PREFIX}/lib /opt/gsasl/lib
                 LIB_DIRS = $${PREFIX}/lib \
                         $${PREFIX}/lib64 \
-                        $$system(qmake -query QT_INSTALL_LIBS)
+                        $$system(qmake -query QT_INSTALL_LIBS) \
+                        /usr/lib/x86_64-linux-gnu
 	}
 	android{
 		LIBPATH += $${PREFIX}/lib/armv7

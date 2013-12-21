@@ -175,7 +175,8 @@ unix : !mac {
 
 	LIBPATH += lib $${PREFIX}/lib /opt/gsasl/lib
 	INCLUDEPATH += $${PREFIX}/include
-	LIB_DIRS = $${PREFIX}/lib $${PREFIX}/lib64 $$system(qmake -query QT_INSTALL_LIBS)
+        LIB_DIRS = $${PREFIX}/lib $${PREFIX}/lib64 $$system(qmake -query QT_INSTALL_LIBS) \
+                        /usr/lib/x86_64-linux-gnu
 	BOOST_FS = boost_filesystem boost_filesystem-mt
 	BOOST_THREAD = boost_thread boost_thread-mt
 	BOOST_PROGRAM_OPTIONS = boost_program_options boost_program_options-mt
