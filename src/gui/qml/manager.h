@@ -15,6 +15,7 @@ class Session;
 class Game;
 class QmlGame;
 class QmlServer;
+class QAbstractTableModel;
 
 class ConfigFile;
 
@@ -48,6 +49,7 @@ public:
     Q_INVOKABLE void cancelConnect();
     Q_INVOKABLE QmlGame *getGame();
     Q_INVOKABLE QmlServer *getServer();
+    Q_INVOKABLE QAbstractTableModel *getServerModel();
 
     GuiWrapper* getGui();
 

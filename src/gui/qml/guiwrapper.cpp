@@ -44,6 +44,7 @@
 #include "qmlgame.h"
 #include "qmlserver.h"
 #include "storeplayers.h"
+#include "servermodel.h"
 #include <net/socket_msg.h>
 
 using namespace std;
@@ -55,6 +56,7 @@ GuiWrapper::GuiWrapper()
     myConfig = myManager->getConfig();
     myGame = new QmlGame();
     myServer = new QmlServer();
+    myServerModel = new ServerModel();
 }
 
 
@@ -522,6 +524,9 @@ void GuiWrapper::SignalNetClientConnect(int actionID)
 void GuiWrapper::SignalNetClientServerListAdd(unsigned serverId)
 {
     qDebug()<<"SignalNetClientServerListAdd()";
+    ServerInfo info = getSession()->getClientServerInfo(serverId);
+    ServerItem server( QString::fromStdString(info.name), info.id, QString::fromStdString(info.country) );
+    myServerModel->addServer(server);
 }
 void GuiWrapper::SignalNetClientServerListShow()
 {

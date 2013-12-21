@@ -13,6 +13,7 @@
 #include "configfile.h"
 #include "configwrapper.h"
 #include "qmlserver.h"
+#include "servermodel.h"
 
 void Manager::Init(ConfigFile *c, Log *l)
 {
@@ -84,6 +85,11 @@ QmlGame *Manager::getGame()
 QmlServer *Manager::getServer()
 {
     return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getServer();
+}
+
+QAbstractTableModel *Manager::getServerModel()
+{
+    return dynamic_cast<QAbstractTableModel*>(dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getServerModel());
 }
 
 GuiWrapper *Manager::getGui() {
