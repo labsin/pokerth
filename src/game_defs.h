@@ -37,16 +37,15 @@
 #define MIN_GUI_SPEED			1
 #define MAX_GUI_SPEED			11
 
-#define DEBUG_MODE			0
 #define SQLITE_LOG			1
 #define HTML_LOG			0
 
 #define POKERTH_VERSION_MAJOR	1
-#define POKERTH_VERSION_MINOR	10
+#define POKERTH_VERSION_MINOR	11
 #define POKERTH_VERSION			((POKERTH_VERSION_MAJOR << 8) | POKERTH_VERSION_MINOR)
 
-#define POKERTH_BETA_REVISION	4
-#define POKERTH_BETA_RELEASE_STRING	 "1.1 beta4"
+#define POKERTH_BETA_REVISION	0
+#define POKERTH_BETA_RELEASE_STRING	 "1.1.1"
 
 #define SQLITE_LOG_VERSION		1
 
@@ -177,18 +176,6 @@ enum NetTimeoutReason {
 	NETWORK_TIMEOUT_GENERIC = 0,
 	NETWORK_TIMEOUT_GAME_ADMIN_IDLE,
 	NETWORK_TIMEOUT_KICK_AFTER_AUTOFOLD
-};
-
-struct ServerStats {
-	ServerStats()
-		: numberOfPlayersOnServer(0), numberOfGamesOpen(0), totalPlayersEverLoggedIn(0),
-		  totalGamesEverCreated(0), maxGamesOpen(0), maxPlayersLoggedIn(0) {}
-	unsigned numberOfPlayersOnServer;
-	unsigned numberOfGamesOpen;
-	unsigned totalPlayersEverLoggedIn;
-	unsigned totalGamesEverCreated;
-	unsigned maxGamesOpen;
-	unsigned maxPlayersLoggedIn;
 };
 
 #endif

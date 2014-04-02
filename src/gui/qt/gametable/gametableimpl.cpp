@@ -67,6 +67,13 @@
 #define FORMATLEFT(X) "<p align='center'>(X)"
 #define FORMATRIGHT(X) "(X)</p>"
 
+#ifdef ANDROID
+#ifndef ANDROID_TEST
+#include "QtGui/5.2.0/QtGui/qpa/qplatformnativeinterface.h"
+#include <jni.h>
+#endif
+#endif
+
 using namespace std;
 
 gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
@@ -108,6 +115,9 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	textLabel_handLabel->hide();
 #ifdef ANDROID
 	tabsDiag->setStyleSheet("QObject { font: 26px; } QDialog { background-image: url(:/android/android-data/gfx/gui/table/default_800x480/table_dark.png); background-position: bottom center; background-origin: content;  background-repeat: no-repeat;}");
+	this->setWindowState(Qt::WindowFullScreen);
+#else
+	tabs.pushButton_settings->hide();
 #endif
 	tabs.label_chance->setMyStyle(myGameTableStyle);
 #else
@@ -498,16 +508,6 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	// 	QString windowIconString();
 	this->setWindowIcon(QIcon(myAppDataPath+"gfx/gui/misc/windowicon.png"));
 
-	//Statusbar
-	if(myConfig->readConfigInt("ShowStatusbarMessages")) {
-
-#ifdef __APPLE__
-		//                 statusBar()->showMessage(tr("Cmd+N to start a new game"));
-#else
-		//                 statusBar()->showMessage(tr("Ctrl+N to start a new game"));
-#endif
-	}
-
 	// 	Dialogs
 #ifdef GUI_800x480
 	myChat = new ChatTools(tabs.lineEdit_ChatInput, myConfig, INGAME_CHAT, tabs.textBrowser_Chat);
@@ -528,8 +528,7 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	//hide left and right icon and menubar from maemo gui for ANDROID
 #ifdef ANDROID
 	fullscreenButton->hide();
-	menubar->hide();
-//        tabsButton->hide();
+	this->setMenuBar(0);
 #endif
 
 	//Connects
@@ -574,14 +573,20 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	connect(voteOnKickTimeoutTimer, SIGNAL(timeout()), this, SLOT(nextVoteOnKickTimeoutAnimationFrame()));
 	connect(enableCallCheckPushButtonTimer, SIGNAL(timeout()), this, SLOT(enableCallCheckPushButton()));
 
-
+#ifdef ANDROID
+	connect( tabs.pushButton_settings, SIGNAL( clicked() ), this, SLOT( callSettingsDialog() ) );
+#else
 	connect( actionConfigure_PokerTH, SIGNAL( triggered() ), this, SLOT( callSettingsDialog() ) );
+#endif
+
 	connect( actionClose, SIGNAL( triggered() ), this, SLOT( closeGameTable()) );
+
 #ifdef GUI_800x480
 	connect( fullscreenButton, SIGNAL( clicked() ), this, SLOT( switchFullscreen() ) );
 #else
 	connect( actionFullScreen, SIGNAL( triggered() ), this, SLOT( switchFullscreen() ) );
 #endif
+
 	connect( actionShowHideChat, SIGNAL( triggered() ), this, SLOT( switchChatWindow() ) );
 	connect( actionShowHideHelp, SIGNAL( triggered() ), this, SLOT( switchHelpWindow() ) );
 	connect( actionShowHideLog, SIGNAL( triggered() ), this, SLOT( switchLogWindow() ) );
@@ -680,7 +685,7 @@ gameTableImpl::gameTableImpl(ConfigFile *c, QMainWindow *parent)
 	connect(this, SIGNAL(signalNetClientPlayerLeft(unsigned)), this, SLOT(netClientPlayerLeft(unsigned)));
 	connect(this, SIGNAL(signalNetClientSpectatorLeft(unsigned)), this, SLOT(netClientSpectatorLeft(unsigned)));
 	connect(this, SIGNAL(signalNetClientSpectatorJoined(unsigned)), this, SLOT(netClientSpectatorJoined(unsigned)));
-
+	connect(this, SIGNAL(signalNetClientPingUpdate(unsigned, unsigned, unsigned)), this, SLOT(pingUpdate(unsigned, unsigned, unsigned)));
 
 #ifdef GUI_800x480
 	connect( tabsButton, SIGNAL( clicked() ), this, SLOT( tabsButtonClicked() ) );
@@ -848,7 +853,6 @@ void gameTableImpl::applySettings(settingsDialogImpl* mySettingsDialog)
 #ifndef GUI_800x480 //currently not for mobile guis because we just use the default style here
 	refreshGameTableStyle();
 #endif
-	//qDebug() << "table: " << myGameTableStyle->getStyleDescription() << myGameTableStyle->getState();
 	if(this->isVisible() && myGameTableStyle->getState() != GT_STYLE_OK) myGameTableStyle->showErrorMessage();
 
 	//blind buttons refresh
@@ -1098,7 +1102,6 @@ void gameTableImpl::refreshPlayerAvatar()
 			switch(getCurrentSeatState((*it_c))) {
 
 			case SEAT_ACTIVE: {
-//				qDebug() << seatPlace << "AVATAR ACTIVE";
 				playerAvatarLabelArray[(*it_c)->getMyID()]->setPixmapAndCountry(avatarPic, countryString, seatPlace);
 			}
 			break;
@@ -1440,7 +1443,7 @@ void gameTableImpl::dealHoleCards()
 		(*it_c)->getMyCards(tempCardsIntArray);
 		for(j=0; j<2; j++) {
 			if((*it_c)->getMyActiveStatus()) {
-				if (( (*it_c)->getMyID() == 0)/* || DEBUG_MODE*/) {
+				if (( (*it_c)->getMyID() == 0) || (currentGame->getCurrentHand()->getLog() && currentGame->getCurrentHand()->getLog()->getDebugMode()) ) {
 					tempCardsPixmapArray[j].load(myCardDeckStyle->getCurrentDir()+QString::number(tempCardsIntArray[j], 10)+".png");
 					if(myConfig->readConfigInt("AntiPeekMode")) {
 						holeCardsArray[(*it_c)->getMyID()][j]->setPixmap(flipside, true);
@@ -2802,29 +2805,23 @@ void gameTableImpl::postRiverRunAnimation6()
 			}
 		}
 
-		if( !DEBUG_MODE ) {
-
-			if(myStartWindow->getSession()->getGameType() == Session::GAME_TYPE_LOCAL) {
-				currentGameOver = true;
+		if(myStartWindow->getSession()->getGameType() == Session::GAME_TYPE_LOCAL) {
+			currentGameOver = true;
 #ifdef GUI_800x480
-				tabs.pushButton_break->setDisabled(false);
+			tabs.pushButton_break->setDisabled(false);
 #else
-				pushButton_break->setDisabled(false);
+			pushButton_break->setDisabled(false);
 #endif
-				QFontMetrics tempMetrics = this->fontMetrics();
-				int width = tempMetrics.width(tr("Start"));
+			QFontMetrics tempMetrics = this->fontMetrics();
+			int width = tempMetrics.width(tr("Start"));
 #ifdef GUI_800x480
-				tabs.pushButton_break->setMinimumSize(width+10,20);
-				tabs.pushButton_break->setText(tr("Start"));
+			tabs.pushButton_break->setMinimumSize(width+10,20);
+			tabs.pushButton_break->setText(tr("Start"));
 #else
-				pushButton_break->setMinimumSize(width+10,20);
-				pushButton_break->setText(tr("Start"));
+			pushButton_break->setMinimumSize(width+10,20);
+			pushButton_break->setText(tr("Start"));
 #endif
-				blinkingStartButtonAnimationTimer->start(500);
-			}
-		} else {
-			myStartWindow->callNewGameDialog();
-			//Bei Cancel nichts machen!!!
+			blinkingStartButtonAnimationTimer->start(500);
 		}
 		return;
 	}
@@ -3545,6 +3542,7 @@ void gameTableImpl::localGameModification()
 	//let the SoundEventHandler know that there is a new game
 	mySoundEventHandler->newGameStarts();
 	spectatorIcon->hide();
+	spectatorNumberLabel->hide();
 }
 
 void gameTableImpl::networkGameModification()
@@ -4292,12 +4290,11 @@ void gameTableImpl::saveGameTableGeometry()
 
 void gameTableImpl::restoreGameTableGeometry()
 {
-#ifdef ANDROID
-	this->showFullScreen();
-#else
 	if(myConfig->readConfigInt("GameTableFullScreenSave")) {
 #ifndef GUI_800x480
-		if(actionFullScreen->isEnabled()) this->showFullScreen();
+		if(actionFullScreen->isEnabled()) {
+			this->showFullScreen();
+		}
 #endif
 	} else {
 		//resize only if style size allow this and if NOT fixed windows size
@@ -4305,6 +4302,14 @@ void gameTableImpl::restoreGameTableGeometry()
 
 			this->resize(myConfig->readConfigInt("GameTableWidthSave"), myConfig->readConfigInt("GameTableHeightSave"));
 		}
+	}
+#ifdef ANDROID
+	if(getAndroidApiVersion() == 10) {
+		QDesktopWidget dw;
+		int availableWidth = dw.screenGeometry().width();
+		int availableHeight = dw.screenGeometry().height();
+		this->showNormal();
+		this->setGeometry(0,0,availableWidth, availableHeight);
 	}
 #endif
 }
@@ -4469,6 +4474,8 @@ void gameTableImpl::refreshSpectatorsDisplay()
 	assert(myStartWindow->getSession());
 	GameInfo info(myStartWindow->getSession()->getClientGameInfo(myStartWindow->getSession()->getClientCurrentGameId()));
 	if(!info.spectatorsDuringGame.empty()) {
+		spectatorIcon->show();
+		spectatorNumberLabel->show();
 		QPixmap spectatorPix(":/gfx/spectator.png");
 		int iconX = this->centralWidget()->geometry().width() - spectatorPix.width() - 1;
 		int iconY = 2;
@@ -4493,8 +4500,35 @@ void gameTableImpl::refreshSpectatorsDisplay()
 	} else {
 		spectatorIcon->setToolTip("");
 		spectatorIcon->clear();
+		spectatorIcon->hide();
 		spectatorNumberLabel->setToolTip("");
 		spectatorNumberLabel->clear();
+		spectatorNumberLabel->hide();
 	}
 }
 
+void gameTableImpl::pingUpdate(unsigned minPing, unsigned avgPing, unsigned maxPing)
+{
+	label_Avatar0->refreshPing(minPing, avgPing, maxPing);
+}
+
+int gameTableImpl::getAndroidApiVersion()
+{
+	int api = -1;
+#ifdef ANDROID
+#ifndef ANDROID_TEST
+	JavaVM *currVM = (JavaVM *)QApplication::platformNativeInterface()->nativeResourceForIntegration("JavaVM");
+	JNIEnv* env;
+	if (currVM->AttachCurrentThread(&env, NULL)<0) {
+		qCritical()<<"AttachCurrentThread failed";
+	} else {
+		jclass jclassApplicationClass = env->FindClass("android/os/Build$VERSION");
+		if (jclassApplicationClass) {
+			api = env->GetStaticIntField(jclassApplicationClass, env->GetStaticFieldID(jclassApplicationClass,"SDK_INT", "I"));
+		}
+		currVM->DetachCurrentThread();
+	}
+#endif
+#endif
+	return api;
+}

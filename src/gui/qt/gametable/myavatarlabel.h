@@ -78,6 +78,7 @@ public slots:
 	}
 	void paintEvent(QPaintEvent*);
 	void putPlayerOnIgnoreList();
+	void removePlayerFromIgnoreList();
 	bool playerIsOnIgnoreList(QString playerName);
 	void reportBadAvatar();
 	void startEditTip();
@@ -86,12 +87,15 @@ public slots:
 	void setPlayerRating(QString);
 	void refreshTooltips();
 	void refreshStars();
+	void refreshPing(unsigned, unsigned, unsigned);
+
 private:
 
 	gameTableImpl *myW;
 	QMenu *myContextMenu;
 	QAction *action_VoteForKick;
 	QAction *action_IgnorePlayer;
+	QAction *action_UnignorePlayer;
 	QAction *action_ReportBadAvatar;
 	QAction *action_EditTip;
 
@@ -103,6 +107,10 @@ private:
 	bool transparent;
 	int myId;
 	int myUniqueId;
+	unsigned myPingState;
+	int myAvgPing;
+	int myMinPing;
+	int myMaxPing;
 };
 
 #endif

@@ -95,6 +95,11 @@
 using namespace std;
 using boost::asio::ip::tcp;
 
+#ifdef BOOST_ASIO_HAS_STD_CHRONO
+using namespace std::chrono;
+#else
+using namespace boost::chrono;
+#endif
 
 class InternalServerCallback : public SessionDataCallback, public ChatCleanerCallback, public ServerDBCallback
 {
@@ -859,19 +864,19 @@ ServerLobbyThread::RegisterTimers()
 {
 	// Remove closed games.
 	m_removeGameTimer.expires_from_now(
-		boost::posix_time::milliseconds(SERVER_REMOVE_GAME_INTERVAL_MSEC));
+		milliseconds(SERVER_REMOVE_GAME_INTERVAL_MSEC));
 	m_removeGameTimer.async_wait(
 		boost::bind(
 			&ServerLobbyThread::TimerRemoveGame, shared_from_this(), boost::asio::placeholders::error));
 	// Update the statistics file.
 	m_saveStatisticsTimer.expires_from_now(
-		boost::posix_time::seconds(SERVER_SAVE_STATISTICS_INTERVAL_SEC));
+		seconds(SERVER_SAVE_STATISTICS_INTERVAL_SEC));
 	m_saveStatisticsTimer.async_wait(
 		boost::bind(
 			&ServerLobbyThread::TimerSaveStatisticsFile, shared_from_this(), boost::asio::placeholders::error));
 	// Update the avatar upload locks.
 	m_loginLockTimer.expires_from_now(
-		boost::posix_time::milliseconds(SERVER_UPDATE_LOGIN_LOCK_INTERVAL_MSEC));
+		milliseconds(SERVER_UPDATE_LOGIN_LOCK_INTERVAL_MSEC));
 	m_loginLockTimer.async_wait(
 		boost::bind(
 			&ServerLobbyThread::TimerUpdateClientLoginLock, shared_from_this(), boost::asio::placeholders::error));
@@ -1685,8 +1690,14 @@ ServerLobbyThread::EstablishSession(boost::shared_ptr<SessionData> session)
 		unsigned previousPlayerId = GetPlayerId(session->GetPlayerData()->GetName());
 		if (previousPlayerId != 0 && previousPlayerId != session->GetPlayerData()->GetUniqueId()) {
 #ifdef POKERTH_OFFICIAL_SERVER
-			// If so, and this is a login server, disconnect the already connected player.
-			InternalRemovePlayer(previousPlayerId, ERR_NET_PLAYER_NAME_IN_USE);
+			// If this is a login server with a websocket connection, decline connection.
+			if (session->GetWebData()) {
+				SessionError(session, ERR_NET_PLAYER_NAME_IN_USE);
+				return;
+			} else {
+				// If this is not a websocket connection, disconnect the already connected player.
+				InternalRemovePlayer(previousPlayerId, ERR_NET_PLAYER_NAME_IN_USE);
+			}
 #else
 			// If this is a server without password protection, close this new session and return.
 			SessionError(session, ERR_NET_PLAYER_NAME_IN_USE);
@@ -1853,7 +1864,7 @@ ServerLobbyThread::TimerRemoveGame(const boost::system::error_code &ec)
 		}
 		// Restart timer
 		m_removeGameTimer.expires_from_now(
-			boost::posix_time::milliseconds(SERVER_REMOVE_GAME_INTERVAL_MSEC));
+			milliseconds(SERVER_REMOVE_GAME_INTERVAL_MSEC));
 		m_removeGameTimer.async_wait(
 			boost::bind(
 				&ServerLobbyThread::TimerRemoveGame, shared_from_this(), boost::asio::placeholders::error));
@@ -1878,7 +1889,7 @@ ServerLobbyThread::TimerUpdateClientLoginLock(const boost::system::error_code &e
 		}
 		// Restart timer
 		m_loginLockTimer.expires_from_now(
-			boost::posix_time::milliseconds(SERVER_UPDATE_LOGIN_LOCK_INTERVAL_MSEC));
+			milliseconds(SERVER_UPDATE_LOGIN_LOCK_INTERVAL_MSEC));
 		m_loginLockTimer.async_wait(
 			boost::bind(
 				&ServerLobbyThread::TimerUpdateClientLoginLock, shared_from_this(), boost::asio::placeholders::error));
@@ -2225,7 +2236,7 @@ ServerLobbyThread::TimerSaveStatisticsFile(const boost::system::error_code &ec)
 		}
 		// Restart timer
 		m_saveStatisticsTimer.expires_from_now(
-			boost::posix_time::seconds(SERVER_SAVE_STATISTICS_INTERVAL_SEC));
+			seconds(SERVER_SAVE_STATISTICS_INTERVAL_SEC));
 		m_saveStatisticsTimer.async_wait(
 			boost::bind(
 				&ServerLobbyThread::TimerSaveStatisticsFile, shared_from_this(), boost::asio::placeholders::error));

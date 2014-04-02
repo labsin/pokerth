@@ -97,7 +97,9 @@ startWindowImpl::startWindowImpl(ConfigFile *c, Log *l)
 
 #ifdef GUI_800x480
 #ifdef ANDROID
-	this->menubar->hide();
+	this->setMenuBar(0);
+//	this->menubar->clear();
+//	this->menubar->hide();
 
 	//check if custom background picture for the resolution is there. Otherwise create it!
 	QString UserDataDir = QString::fromUtf8(myConfig->readConfigString("UserDataDir").c_str());
@@ -381,9 +383,6 @@ void startWindowImpl::startNewLocalGame(newGameDialogImpl *v)
 	int tmpDealerPos = 0;
 	startData.numberOfPlayers = gameData.maxNumberOfPlayers;
 	Tools::GetRand(0, startData.numberOfPlayers-1, 1, &tmpDealerPos);
-	//if(DEBUG_MODE) {
-	//    tmpDealerPos = 4;
-	//}
 	startData.startDealerPlayerId = static_cast<unsigned>(tmpDealerPos);
 
 	//some gui modifications
@@ -655,7 +654,6 @@ void startWindowImpl::showNetworkStartDialog()
 	myStartNetworkGameDialog->exec();
 
 	if (myStartNetworkGameDialog->result() == QDialog::Accepted ) {
-
 		this->hide();
 		//some gui modifications
 		myGuiInterface->getMyW()->networkGameModification();

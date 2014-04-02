@@ -491,6 +491,34 @@ Por Favor, verifique se você está enviando o arquivo de log valido do PokerTH.
         <source>Add/Edit/Remove tooltip</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Unignore Player</source>
+        <translation>Jogador aceito</translation>
+    </message>
+    <message>
+        <source>Server response times</source>
+        <translation>Tempos de resposta do servidor</translation>
+    </message>
+    <message>
+        <source>Average: </source>
+        <translation>Média:</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>Minimum: </source>
+        <translation>Minimo:</translation>
+    </message>
+    <message>
+        <source>Maximum: </source>
+        <translation>Maximo:</translation>
+    </message>
+    <message>
+        <source>You will receive chat messages and game invitations from this user again!&lt;br&gt;Do you really want to remove player &lt;b&gt;%1&lt;/b&gt; from your ignore list?</source>
+        <translation>Você receberá mensagens de chat e convites jogo deste usuário novamente! &lt;br&gt; Você realmente deseja remover este jogador &lt;b&gt;%1&lt;/b&gt; a partir de sua lista de ignorados?</translation>
+    </message>
 </context>
 <context>
     <name>ServerListDialog</name>
@@ -4096,6 +4124,22 @@ Sinta se avontade para convidar outro jogador clicando no apelido na lista de jo
         <source>Spectators (%1)</source>
         <translation>Espectadores (%1)</translation>
     </message>
+    <message>
+        <source>Unignore player</source>
+        <translation>Aceitar jogador</translation>
+    </message>
+    <message>
+        <source>Unignore %1</source>
+        <translation>Aceitar %1</translation>
+    </message>
+    <message>
+        <source>Unignore player ...</source>
+        <translation>Aceitar Jogador ...</translation>
+    </message>
+    <message>
+        <source>You will receive chat messages and game invitations from this user again!&lt;br&gt;Do you really want to remove player &lt;b&gt;%1&lt;/b&gt; from your ignore list?</source>
+        <translation>Você receberá mensagens de chat e convites de jogo deste usuário novamente! &lt;br&gt; Você realmente deseja remover jogador &lt;b&gt;%1&lt;/b&gt; a partir de sua lista de ignorados?</translation>
+    </message>
 </context>
 <context>
     <name>gameTable</name>
@@ -6038,6 +6082,14 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Allow spectators to watch the game</source>
         <translation>Permitir espectadores a assistirem o jogo</translation>
+    </message>
+    <message>
+        <source>Show network state color on the avatar</source>
+        <translation>Mostrar estado da rede através da cor no avatar</translation>
+    </message>
+    <message>
+        <source>Show network state color in the corner of the avatar</source>
+        <translation>Mostrar estado da rede nos cantos do avatar</translation>
     </message>
 </context>
 <context>

@@ -66,6 +66,16 @@ public:
 	void logAfterGame();
 //    void closeLogDbAtExit();
 
+	void debugMode_getStartSmallBlind(int* startSmallBlind, int* currentSmallBlind);
+	void debugMode_getStartDealerPosition(unsigned* dealerPosition);
+	void debugMode_getBoardCards(int* tempBoardArray, int handID);
+	void debugMode_getPlayerCards(int* tempPlayerArray, int handID, int seatID);
+	void debugMode_getPlayerStartCash(int* startCash, int seatID);
+	void debugMode_getPlayerAction(PlayerAction* playerAction, int* bet, int* raise, GameState gameState, int handID, int seatID, int mySet);
+	bool getDebugMode() {
+		return debug_mode;
+	}
+
 	void setCurrentRound(GameState theValue) {
 		currentRound = theValue;
 	}
@@ -85,6 +95,8 @@ private:
 	int currentHandID;
 	GameState currentRound;
 	std::string sql;
+
+	bool debug_mode;
 };
 
 #endif // LOG_H

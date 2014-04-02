@@ -1,3 +1,22 @@
+2014-01-10 version 1.1.1
+- BUGFIX: Fixed crash when the first action in the first game times out (#258)
+- BUGFIX: Properly refresh the game table graphics after changing settings (#253)
+- BUGFIX: The menu on the game table was not clickable sometimes (#242)
+
+2013-12-22 version 1.1
+- New web-based spectator mode on http://www.pokerth.net/live (#37)
+- New option to allow/disallow spectators when creating a game (#215)
+- Show list of spectators in the lobby and on the game table (#196)
+- Support for WebSocket connections was integrated in the server
+- Show server ping ("application layer ping") in the client (#239)
+- Added option to disable emoticons in the chat (#172)
+- Avatars are no longer displayed for players which are on the ignore list (#187)
+- New option to "unignore" a player in the context menu (#56)
+- BUGFIX: context menu in connected player list was fixed (#183)
+- BUGFIX: "display idle players" in the lobby was fixed (#136)
+- BUGFIX: No longer beep if ignored player uses nickname in chat (#221)
+- translation updates
+
 2013-12-01 version 1.1 beta4
 - Updated several translations
 - New icon for spectator list on table (#217)

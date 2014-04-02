@@ -56,11 +56,11 @@ Game::Game(GuiInterface* gui, boost::shared_ptr<EngineFactory> factory,
 
 	dealerPosition = startData.startDealerPlayerId;
 
-	if(DEBUG_MODE) {
-		startSmallBlind = 10;
-		currentSmallBlind = startSmallBlind;
-		dealerPosition = 4;
-	}
+	// debug mode
+    if(myLog) {
+        myLog->debugMode_getStartSmallBlind(&startSmallBlind,&currentSmallBlind);
+        myLog->debugMode_getStartDealerPosition(&dealerPosition);
+    }
 
 	int i;
 
@@ -77,7 +77,7 @@ Game::Game(GuiInterface* gui, boost::shared_ptr<EngineFactory> factory,
 		throw LocalException(__FILE__, __LINE__, ERR_DEALER_NOT_FOUND);
 
 	// create board
-	currentBoard = myFactory->createBoard(dealerPosition);
+	currentBoard = myFactory->createBoard();
 
 	// create player lists
 	seatsList.reset(new std::list<boost::shared_ptr<PlayerInterface> >);
@@ -108,6 +108,9 @@ Game::Game(GuiInterface* gui, boost::shared_ptr<EngineFactory> factory,
 			myStayOnTableStatus = type == PLAYER_TYPE_HUMAN;
 			++player_i;
 		}
+
+		// debug mode
+        if(myLog) myLog->debugMode_getPlayerStartCash(&myStartCash, i);
 
 		// create player objects
 		boost::shared_ptr<PlayerInterface> tmpPlayer = myFactory->createPlayer(i, uniqueId, type, myName, myAvatarFile, myStartCash, startQuantityPlayers > i, myStayOnTableStatus, 0);
