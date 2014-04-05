@@ -164,9 +164,10 @@ public:
 	void SignalNetClientRejoinPossible(unsigned gameId);
 	void SignalNetClientPostRiverShowCards(unsigned playerId);
 	void SignalNetClientGameInfo(int actionID);
-	void SignalNetClientError(int errorID, int osErrorID);
+    void SignalNetClientError(int errorID, int osErrorID);
 	void SignalNetClientNotification(int notificationId);
 	void SignalNetClientStatsUpdate(const ServerStats &stats);
+    void SignalNetClientPingUpdate(unsigned minPing, unsigned avgPing, unsigned maxPing);
 	void SignalNetClientShowTimeoutDialog(NetTimeoutReason reason, unsigned remainingSec);
 	void SignalNetClientRemovedFromGame(int notificationId);
 	void SignalNetClientSelfJoined(unsigned playerId, const std::string &playerName, bool isGameAdmin);

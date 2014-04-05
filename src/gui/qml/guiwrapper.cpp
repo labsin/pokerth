@@ -570,6 +570,11 @@ void GuiWrapper::SignalNetClientShowTimeoutDialog(NetTimeoutReason reason, unsig
 {
     qDebug()<<"SignalNetClientShowTimeoutDialog()";
 }
+void GuiWrapper::SignalNetClientPingUpdate(unsigned minPing, unsigned avgPing, unsigned maxPing)
+{
+    qDebug()<<"SignalNetClientPingUpdate()";
+}
+
 void GuiWrapper::SignalNetClientRemovedFromGame(int notificationId)
 {
     qDebug()<<"SignalNetClientRemovedFromGame()";
