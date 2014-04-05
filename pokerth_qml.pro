@@ -1,7 +1,7 @@
 # QMake pro-file for PokerTH game
 
 folder_data.source = data
-folder_data.target = data
+folder_data.target = /
 DEPLOYMENTFOLDERS += folder_data
 CONFIG(debug, debug|release) {
     CONFIG += NO_RESOURCES
