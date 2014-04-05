@@ -9,6 +9,8 @@
 #include "gamedataclass.h"
 #include "gamedata.h"
 
+#define DEBUG_MODE true
+
 class GuiInterface;
 class GuiWrapper;
 class Session;
