@@ -16,7 +16,6 @@ ApplicationWindow {
     minimumHeight: height
     maximumWidth: width
     maximumHeight: height
-    flags: Qt.Window
 
     property Window dialogWindow
 
