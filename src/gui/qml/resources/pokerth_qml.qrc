@@ -1,11 +1,20 @@
 <RCC>
     <qresource prefix="/qml">
-        <file alias="CreateNetwerkGameDialog.qml">qml/CreateNetwerkGameDialog.qml</file>
+        <file alias="BlindsWindow.qml">qml/BlindsWindow.qml</file>
+        <file alias="GameWindow.qml">qml/GameWindow.qml</file>
         <file alias="InternetGameDialog.qml">qml/InternetGameDialog.qml</file>
+        <file alias="LoadingWindow.qml">qml/LoadingWindow.qml</file>
+        <file alias="LoginWindow.qml">qml/LoginWindow.qml</file>
         <file alias="LogsDialog.qml">qml/LogsDialog.qml</file>
-        <file alias="StartWindow.qml">qml/StartWindow.qml</file>
         <file alias="NewGameDialog.qml">qml/NewGameDialog.qml</file>
-        <file alias="windows.js">qml/windows.js</file>
         <file alias="Main.qml">qml/Main.qml</file>
+        <file alias="Card.qml">qml/Card.qml</file>
+        <file alias="createComponent.js">qml/createComponent.js</file>
+        <file alias="CreateNetwerkGameDialog.qml">qml/CreateNetwerkGameDialog.qml</file>
+        <file alias="Hand.qml">qml/Hand.qml</file>
+        <file alias="Player.qml">qml/Player.qml</file>
+        <file alias="Star.qml">qml/Star.qml</file>
+        <file alias="Stars.qml">qml/Stars.qml</file>
+        <file alias="StartWindow.qml">qml/StartWindow.qml</file>
     </qresource>
 </RCC>

@@ -1,0 +1,15 @@
+{
+    "name": "com.ubuntu.developer.labsin.pokerth",
+    "description": "Texas hold'em game",
+    "framework": "ubuntu-sdk-14.04-papi-dev1",
+    "architecture": "armhf",
+    "title": "pokerth",
+    "hooks": {
+        "pokerth": {
+            "apparmor": "pokerth.json",
+            "desktop": "pokerth.desktop"
+        }
+    },
+    "version": "0.1.0",
+    "maintainer": "Sam Segers <sam.sgrs@gmail.com>"
+}

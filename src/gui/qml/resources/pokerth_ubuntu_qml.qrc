@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file alias="BlindsWindow.qml">ubuntu-qml/BlindsWindow.qml</file>
+        <file alias="GameWindow.qml">ubuntu-qml/GameWindow.qml</file>
+        <file alias="InternetGameDialog.qml">ubuntu-qml/InternetGameDialog.qml</file>
+        <file alias="LoadingWindow.qml">ubuntu-qml/LoadingWindow.qml</file>
+        <file alias="LoginWindow.qml">ubuntu-qml/LoginWindow.qml</file>
+        <file alias="LogsDialog.qml">ubuntu-qml/LogsDialog.qml</file>
+        <file alias="NewGameDialog.qml">ubuntu-qml/NewGameDialog.qml</file>
+        <file alias="Main.qml">ubuntu-qml/Main.qml</file>
+        <file alias="Card.qml">ubuntu-qml/Card.qml</file>
+        <file alias="createComponent.js">ubuntu-qml/createComponent.js</file>
+        <file alias="CreateNetwerkGameDialog.qml">ubuntu-qml/CreateNetwerkGameDialog.qml</file>
+        <file alias="Hand.qml">ubuntu-qml/Hand.qml</file>
+        <file alias="Player.qml">ubuntu-qml/Player.qml</file>
+        <file alias="Star.qml">ubuntu-qml/Star.qml</file>
+        <file alias="Stars.qml">ubuntu-qml/Stars.qml</file>
+    </qresource>
+</RCC>
