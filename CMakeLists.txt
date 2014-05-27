@@ -20,16 +20,17 @@ execute_process(COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
 )
 
 # add definitions
-include(DefineCMakeDefaults)
-include(DefinePlatformDefaults)
 include(DefineCompilerFlags)
-include(DefineInstallationPaths)
 include(DefineOptions.cmake)
 
 include(CLICKInstallDirs)
-include(CLICKDeployLibs)
-include(QtCreatorResources)
+if(CLICK_MODE)
+    include(CLICKDeployLibs)
+else(CLICK_MODE)
+    include(CPackConfig.cmake)
+endif(CLICK_MODE)
 include(ResolveLibs)
+include(QtCreatorResources)
 
 # disallow in-source build
 include(MacroEnsureOutOfSourceBuild)
@@ -44,9 +45,6 @@ set(CMAKE_AUTOMOC ON)
 # for dh_translations to extract the domain
 # (regarding syntax consistency, see http://pad.lv/1181187)
 # set (GETTEXT_PACKAGE "tilem")
-
-set(RUN_DIR ${CMAKE_BINARY_DIR}/run)
-set(RUN_BINARY_DIR ${RIN_DIR}/lib/${BUILD_ARCH})
 
 set(OTHER_FILES 
     android/src/org/kde/necessitas/ministro/IMinistro.aidl
@@ -80,25 +78,21 @@ set(OTHER_FILES
 
 #qtcreator_add_project_resources(${OTHER_FILES})
 
+if(GUI_800x480)
+    add_definitions(-DGUI_800x480)
+endif(GUI_800x480)
+
+set(OTHER_FILES
+    ${CMAKE_SOURCE_DIR}/TODO
+    ${CMAKE_SOURCE_DIR}/INSTALL
+    ${CMAKE_SOURCE_DIR}/COPYING
+    ${CMAKE_SOURCE_DIR}/docs/
+    )
+
+qtcreator_add_project_resources(${OTHER_FILES})
+
+# Build runtime files in the build root so we can run in the build dir
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 add_subdirectory(data)
-include(pokerth_db.cmake)
-include(pokerth_protocol.cmake)
-include(pokerth_lib.cmake)
-include(pokerth_qml.cmake)
-
-add_custom_target(${RUNDIR_TARGET} ALL
-    DEPENDS pokerth)
-foreach(_target )
-add_custom_command(
-    TARGET ${RUNDIR_TARGET}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${${_target}_BINARY_DIR}/out"
-        "${RUN_DIR}/"
-    COMMAND ${CMAKE_COMMAND} -E echo "COPY RUN: ${_target}"
-    COMMAND ${CMAKE_COMMAND} -E echo "FROM: ${${_target}_BINARY_DIR}/out"
-        "TO: ${RUN_DIR}/" )
-endforeach()
-
-add_custom_target(run
-    COMMAND qmlscene -I lib/${BUILD_ARCH} TilEm.qml
-    WORKING_DIRECTORY run/)
+add_subdirectory(cmake/projects)

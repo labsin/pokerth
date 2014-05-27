@@ -6,7 +6,7 @@
 #include <QUrl>
 #include <QQuickWindow>
 #include <QDebug>
-#include "src/gui/qml/customqmlapplicationengine.h"
+#include "customqmlapplicationengine.h"
 #include "configfile.h"
 #include "log.h"
 #include "gui/qml/manager.h"

@@ -15,5 +15,6 @@
         <file alias="Player.qml">ubuntu-qml/Player.qml</file>
         <file alias="Star.qml">ubuntu-qml/Star.qml</file>
         <file alias="Stars.qml">ubuntu-qml/Stars.qml</file>
+        <file alias="StartWindow.qml">ubuntu-qml/StartWindow.qml</file>
     </qresource>
 </RCC>
