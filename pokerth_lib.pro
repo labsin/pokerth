@@ -55,6 +55,7 @@ HEADERS += \
 		src/core/crypthelper.h \
 		src/core/avatarmanager.h \
 		src/core/pokerthexception.h \
+                src/core/openssl_wrapper.h \
 		src/engine/boardinterface.h \
 		src/engine/enginefactory.h \
 		src/engine/handinterface.h \

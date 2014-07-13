@@ -47,14 +47,19 @@ CONFIG += qt \
 QT += sql widgets
 
 include(deploy.pri)
-include(src/third_party/qtsingleapplication/qtsingleapplication.pri)
+#include(src/third_party/qtsingleapplication/qtsingleapplication.pri)
 
 MOC_DIR = mocs
 OBJECTS_DIR = obj
 DEFINES += ENABLE_IPV6 TIXML_USE_STL BOOST_FILESYSTEM_DEPRECATED
 DEFINES += PREFIX=\"$${PREFIX}\"
 TARGET = pokerth
-RESOURCES = src/gui/qml/resources/pokerth.qrc
+android{
+    RESOURCES = src/gui/qt/resources/pokerth_android.qrc
+}
+!android{
+    RESOURCES = src/gui/qt/resources/pokerth.qrc
+}
 !NO_RESOURCES {
     RESOURCES += src/gui/qml/resources/pokerth_qml.qrc
 }
@@ -296,9 +301,9 @@ unix:!mac {
                         $$system(qmake -query QT_INSTALL_LIBS) \
                         /usr/lib/x86_64-linux-gnu
 	}
-	android{
-		LIBPATH += $${PREFIX}/lib/armv7
-		LIB_DIRS = $${PREFIX}/lib/armv7
+        android{
+                LIBPATH += $${PREFIX}/lib/armv7
+                LIB_DIRS = $${PREFIX}/lib/armv7
 	}
 	BOOST_FS = boost_filesystem \
 		boost_filesystem-mt
@@ -407,7 +412,8 @@ unix:!mac {
 			$$BOOST_IOSTREAMS \
 			$$BOOST_REGEX \
 			$$BOOST_SYS
-		!count(BOOST_LIBS, 5):error("Unable to find boost libraries in PREFIX=$${PREFIX}/armv5")
+                !count(BOOST_LIBS, 5):error("Unable to find boost libraries in PREFIX=$${PREFIX}/armv7")
+                LIBS += -L"$${PREFIX}/lib/armv7"
 		LIBS += -ltinyxml
 		LIBS += $$BOOST_LIBS
 		LIBS += -lgsasl -lidn

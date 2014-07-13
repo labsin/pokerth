@@ -412,8 +412,8 @@ unix:!mac {
                         /usr/lib/x86_64-linux-gnu
 	}
 	android{
-		LIBPATH += $${PREFIX}/lib/armv7
-		LIB_DIRS = $${PREFIX}/lib/armv7
+                LIBPATH += $${PREFIX}/lib/armv5
+                LIB_DIRS = $${PREFIX}/lib/armv5
 	}
 	BOOST_FS = boost_filesystem \
 		boost_filesystem-mt
