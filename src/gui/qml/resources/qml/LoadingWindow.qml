@@ -10,6 +10,13 @@ Window {
     height: 100
 
     modality: Qt.WindowModal
+    property string error: ""
+    property string label: getLabelForConnectAction(CurrentServer.connectAction)
+    property string message: error!=""?error:label
+
+    onVisibleChanged: {
+        error = ""
+    }
 
     onClosing: {
         if(CurrentServer.ConnectAction !== PokerTH.Server.ConnectSessionDone)
@@ -21,7 +28,7 @@ Window {
         Label {
             id: label_progress
             height: implicitHeight
-            text: getLabelForConnectAction(CurrentServer.connectAction)
+            text: message
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right

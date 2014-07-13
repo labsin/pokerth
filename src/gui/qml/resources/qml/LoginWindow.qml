@@ -16,6 +16,14 @@ Window {
         if(CurrentServer.ConnectAction !== PokerTH.Server.ConnectSessionDone)
             CurrentServer.stopConnecting()
     }
+    Component.onCompleted: {
+        textField_username.text = PokerTH.Config.readConfigString("MyName")
+        groubBox_registeredUser.checked = PokerTH.Config.readConfigInt("InternetLoginMode")===0
+        if(PokerTH.Config.readConfigInt("InternetSavePassword")===1) {
+            textField_password.text = PokerTH.Config.readConfigBase64String("InternetLoginPassword")
+            checkBox_rememberPW.checked = true
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -85,6 +93,7 @@ Window {
                     CurrentServer.setLoginData(groubBox_registeredUser.checked, textField_username.text, textField_password.text, checkBox_rememberPW.checked)
                     window.hide()
                 }
+                focus: true
             }
             Button {
                 id: button_cancel

@@ -2,46 +2,87 @@ import QtQuick 2.1
 import "createComponent.js" as Create
 import PokerTH 1.0 as PokerTH
 
-Item {
-    id: main
+StartWindow {
+    id: startWindow
+    visible: true
+
     property variant gameWindow
     property variant loadingWindow
     property variant loginWindow
-    StartWindow {
-        id: startWindow
-        visible: true
-    }
+    property variant lobbyWindow
 
     Connections {
-        target: CurrentGame
+        target: Manager.game
         onGuiInitiated: {
             print("Starting Game")
-            gameWindow = Create.createObject("GameWindow.qml",startWindow)
+            if(!gameWindow)
+                gameWindow = Create.createObject("GameWindow.qml",startWindow)
             if(gameWindow) {
                 gameWindow.show()
-                startWindow.hide();
+                gameWindow.closing.connect(
+                            function(){
+                                startWindow.show();
+                            })
+                if(startWindow)
+                    startWindow.hide()
+                if(loadingWindow)
+                    loadingWindow.hide()
+                if(loginWindow)
+                    loginWindow.hide()
+                if(lobbyWindow)
+                    lobbyWindow.hide()
             }
         }
     }
 
     Connections {
-        target: CurrentServer
+        target: Manager.server
+        onConnectedToServer: {
+            print("Connected to Server")
+            if(!lobbyWindow)
+                lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
+            if(lobbyWindow) {
+                lobbyWindow.closing.connect(
+                            function(){
+                                startWindow.show();
+                                Manager.cancelConnect()
+                            })
+                lobbyWindow.show()
+                if(loadingWindow)
+                    loadingWindow.hide()
+                if(loginWindow)
+                    loginWindow.hide()
+                if(startWindow)
+                    startWindow.hide()
+                if(gameWindow)
+                    gameWindow.hide()
+            }
+        }
         onConnectingToServer: {
             print("Connecting to Server")
             if(!loadingWindow)
                 loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
-            if(loginWindow)
-                loginWindow.hide();
-            loadingWindow.show()
+            if(loadingWindow) {
+                loadingWindow.show()
+                if(loginWindow)
+                    loginWindow.hide()
+                if(lobbyWindow)
+                    lobbyWindow.hide()
+                if(gameWindow)
+                    gameWindow.hide()
+            }
         }
+
         onStopConnecting: {
             print("Stop Connecting")
             if(loadingWindow) {
-                loadingWindow.hide();
+                loadingWindow.hide()
             }
             if(loginWindow)
-                loginWindow.hide();
-            startWindow.show();
+                loginWindow.hide()
+            if(lobbyWindow)
+                lobbyWindow.hide()
+            startWindow.show()
         }
         onLoginNeeded: {
             print("Login Needed")
@@ -53,133 +94,184 @@ Item {
 
             loginWindow.show()
         }
-        onServerError: {
-            print("Connect Error")
-            var errorString;
+        onNetworkNotification: {
+            print("Network Notificaion")
+            var errorString
 
-            switch (error) {
+            switch(notificationID) {
+
+            case PokerTH.Server.NetNotJoinIpBlocked:
+            errorString = "You cannot join this game, because another player in that game has your network address."
+            break;
+            case PokerTH.Server.NetNotRemovedStartFailed:
+                errorString = "Your connection to the server is very slow, the game had to start without you."
+            break;
+            case PokerTH.Server.NetNotRemovedKicked:
+                errorString = "You were kicked from the game."
+            break;
+            case PokerTH.Server.NetNotRemovedGameFull:
+            case PokerTH.Server.NetNotJoinGameFull:
+                errorString = "Sorry, this game is already full."
+            break;
+            case PokerTH.Server.NetNotRemovedAlreadyRunning:
+            case PokerTH.Server.NetNotJoinAlreadyRunning:
+                errorString = "Unable to join - the server has already started the game."
+            break;
+            case PokerTH.Server.NetNotJoinNotInvited:
+                errorString = "This game is of type invite-only. You cannot join this game without being invited."
+            break;
+            case PokerTH.Server.NetNotJoinGameNameInUse:
+            case PokerTH.Server.NetNotJoinGameBadName:
+                errorString = "TODO"
+            break;
+            case PokerTH.Server.NetNotRemovedTimeout:
+                errorString = "Your admin state timed out due to inactivity. Feel free to create a new game!"
+            break;
+            case PokerTH.Server.NetNotJoinInvalidPassword:
+                errorString = "Invalid password when joining the game.\nPlease reenter the password and try again."
+            break;
+            case PokerTH.Server.NetNotJoinGuestForbidden:
+                errorString = "You cannot join this type of game as guest."
+            break;
+            case PokerTH.Server.NetNotJoinInvalidSettings:
+                errorString = "The settings are invalid for this type of game."
+            break;
+            case PokerTH.Server.NetNotNewReleaseAvailable:
+                errorString = "A new release of PokerTH is available.<br>Please go to <a href=\"http://www.pokerth.net/\" target=\"_blank\">http://www.pokerth.net</a> and download the latest version."
+            break;
+            case PokerTH.Server.NetNotOutdatedBeta:
+                errorString = "This beta release of PokerTH is outdated.<br>Please go to <a href=\"http://www.pokerth.net/\" target=\"_blank\">http://www.pokerth.net</a> and download the latest version."
+            }
+
+            print(errorString)
+        }
+        onNetworkError: {
+            print("Network Error")
+            var errorString
+
+            switch (errorID) {
             case PokerTH.Server.ConnErrServerAddrNotSet:
 
                 errorString = "Server address was not set."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrInvalidPort:
 
                 errorString = "An invalid port was set (ports 0-1023 are not allowed)."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrCreationFailed:
 
                 errorString = "Could not create a socket for TCP communication."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrSetAddrFailed:
 
                 errorString = "Could not set the IP address."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrSetPortFailed:
 
                 errorString = "Could not set the port for this type of address."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrResolveFailed:
 
                 errorString = "The server name could not be resolved."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrBindFailed:
 
                 errorString = "Bind failed - please choose a different port."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrListenFailed:
 
                 errorString = "Internal network error: \"listen\" failed."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrAcceptFailed:
 
                 errorString = "Server execution was terminated."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrConnectFailed:
 
                 errorString = "Could not connect to the server."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrConnectTimeout:
 
                 errorString = "Connection timed out.\nPlease check the server address.\n\nIf the server is behind a NAT-Router, make sure port forwarding has been set up on server side."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrSelectFailed:
 
                 errorString = "Internal network error: \"select\" failed."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrSendFailed:
 
                 errorString = "Internal network error: \"send\" failed."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrRecvFailed: // Sometimes windows reports recv failed on close.
             case PokerTH.Server.ConnErrConnReset:
 
                 errorString = "The connection to the server was lost."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrConnExists:
 
                 errorString = "Internal network error: Duplicate TCP connection."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrInvalidPacket:
 
                 errorString = "An invalid network packet was received.\nPlease make sure that all players use the same version of PokerTH."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrInvalidState:
 
                 errorString = "Internal state error.\nPlease make sure that all players use the same version of PokerTH."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrInvalidServerListURL:
             case PokerTH.Server.ConnErrTransferInvalidURL:
 
                 errorString = "Invalid server list URL.\nPlease correct the address in the settings."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrInvalidServerListXML:
 
                 errorString = "The PokerTH internet server list contains invalid data.\nIf you use a custom server list, please make sure its format is correct."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrUnzipFailed:
 
                 errorString = "Could not unzip the PokerTH internet server list."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrTransferInitFailed:
             case PokerTH.Server.ConnErrTransferSelectFailed:
             case PokerTH.Server.ConnErrTransferFailed:
@@ -187,161 +279,164 @@ Item {
                 errorString = "Could not download the PokerTH internet server list.\nPlease make sure you are directly connected to the internet."
 
 
-                break;
+                break
             case PokerTH.Server.ConnErrTransferOpenFailed:
 
                 errorString = "Could not open the target file when downloading the server list."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrVersionNotSupported:
                 errorString = "The PokerTH server does not support this version of the game.<br>Please go to <a href=\"http://www.pokerth.net/\" target=\"_blank\">http://www.pokerth.net</a> and download the latest version."
 
-                break;
+                break
             case PokerTH.Server.NetErrServerFull:
 
                 errorString = "Sorry, this server is already full."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidPassword:
 
                 errorString = "Invalid login.\nPlease check your username and password."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidPasswordStr:
 
                 errorString = "The password is too long. Please choose another one."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrPlayerNameInUse:
 
                 errorString = "The NickName is already in use. Please choose another one."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidPlayerName:
 
                 errorString = "The NickName is invalid. Please choose another one."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidGameName:
 
                 errorString = "The game name is either too short or too long. Please choose another one."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrUnknownGame:
 
                 errorString = "The game could not be found."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidChatText:
 
                 errorString = "The chat text is invalid."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrUnknownPlayerId:
 
                 errorString = "The server referred to an unknown player. Aborting."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrNoCurrentPlayer:
 
                 errorString = "Internal error: The current player could not be found."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrPlayerNotActive:
 
                 errorString = "Internal error: The current player is not active."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrPlayerKicked:
 
                 errorString = "You were kicked from the server."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrPlayerBanned:
 
                 errorString = "You were temporarily banned from the server."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrPlayerBlocked:
 
                 errorString = "Your account is blocked indefinitely."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrSessionTimedOut:
 
                 errorString = "Your server connection timed out due to inactivity. You are very welcome to reconnect!"
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidPlayerCount:
 
                 errorString = "The client player count is invalid."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrTooManyManualBlinds:
 
                 errorString = "Too many manual blinds were set. Please reconfigure the manual blinds."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidAvatarFile:
             case PokerTH.Server.NetErrWrongAvatarSize:
 
                 errorString = "An invalid avatar file was configured. Please choose a different avatar."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrAvatarTooLarge:
 
                 errorString = "The selected avatar file is too large. Please choose a different avatar."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInitBlocked:
 
                 errorString = "You cannot login at this time. Please try again in a few seconds."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrInvalidRequestId:
 
                 errorString = "An internal avatar error occured. Please report this to an admin in the lobby chat."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrStartTimeout:
 
                 errorString = "Could not start game: Synchronization failed."
 
 
-                break;
+                break
             case PokerTH.Server.NetErrServerMaintenance:
 
                 errorString = "The server is down for maintenance. Please try again later."
 
 
-                break;
+                break
             default:
 
                 errorString = "An internal error occured."
 
 
+            }
+            if(loadingWindow) {
+                loadingWindow.error = errorString;
             }
 
             print(errorString)

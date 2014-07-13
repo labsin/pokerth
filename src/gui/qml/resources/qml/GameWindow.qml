@@ -319,11 +319,11 @@ ApplicationWindow {
                     exclusiveGroup: actionButtons
                     onClicked: {
                         if(CurrentGame.buttonsCheckable) {
-                            if(CurrentGame.checkedButton==Game.AllInButton) {
-                                CurrentGame.checkedButton=Game.NoButton
+                            if(CurrentGame.checkedButton==PokerTH.Game.AllInButton) {
+                                CurrentGame.checkedButton=PokerTH.Game.NoButton
                             }
                             else {
-                                CurrentGame.checkedButton=Game.AllInButton
+                                CurrentGame.checkedButton=PokerTH.Game.AllInButton
                             }
                         }
                         else {
@@ -354,11 +354,11 @@ ApplicationWindow {
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(CurrentGame.buttonsCheckable) {
-                        if(CurrentGame.checkedButton==Game.BetRaiseButton) {
-                            CurrentGame.checkedButton=Game.NoButton
+                        if(CurrentGame.checkedButton==PokerTH.Game.BetRaiseButton) {
+                            CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
                         else {
-                            CurrentGame.checkedButton=Game.BetRaiseButton
+                            CurrentGame.checkedButton=PokerTH.Game.BetRaiseButton
                         }
                     }
                     else {
@@ -377,11 +377,11 @@ ApplicationWindow {
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(CurrentGame.buttonsCheckable) {
-                        if(CurrentGame.checkedButton==Game.CallButton) {
-                            CurrentGame.checkedButton=Game.NoButton
+                        if(CurrentGame.checkedButton==PokerTH.Game.CallButton) {
+                            CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
                         else {
-                            CurrentGame.checkedButton=Game.CallButton
+                            CurrentGame.checkedButton=PokerTH.Game.CallButton
                         }
                     }
                     else {
@@ -405,11 +405,11 @@ ApplicationWindow {
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(CurrentGame.buttonsCheckable) {
-                        if(CurrentGame.checkedButton==Game.FoldButton) {
-                            CurrentGame.checkedButton=Game.NoButton
+                        if(CurrentGame.checkedButton==PokerTH.Game.FoldButton) {
+                            CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
                         else {
-                            CurrentGame.checkedButton=Game.FoldButton
+                            CurrentGame.checkedButton=PokerTH.Game.FoldButton
                         }
                     }
                     else {
