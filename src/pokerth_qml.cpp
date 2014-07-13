@@ -29,44 +29,50 @@ int main(int argc, char *argv[])
 #endif
 
     //create defaultconfig
-    ConfigFile *myConfig = new ConfigFile(argv[0], true);
+    ConfigFile *myConfig = new ConfigFile(argv[0], false);
     Log *myLog = new Log(myConfig);
 
-    qDebug() << (myConfig->readConfigString("AppDataDir")).c_str();
-
     ManagerSingleton::Instance()->Init(myConfig, myLog);
+    QString rscPath = ("file://"+myConfig->readConfigString("AppDataDir")).c_str();
 //    QString rscPath = QDir::currentPath() + "/data";
+#ifdef NO_RESOURCES
+    QUrl url(rscPath+"/resources/qml/Main.qml");
+#else
     QUrl url("qrc:///qml/Main.qml");
+#endif
 
+    qDebug() << "rscPath: " << rscPath;
+
+/*
     QQuickView view;
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     QQmlEngine* engine = view.engine();
-    QString rscPath = ("file://"+myConfig->readConfigString("AppDataDir")).c_str();
+*/
+
+    CustomQmlApplicationEngine* engine = new CustomQmlApplicationEngine();
+    QObject::connect(engine,SIGNAL(destroyed()), &app, SLOT(quit()));
+
     engine->rootContext()->setContextProperty("rscPath",rscPath);
     engine->rootContext()->setContextProperty("Manager",ManagerSingleton::Instance());
     engine->rootContext()->setContextProperty("CurrentGame",ManagerSingleton::Instance()->getGame());
     engine->rootContext()->setContextProperty("CurrentServer",ManagerSingleton::Instance()->getServer());
     engine->addImageProvider("PokerTH",new ImageProvider);
+
+/*
     view.setSource(url);
     view.show();
-/*
-    CustomQmlApplicationEngine engine;
-    QObject::connect(&engine,SIGNAL(destroyed()), &app, SLOT(quit()));
-    QString rscPath = ("file://"+myConfig->readConfigString("AppDataDir")).c_str();
-    engine.rootContext()->setContextProperty("rscPath",rscPath);
-    engine.rootContext()->setContextProperty("Manager",ManagerSingleton::Instance());
-    engine.rootContext()->setContextProperty("CurrentGame",ManagerSingleton::Instance()->getGame());
-    engine.rootContext()->setContextProperty("CurrentServer",ManagerSingleton::Instance()->getServer());
-    engine.addImageProvider("PokerTH",new ImageProvider);
+*/
+
 //    QQmlComponent component(&engine, url);
 //    QObject *object = component.create();
 //    if(object) {
 //        QMetaObject::invokeMethod(object,"show");
 //    }
-    engine.load(url);
-*/
+    engine->load(url);
+
 
     int returnCode = app.exec();
+    delete engine;
 
 //    delete object;
     return returnCode;
