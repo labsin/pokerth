@@ -6,7 +6,7 @@
 PlayerModel::PlayerModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-    m_storePlayers = new StorePlayers();
+    m_storePlayers = new StorePlayers(this);
     connect(m_storePlayers,SIGNAL(activeListShouldReset()),this,SLOT(resetModel()));
 }
 
@@ -46,7 +46,7 @@ bool PlayerModel::addPlayer(int index, QmlPlayer* player)
             m_storePlayers->removeAt(index);
             endRemoveRows();
         }
-        else if(player->getActiveStatus()) {
+        if(player->getActiveStatus()) {
             beginInsertRows(QModelIndex(), index, index);
             m_storePlayers->add(player);
             endInsertRows();
@@ -82,7 +82,7 @@ bool PlayerModel::addPlayer(QmlPlayer* player)
 QmlPlayer * const &PlayerModel::at(int index)
 {
     if(!m_storePlayers->validIndex(index)) {
-        addPlayer(index,new QmlPlayer());
+        addPlayer(index,new QmlPlayer(m_storePlayers));
     }
     return m_storePlayers->at(index);
 }

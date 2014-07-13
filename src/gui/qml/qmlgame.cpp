@@ -26,14 +26,14 @@ QmlGame::QmlGame(QObject *parent) :
   , m_buttonsCheckable(false), m_highestSet(0), m_minimumRaise(0), m_fullBetRule(false)
   , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP)
 {
-    myPlayerModel = new PlayerModel();
+    myPlayerModel = new PlayerModel(this);
     myManager = ManagerSingleton::Instance();
 
-    m_flopCard1 = new QmlCard();
-    m_flopCard2 = new QmlCard();
-    m_flopCard3 = new QmlCard();
-    m_turnCard = new QmlCard();
-    m_riverCard = new QmlCard();
+    m_flopCard1 = new QmlCard(this);
+    m_flopCard2 = new QmlCard(this);
+    m_flopCard3 = new QmlCard(this);
+    m_turnCard = new QmlCard(this);
+    m_riverCard = new QmlCard(this);
 
     //Timer Objekt erstellen
     dealFlopCards0Timer = new QTimer(this);
@@ -224,11 +224,12 @@ void QmlGame::nextRoundCleanGui()
 {
     myPlayerModel->nextRound();
     setblinkStartButton(false);
-    setflopCard1(new QmlCard());
-    setflopCard2(new QmlCard());
-    setflopCard3(new QmlCard());
-    setturnCard(new QmlCard());
-    setriverCard(new QmlCard());
+    // TODO check
+    setflopCard1(new QmlCard(this));
+    setflopCard2(new QmlCard(this));
+    setflopCard3(new QmlCard(this));
+    setturnCard(new QmlCard(this));
+    setriverCard(new QmlCard(this));
     setbuttonsCheckable(false);
     setbets(0);
     emit nextRound();
@@ -604,7 +605,6 @@ void QmlGame::dealRiverCards0()
 void QmlGame::dealRiverCards1()
 {
     m_riverCard->setdealt(true);
-    // 	QTimer::singleShot(dealCardsSpeed, this, SLOT( dealRiverCards2() ));
     dealRiverCards1Timer->start(dealCardsSpeed);
 }
 
@@ -635,7 +635,7 @@ void QmlGame::nextPlayerAnimation()
 {
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
 
-    myManager->getGui()->refreshSet();
+    refreshSet();
 
     PlayerListConstIterator it_c;
     PlayerList seatsList = currentHand->getSeatsList();
@@ -644,9 +644,9 @@ void QmlGame::nextPlayerAnimation()
     }
 
     if(currentHand->getPreviousPlayerID() != -1) {
-        myManager->getGui()->refreshAction(currentHand->getPreviousPlayerID(), (*it_c)->getMyAction());
+        refreshAction(currentHand->getPreviousPlayerID(), (*it_c)->getMyAction());
     }
-    myManager->getGui()->refreshCash();
+    refreshCash();
     updateMyButtonsState();
     nextPlayerAnimationTimer->start(nextPlayerSpeed1);
 }

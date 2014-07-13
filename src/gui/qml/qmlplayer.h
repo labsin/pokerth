@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "playerdata.h"
 #include "game_defs.h"
+#include "QQmlListProperty"
 
 class ConfigFile;
 class HandInterface;
@@ -32,7 +33,7 @@ class QmlPlayer : public QObject
     Q_PROPERTY(Button button READ getButton NOTIFY buttonChanged)
     Q_PROPERTY(bool activeStatus READ getActiveStatus NOTIFY activeStatusChanged)
     Q_PROPERTY(bool stayOnTableStatus READ getStayOnTableStatus NOTIFY stayOnTableStatusChanged)
-    Q_PROPERTY(QList<QObject*> cards READ getCards NOTIFY cardsChanged)
+    Q_PROPERTY(QQmlListProperty<QmlCard> cards READ getCards)
     Q_PROPERTY(bool thisTurn READ getTurn NOTIFY turnChanged)
     Q_PROPERTY(QString cardsValueInt READ getCardsValueInt NOTIFY cardsValueIntChanged)
     Q_PROPERTY(bool sessionActive READ isSessionActive NOTIFY sessionActive)
@@ -230,7 +231,7 @@ public:
 
     void setCards(int* theValue);
 
-    QList<QObject *> getCards() const;
+    QQmlListProperty<QmlCard> getCards();
 
     void setTurn(bool theValue) {
         if(myTurn != theValue){
@@ -312,7 +313,6 @@ signals:
     void buttonChanged(Button arg);
     void activeStatusChanged(bool arg);
     void stayOnTableStatusChanged(bool arg);
-    void cardsChanged(QList<QObject *> arg);
     void turnChanged(bool arg);
     void cardsValueIntChanged(int arg);
 
@@ -350,7 +350,7 @@ private:
     int myNiveau[3];
     bool logHoleCardsDone;
 
-    QList<QObject*> myCards;
+    QList<QmlCard*> myCards;
     int myCash;
     int mySet;
     int myStars;

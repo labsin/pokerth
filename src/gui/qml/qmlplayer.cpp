@@ -8,8 +8,9 @@
 QmlPlayer::QmlPlayer(QObject *parent) :
     QObject(parent), myCardsValueInt(0), myOdds(0), logHoleCardsDone(false), myCash(0), mySet(0), myStars(0), myAction(NoAction), myButton(NoButton), myActiveStatus(0), myStayOnTableStatus(0), myTurn(0), myRoundStartCash(0), m_isSessionActive(false), m_isKicked(false), m_isMuted(false)
 {
-    myCards << dynamic_cast<QObject *>(new QmlCard()) << dynamic_cast<QObject *>(new QmlCard());
-    emit cardsChanged(myCards);
+    QmlCard* c1 = new QmlCard(this);
+    QmlCard* c2 = new QmlCard(this);
+    myCards << c1 << c2;
 }
 
 QmlPlayer::~QmlPlayer()
@@ -32,8 +33,8 @@ QmlCard *QmlPlayer::getCard(int index) {
     return dynamic_cast<QmlCard *>(myCards[index]);
 }
 
-QList<QObject *> QmlPlayer::getCards() const {
-    return myCards;
+QQmlListProperty<QmlCard> QmlPlayer::getCards() {
+    return QQmlListProperty<QmlCard>(this, myCards);
 }
 
 void QmlPlayer::initCards()
