@@ -17,6 +17,11 @@ QString ConfigWrapper::readConfigString(QString varName) const
     return QString::fromStdString(myConfigFile->readConfigString(varName.toStdString()));
 }
 
+QString ConfigWrapper::readConfigBase64String(QString varName) const
+{
+    return QString::fromUtf8(QByteArray::fromBase64(myConfigFile->readConfigString(varName.toStdString()).c_str()));
+}
+
 QStringList ConfigWrapper::readConfigStringList(QString varName) const
 {
     std::list<std::string>  stringList = myConfigFile->readConfigStringList(varName.toStdString());
@@ -53,6 +58,11 @@ QVariantList ConfigWrapper::readConfigIntListAsQVariantList(QString varName) con
 void ConfigWrapper::writeConfigInt(QString varName, int varCont)
 {
     myConfigFile->writeConfigInt(varName.toStdString(), varCont);
+}
+
+void ConfigWrapper::writeConfigString(QString varName, QString varCont)
+{
+    myConfigFile->writeConfigString(varName.toStdString(), varCont.toStdString());
 }
 
 // define the singleton type provider function (callback).
