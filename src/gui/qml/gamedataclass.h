@@ -201,9 +201,15 @@ class GameInfoClass : public QObject
 {
     Q_OBJECT
     Q_ENUMS(GameMode)
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(GameDataClass* data READ gameData NOTIFY gameDataChanged)
+    Q_PROPERTY(GameMode mode READ mode NOTIFY gameModeChanged)
+    Q_PROPERTY(unsigned admin READ adminId NOTIFY adminIdChanged)
+    Q_PROPERTY(bool isPasswordProtected READ isPasswordProtected NOTIFY isPasswordProtectedChanged)
 public:
     explicit GameInfoClass(QObject *parent = 0);
     GameInfoClass(GameInfo gameInfo, QObject *parent = 0);
+    ~GameInfoClass();
 
     enum GameMode {
         GAME_MODE_CREATED = 1,
@@ -211,12 +217,47 @@ public:
         GAME_MODE_CLOSED
     };
 
+    QString name() const
+    {
+        return QString::fromStdString(gi.name);
+    }
+
+    GameDataClass* gameData() const
+    {
+        return gd;
+    }
+
+    GameMode mode() const
+    {
+        return (enum GameMode) gi.mode;
+    }
+
+    unsigned adminId() const
+    {
+        return gi.adminPlayerId;
+    }
+
+    bool isPasswordProtected() const
+    {
+        return gi.isPasswordProtected;
+    }
+
 signals:
+
+    void nameChanged(QString arg);
+    void gameDataChanged(GameDataClass* arg);
+
+    void gameModeChanged(GameMode arg);
+
+    void adminIdChanged(unsigned arg);
+
+    void isPasswordProtectedChanged(bool arg);
 
 public slots:
 
 private:
     GameInfo gi;
+    GameDataClass* gd;
 };
 
 class StartDataClass : public QObject

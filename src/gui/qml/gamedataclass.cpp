@@ -195,13 +195,19 @@ void GameDataClass::setdefaultBlinds(bool arg)
 }
 
 GameInfoClass::GameInfoClass(QObject *parent) :
-    QObject(parent)
+    QObject(parent), gd(NULL)
 {
 }
 
 GameInfoClass::GameInfoClass(GameInfo gameInfo, QObject *parent) :
     QObject(parent), gi(gameInfo)
 {
+    gd = new GameDataClass(gameInfo.data, this);
+}
+
+GameInfoClass::~GameInfoClass()
+{
+    delete gd;
 }
 
 StartDataClass::StartDataClass(QObject *parent) :
