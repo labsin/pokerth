@@ -1,15 +1,18 @@
 # QMake pro-file for PokerTH game
 
+# Hack around https://bugreports.qt-project.org/browse/QTBUG-22829
+QMAKE_MOC = $$QMAKE_MOC -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
+
 folder_data.source = data
 folder_data.target = /
 DEPLOYMENTFOLDERS += folder_data
-CONFIG(debug, debug|release) {
-    CONFIG += NO_RESOURCES
-}
+#CONFIG(debug, debug|release) {
+#    CONFIG += NO_RESOURCES
+#}
 NO_RESOURCES {
     DEFINES += NO_RESOURCES
     no_resources.source = src/gui/qml/resources
-    no_resources.target =
+    no_resources.target = data
     DEPLOYMENTFOLDERS += no_resources
 }
 

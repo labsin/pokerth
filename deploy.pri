@@ -76,11 +76,11 @@ win32 {
             !isEqual(source,$$targetFullPath) {
                 !isEmpty(copyCommand):copyCommand += &&
                 copyCommand += $(MKDIR) \"$$target\"
-                copyCommand += && $(COPY_DIR) \"$$source\" \"$$target\"
+                copyCommand += && $(COPY_DIR) -L \"$$source\" \"$$target\"
             }
         }
         !isEmpty(copyCommand) {
-            copyCommand = @echo Copying application data... && $$copyCommand
+            copyCommand = @echo Copying application data... $(COPY_DIR) && $$copyCommand
             copydeploymentfolders.commands = $$copyCommand
             first.depends = $(first) copydeploymentfolders
             export(first.depends)
