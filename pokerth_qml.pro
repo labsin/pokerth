@@ -44,7 +44,7 @@ CONFIG += qt \
 	rtti \
 	stl \
         warn_on
-QT += sql widgets
+QT += sql gui
 
 include(deploy.pri)
 #include(src/third_party/qtsingleapplication/qtsingleapplication.pri)
@@ -69,14 +69,14 @@ android{
 INCLUDEPATH += . \
 	src \
 	src/engine \
-        src/gui \
-        src/qt/qttools \
+    src/gui \
+    src/qt/qttools \
 	src/net \
 	src/engine/local_engine \
 	src/engine/network_engine \
-        src/config \
-        src/core \
-        src/gui/qml
+    src/config \
+    src/core \
+    src/gui/qml
 
 DEPENDPATH += . \
 	src \
@@ -84,32 +84,69 @@ DEPENDPATH += . \
 	src/core \
 	src/engine \
 	src/gui \
+	src/gui/qml \
 	src/net \
 	src/core/common \
 	src/engine/local_engine \
-        src/engine/network_engine \
-        src/net/common \
+    src/engine/network_engine \
+    src/net/common \
 
 # Input
-HEADERS += src/engine/game.h \
-	src/session.h \
-	src/playerdata.h \
-	src/gamedata.h \
+HEADERS += \
 	src/config/configfile.h \
-	src/core/thread.h \
 	src/core/loghelper.h \
+	src/core/thread.h \
+	src/engine/berointerface.h \
 	src/engine/boardinterface.h \
 	src/engine/enginefactory.h \
+	src/engine/game.h \
 	src/engine/handinterface.h \
+	src/engine/local_engine/cardsvalue.h \
+	src/engine/local_engine/localbero.h \
+	src/engine/local_engine/localberoflop.h \
+	src/engine/local_engine/localberopostriver.h \
+	src/engine/local_engine/localberopreflop.h \
+	src/engine/local_engine/localberoriver.h \
+	src/engine/local_engine/localberoturn.h \
+	src/engine/local_engine/localboard.h \
+	src/engine/local_engine/localenginefactory.h \
+	src/engine/local_engine/localhand.h \
+	src/engine/local_engine/localplayer.h \
+	src/engine/local_engine/replay.h \
+	src/engine/local_engine/tools.h \
+	src/engine/network_engine/clientbero.h \
+	src/engine/network_engine/clientboard.h \
+	src/engine/network_engine/clientenginefactory.h \
+	src/engine/network_engine/clienthand.h \
+	src/engine/network_engine/clientplayer.h \
 	src/engine/playerinterface.h \
-	src/engine/berointerface.h \
+	src/gamedata.h \
+	src/gui/generic/serverguiwrapper.h \
 	src/gui/guiinterface.h \
+	src/gui/qml/configwrapper.h \
+	src/gui/qml/customqmlapplicationengine.h \
+	src/gui/qml/gamedataclass.h \
+	src/gui/qml/guiwrapper.h \
+	src/gui/qml/imageprovider.h \
+	src/gui/qml/manager.h \
+	src/gui/qml/playermodel.h \
+	src/gui/qml/qmlcard.h \
+	src/gui/qml/qmlgame.h \
+	src/gui/qml/qmlplayer.h \
+	src/gui/qml/qmlserver.h \
+        src/gui/qml/roleitemmodel.h \
+	src/gui/qml/storeplayers.h \
+	src/gui/qml/styles/gametablestylereader.h \
+	src/gui/qt/qttools/qthelper/qthelper.h \
+	src/gui/qt/qttools/qttoolswrapper.h \
+        src/gui/qttoolsinterface.h \
 	src/net/clientcallback.h \
 	src/net/clientcontext.h \
 	src/net/clientexception.h \
 	src/net/clientstate.h \
 	src/net/clientthread.h \
 	src/net/genericsocket.h \
+	src/net/net_helper.h \
 	src/net/netpacket.h \
 	src/net/senderhelper.h \
 	src/net/serveraccepthelper.h \
@@ -117,67 +154,33 @@ HEADERS += src/engine/game.h \
 	src/net/socket_helper.h \
 	src/net/socket_msg.h \
 	src/net/socket_startup.h \
-	src/net/net_helper.h \
-	src/engine/local_engine/cardsvalue.h \
-	src/engine/local_engine/localboard.h \
-	src/engine/local_engine/localenginefactory.h \
-	src/engine/local_engine/localhand.h \
-	src/engine/local_engine/localplayer.h \
-	src/engine/local_engine/localberopreflop.h \
-	src/engine/local_engine/localberoflop.h \
-	src/engine/local_engine/localberoturn.h \
-	src/engine/local_engine/localberoriver.h \
-	src/engine/local_engine/localberopostriver.h \
-	src/engine/local_engine/tools.h \
-	src/engine/local_engine/localbero.h \
-	src/engine/network_engine/clientboard.h \
-	src/engine/network_engine/clientenginefactory.h \
-	src/engine/network_engine/clienthand.h \
-	src/engine/network_engine/clientplayer.h \
-        src/engine/network_engine/clientbero.h \
-        src/gui/qttoolsinterface.h \
-        src/gui/qt/qttools/qttoolswrapper.h \
-        src/gui/qt/qttools/qthelper/qthelper.h \
-        src/gui/generic/serverguiwrapper.h \
-        src/engine/local_engine/replay.h \
-    src/gui/qml/guiwrapper.h \
-    src/gui/qml/manager.h \
+	src/playerdata.h \
+	src/session.h \
     src/singleton.h \
-    src/gui/qml/customqmlapplicationengine.h \
-    src/gui/qml/configwrapper.h \
-    src/gui/qml/gamedataclass.h \
-    src/gui/qml/imageprovider.h \
-    src/gui/qml/styles/gametablestylereader.h \
-    src/gui/qml/playermodel.h \
-    src/gui/qml/storeplayers.h \
-    src/gui/qml/qmlgame.h \
-    src/gui/qml/qmlcard.h \
-    src/gui/qml/qmlserver.h \
-    src/gui/qml/qmlplayer.h \
-    src/gui/qml/servermodel.h
+    src/gui/qml/qmlroles.h
 
-SOURCES += src/pokerth_qml.cpp \
-        src/gui/qttoolsinterface.h \
-        src/gui/qt/qttools/qttoolswrapper.cpp \
-        src/gui/qt/qttools/qthelper/qthelper.cpp \
-	src/net/common/net_helper_client.cpp \
-        src/core/common/loghelper_client.cpp \
-        src/engine/local_engine/replay.cpp \
-        src/net/common/servermanagerfactoryclient.cpp \
-    src/gui/qml/guiwrapper.cpp \
-    src/gui/qml/manager.cpp \
-    src/gui/qml/customqmlapplicationengine.cpp \
+SOURCES += \
+    src/core/common/loghelper_client.cpp \
+    src/engine/local_engine/replay.cpp \
     src/gui/qml/configwrapper.cpp \
+    src/gui/qml/customqmlapplicationengine.cpp \
     src/gui/qml/gamedataclass.cpp \
+    src/gui/qml/guiwrapper.cpp \
     src/gui/qml/imageprovider.cpp \
-    src/gui/qml/styles/gametablestylereader.cpp \
+    src/gui/qml/manager.cpp \
     src/gui/qml/playermodel.cpp \
-    src/gui/qml/storeplayers.cpp \
-    src/gui/qml/qmlgame.cpp \
     src/gui/qml/qmlcard.cpp \
-    src/gui/qml/qmlserver.cpp \
+    src/gui/qml/qmlgame.cpp \
     src/gui/qml/qmlplayer.cpp \
-    src/gui/qml/servermodel.cpp
+    src/gui/qml/qmlserver.cpp \
+    src/gui/qml/roleitemmodel.cpp \
+    src/gui/qml/storeplayers.cpp \
+    src/gui/qml/styles/gametablestylereader.cpp \
+    src/gui/qt/qttools/qthelper/qthelper.cpp \
+    src/gui/qt/qttools/qttoolswrapper.cpp \
+    src/net/common/net_helper_client.cpp \
+    src/net/common/servermanagerfactoryclient.cpp \
+    src/pokerth_qml.cpp
 
 TRANSLATIONS = ts/pokerth_af.ts \
 	ts/pokerth_bg.ts \

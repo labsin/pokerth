@@ -43,8 +43,7 @@
 #include "qmlplayer.h"
 #include "qmlgame.h"
 #include "qmlserver.h"
-#include "storeplayers.h"
-#include "servermodel.h"
+#include "playermodel.h"
 #include <net/socket_msg.h>
 
 using namespace std;
@@ -54,39 +53,20 @@ GuiWrapper::GuiWrapper()
 {
     myManager = ManagerSingleton::Instance();
     myConfig = myManager->getConfig();
-    myGame = new QmlGame();
-    myServer = new QmlServer();
-    myServerModel = new ServerModel();
+    myGame = myManager->getGame();
+    myServer = myManager->getServer();
+    emit myManager->afterInit();
 }
 
 
 GuiWrapper::~GuiWrapper()
 {
-    delete myGame;
-    delete myServer;
 }
 
 void GuiWrapper::initGui(int speed)
 {
     qDebug()<<"initGui()";
-    myGame->stopTimer();
-    assert(myManager->getSession());
-    //set WindowTitle dynamically
-    QString titleString = "";
-    if(myManager->getSession()->getGameType() == Session::GAME_TYPE_INTERNET || myManager->getSession()->getGameType() == Session::GAME_TYPE_NETWORK) {
-        GameInfo info(myManager->getSession()->getClientGameInfo(myManager->getSession()->getClientCurrentGameId()));
-        titleString = QString::fromUtf8(info.name.c_str())+" - ";
-    }
-    myGame->settitle(QString(titleString + tr("PokerTH %1 - The Open-Source Texas Holdem Engine").arg(POKERTH_BETA_RELEASE_STRING)));
-
-    //set speeds for local game and for first network game
-    if( !myManager->getSession()->isNetworkClientRunning() || (myManager->getSession()->isNetworkClientRunning() && !myManager->getSession()->getCurrentGame()) ) {
-        myGame->setgameSpeed(speed);
-    }
-
-    // TODO: is there an other way?
-    //    myPlayerModel->addRows(myManager->getSession()->getCurrentGame()->getActivePlayerList()->size());
-    emit myGame->guiInitiated(speed);
+    emit myGame->initGui(speed);
 }
 
 boost::shared_ptr<Session> GuiWrapper::getSession()
@@ -101,352 +81,191 @@ void GuiWrapper::setSession(boost::shared_ptr<Session> /*session*/)
 void GuiWrapper::refreshSet() const
 {
     qDebug()<<"refreshSet()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        myGame->getPlayerModel()->at((*it_c)->getMyID())->setSet((*it_c)->getMySet());
-    }
+    emit myGame->signalRefreshSet();
 }
 void GuiWrapper::refreshCash() const
 {
-    qDebug()<<"refreshCash()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        refreshStatus(*it_c);
-        myGame->getPlayerModel()->at((*it_c)->getMyID())->setCash((*it_c)->getMyCash());
-    }
+    emit myGame->signalRefreshCash();
 }
 void GuiWrapper::refreshAction(int playerID, int playerAction) const
 {
-    myGame->getPlayerModel()->at(playerID)->setAction(static_cast<PlayerAction>(playerAction));
-}
-void GuiWrapper::refreshActions() const
-{
-    qDebug()<<"refreshActions()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        refreshAction( (*it_c)->getMyID(), (*it_c)->getMyAction());
-    }
-}
-void GuiWrapper::refreshPlayerAvatar() const
-{
-    qDebug()<<"refreshPlayerAvatar()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        setPlayerAvatar((*it_c)->getMyUniqueID(), (*it_c)->getMyAvatar());
-    }
+    emit myGame->signalRefreshAction(playerID, playerAction);
 }
 void GuiWrapper::refreshChangePlayer() const
 {
     qDebug()<<"refreshChangePlayer()";
-    refreshSet();
-    refreshActions();
-    refreshCash();
+    emit myGame->signalRefreshChangePlayer();
 
 }
 void GuiWrapper::refreshAll() const
 {
     qDebug()<<"refreshAll()";
-    refreshSet();
-    refreshButton();
-    refreshActions();
-    refreshCash();
-    refreshGroupbox();
-    refreshPlayerName();
-    refreshPlayerAvatar();
+    emit myGame->signalRefreshAll();
 }
 void GuiWrapper::refreshPot() const
 {
     qDebug()<<"refreshPot()";
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-
-    myGame->setboardSet(currentHand->getBoard()->getSets());
-    myGame->setpot(currentHand->getBoard()->getPot());
+    emit myGame->signalRefreshPot();
 }
 void GuiWrapper::refreshGroupbox(int playerID, int status) const
 {
     qDebug()<<"refreshGroupbox()";
-    int j;
-
-    if(playerID == -1 || status == -1) {
-
-        boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-        PlayerListConstIterator it_c;
-        PlayerList seatsList = currentGame->getSeatsList();
-        for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-            QmlPlayer *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
-
-            tmp->setTurn((*it_c)->getMyTurn());
-            tmp->setActiveStatus((*it_c)->getMyActiveStatus());
-        }
-    } else {
-        QmlPlayer *tmp = myGame->getPlayerModel()->at(playerID);
-        switch(status) {
-
-            //inactive
-        case 0: {
-            tmp->setActiveStatus(false);
-        }
-        break;
-        //active but fold
-        case 1: {
-            tmp->setActiveStatus(true);
-            tmp->setTurn(false);
-//            tmp->setAction(PLAYER_ACTION_FOLD);
-        }
-        break;
-        //active in action
-        case 2:  {
-            tmp->setActiveStatus(true);
-            //Is below right?
-            tmp->setTurn(true);
-        }
-        break;
-        //active not in action
-        case 3:  {
-            tmp->setActiveStatus(true);
-            //Is below right?
-            tmp->setTurn(false);
-        }
-        break;
-        default:
-        {}
-        }
-    }
+    emit myGame->signalRefreshGroupbox(playerID, status);
 }
 void GuiWrapper::refreshPlayerName() const
 {
     qDebug()<<"refreshPlayerName()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        QmlPlayer *tmp = myGame->getPlayerModel()->at((*it_c)->getMyID());
-        QString name = QString::fromUtf8((*it_c)->getMyName().c_str());
-        QString guid = QString::fromUtf8((*it_c)->getMyGuid().c_str());
-        qDebug()<<"Name: "<<name<<" Guid: "<<guid;
-        bool guest = myManager->getSession()->getClientPlayerInfo((*it_c)->getMyUniqueID()).isGuest;
-        tmp->setButton((*it_c)->getMyButton());
-        tmp->setGuest(guest);
-        tmp->setPlayerType((*it_c)->getMyType());
-        tmp->setName(name);
-        tmp->setGuid(guid);
-    }
+    emit myGame->signalRefreshPlayerName();
 }
 void GuiWrapper::refreshButton() const
 {
     qDebug()<<"refreshButton()";
-    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentGame->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        myGame->getPlayerModel()->at((*it_c)->getMyID())->setButton((*it_c)->getMyButton());
-    }
+    emit myGame->signalRefreshButton();
 }
 void GuiWrapper::refreshGameLabels(GameState gameState) const
 {
     qDebug()<<"refreshGameLabels()";
-    myGame->setgameState(static_cast<QmlGame::QmlGameState>(gameState));
-
-    myGame->sethandNr(myManager->getSession()->getCurrentGame()->getCurrentHand()->getMyID());
-    myGame->setgameNr(myManager->getSession()->getCurrentGame()->getMyGameID());
+    emit myGame->signalRefreshGameLabels(static_cast<int>(gameState));
 }
-
-void GuiWrapper::refreshStatus(boost::shared_ptr<PlayerInterface> player) const
-{
-    qDebug()<<"refreshStatus()";
-    QmlPlayer *tmp = myGame->getPlayerModel()->at(player->getMyID());
-    tmp->setActiveStatus(player->getMyActiveStatus());
-    tmp->setStayOnTableStatus(player->getMyStayOnTableStatus());
-    tmp->setIsSessionActive(player->isSessionActive());
-    tmp->setIsKicked(player->isKicked());
-    tmp->setIsMuted(player->isMuted());
-}
-
 void GuiWrapper::setPlayerAvatar(int myUniqueID, const std::string &myAvatar) const
 {
     qDebug()<<"setPlayerAvatar()";
-    boost::shared_ptr<PlayerInterface> tmpPlayer = myManager->getSession()->getCurrentGame()->getPlayerByUniqueId(myUniqueID);
-    QString myTmpAvatar = QString::fromUtf8(myAvatar.c_str());
-    qDebug()<<"Avatar: "<<myTmpAvatar;
-    if (tmpPlayer.get()) {
-        QString countryString(QString(myManager->getSession()->getClientPlayerInfo(myUniqueID).countryCode.c_str()).toLower());
-        QmlPlayer* tmp = myGame->getPlayerModel()->at(tmpPlayer->getMyID());
-        tmp->setCountry(countryString);
-
-        QFile myAvatarFile(myTmpAvatar);
-        if(myAvatarFile.exists()) {
-            tmp->setAvatar(myTmpAvatar);
-        } else {
-            tmp->setAvatar(QString(""));
-        }
-    }
+    emit myGame->signalSetPlayerAvatar(myUniqueID, QString::fromStdString(myAvatar));
 }
-
 
 void GuiWrapper::waitForGuiUpdateDone() const
 {
     qDebug()<<"waitForGuiUpdateDone()";
+    emit myGame->signalGuiUpdateDone();
+    emit myGame->waitForGuiUpdateDone();
 }
 
 void GuiWrapper::dealBeRoCards(int myBeRoID)
 {
     qDebug()<<"dealBeRoCards()";
-    myGame->dealBeRoCards(myBeRoID);
+    emit myGame->signalDealBeRoCards(myBeRoID);
 }
 
 void GuiWrapper::dealHoleCards()
 {
     qDebug()<<"dealHoleCards()";
-    myGame->dealHoleCards();
+    emit myGame->signalDealHoleCards();
 }
 void GuiWrapper::dealFlopCards()
 {
     qDebug()<<"dealFlopCards()";
-    myGame->dealFlopCards0();
+    emit myGame->signalDealFlopCards();
 }
 void GuiWrapper::dealTurnCard()
 {
     qDebug()<<"dealTurnCard()";
-    myGame->dealTurnCards0();
+    emit myGame->signalDealTurnCards();
 }
 void GuiWrapper::dealRiverCard()
 {
     qDebug()<<"dealRiverCard()";
-    myGame->dealRiverCards0();
+    emit myGame->signalDealRiverCards();
 }
 
 void GuiWrapper::nextPlayerAnimation()
 {
     qDebug()<<"nextPlayerAnimation()";
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-
-    //refresh Change Player
-    refreshSet();
-
-    PlayerListConstIterator it_c;
-    PlayerList seatsList = currentHand->getSeatsList();
-    for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        if((*it_c)->getMyID() == currentHand->getPreviousPlayerID()) break;
-    }
-
-    if(currentHand->getPreviousPlayerID() != -1) {
-        refreshAction(currentHand->getPreviousPlayerID(), (*it_c)->getMyAction());
-    }
-    refreshCash();
-
-    //refresh actions for human player
-    updateMyButtonsState();
-
-    emit myGame->nextPlayerAnimationSignal();
+    emit myGame->signalNextPlayerAnimation();
 }
 
 void GuiWrapper::beRoAnimation2(int myBeRoID)
 {
     qDebug()<<"beRoAnimation2()";
-    myGame->beRoAnimation2(myBeRoID);
+    emit myGame->signalBeRoAnimation2(myBeRoID);
 }
 
 void GuiWrapper::preflopAnimation1()
 {
     qDebug()<<"preflopAnimation1()";
-    myGame->preflopAnimation1();
+    emit myGame->signalPreflopAnimation1();
 }
 void GuiWrapper::preflopAnimation2()
 {
     qDebug()<<"preflopAnimation2()";
-    myGame->preflopAnimation2();
+    emit myGame->signalPreflopAnimation2();
 }
 
 void GuiWrapper::flopAnimation1()
 {
     qDebug()<<"flopAnimation1()";
-    myGame->flopAnimation1();
+    emit myGame->signalFlopAnimation1();
 }
 void GuiWrapper::flopAnimation2()
 {
     qDebug()<<"flopAnimation2()";
-    myGame->flopAnimation2();
+    emit myGame->signalFlopAnimation2();
 }
 
 void GuiWrapper::turnAnimation1()
 {
     qDebug()<<"turnAnimation1()";
-    myGame->turnAnimation1();
+    emit myGame->signalTurnAnimation1();
 }
 void GuiWrapper::turnAnimation2()
 {
     qDebug()<<"turnAnimation2()";
-    myGame->turnAnimation2();
+    emit myGame->signalTurnAnimation2();
 }
 
 void GuiWrapper::riverAnimation1()
 {
     qDebug()<<"riverAnimation1()";
-    myGame->riverAnimation1();
+    emit myGame->signalRiverAnimation1();
 }
 void GuiWrapper::riverAnimation2()
 {
     qDebug()<<"riverAnimation2()";
-    myGame->riverAnimation2();
+    emit myGame->signalRiverAnimation2();
 }
 
 void GuiWrapper::postRiverAnimation1()
 {
     qDebug()<<"postRiverAnimation1()";
-    myGame->postRiverAnimation1();
+    emit myGame->signalPostRiverAnimation1();
 }
 void GuiWrapper::postRiverRunAnimation1()
 {
     qDebug()<<"postRiverRunAnimation1()";
-    myGame->postRiverRunAnimation1();
+    emit myGame->signalPostRiverRunAnimation1();
 }
 
 void GuiWrapper::flipHolecardsAllIn()
 {
     qDebug()<<"flipHolecardsAllIn()";
-    myGame->flipHolecardsAllIn();
+    emit myGame->signalFlipHolecardsAllIn();
 }
 
 void GuiWrapper::handSwitchRounds()
 {
-    myManager->getSession()->getCurrentGame()->getCurrentHand()->switchRounds();
+    emit myGame->signalHandSwitchRounds();
 }
 
 void GuiWrapper::nextRoundCleanGui()
 {
     qDebug()<<"nextRoundCleanGui()";
     refreshAll();
-    myGame->nextRoundCleanGui();
+    emit myGame->signalNextRoundCleanGui();
 }
 
 void GuiWrapper::meInAction()
 {
     qDebug()<<"meInAction()";
-    myGame->meInAction();
+    emit myGame->signalMeInAction();
 }
 void GuiWrapper::updateMyButtonsState()
 {
     qDebug()<<"updateMyButtonsState()";
-    myGame->updateMyButtonsState();
+    emit myGame->signalUpdateMyButtonsState();
 }
 void GuiWrapper::disableMyButtons()
 {
     qDebug()<<"disableMyButtons()";
-    myGame->setbuttonsCheckable(false);
+    emit myGame->signalDisableMyButtons();
 }
 void GuiWrapper::startTimeoutAnimation(int playerNum, int timeoutSec)
 {
@@ -519,18 +338,22 @@ void GuiWrapper::flushLogAtHand()
 void GuiWrapper::SignalNetClientConnect(int actionID)
 {
     qDebug()<<"SignalNetClientConnect()";
-    myServer->setconnectAction(actionID);
+    emit myServer->SignalNetClientConnect(actionID);
+}
+void GuiWrapper::SignalNetClientServerListClear()
+{
+    qDebug()<<"SignalNetClientServerListClear()";
+    emit myManager->SignalNetClientServerListClear();
 }
 void GuiWrapper::SignalNetClientServerListAdd(unsigned serverId)
 {
     qDebug()<<"SignalNetClientServerListAdd()";
-    ServerInfo info = getSession()->getClientServerInfo(serverId);
-    ServerItem server( QString::fromStdString(info.name), info.id, QString::fromStdString(info.country) );
-    myServerModel->addServer(server);
+    emit myManager->SignalNetClientServerListAdd(serverId);
 }
 void GuiWrapper::SignalNetClientServerListShow()
 {
     qDebug()<<"SignalNetClientServerListShow()";
+    emit myServer->SignalNetClientServerListShow();
 }
 void GuiWrapper::SignalNetClientLoginShow()
 {
@@ -545,26 +368,24 @@ void GuiWrapper::SignalNetClientPostRiverShowCards(unsigned playerId)
 {
     qDebug()<<"SignalNetClientPostRiverShowCards()";
 }
-void GuiWrapper::SignalNetClientServerListClear()
-{
-    qDebug()<<"SignalNetClientServerListClear()";
-}
 void GuiWrapper::SignalNetClientGameInfo(int actionID)
 {
     qDebug()<<"SignalNetClientGameInfo()";
 }
 void GuiWrapper::SignalNetClientError(int errorID, int osErrorID)
 {
-    qDebug()<<"SignalNetClientError()";
-    emit myManager->getServer()->serverError(errorID);
+    qDebug()<<"SignalNetClientError(): "<<errorID;
+    emit myManager->getServer()->networkError(errorID, osErrorID);
 }
 void GuiWrapper::SignalNetClientNotification(int notificationId)
 {
-    qDebug()<<"SignalNetClientNotification()";
+    qDebug()<<"SignalNetClientNotification(): "<<notificationId;
+    emit myServer->networkNotification(notificationId);
 }
 void GuiWrapper::SignalNetClientStatsUpdate(const ServerStats &stats)
 {
     qDebug()<<"SignalNetClientStatsUpdate()";
+    emit myServer->SignalNetClientStatsUpdate(stats);
 }
 void GuiWrapper::SignalNetClientShowTimeoutDialog(NetTimeoutReason reason, unsigned remainingSec)
 {
@@ -577,78 +398,112 @@ void GuiWrapper::SignalNetClientPingUpdate(unsigned minPing, unsigned avgPing, u
 
 void GuiWrapper::SignalNetClientRemovedFromGame(int notificationId)
 {
-    qDebug()<<"SignalNetClientRemovedFromGame()";
+    qDebug()<<"SignalNetClientRemovedFromGame(): "<<notificationId;
+    emit myServer->SignalNetClientRemovedFromGame(notificationId);
+    emit myServer->networkNotification(notificationId);
 }
 void GuiWrapper::SignalNetClientSelfJoined(unsigned playerId, const string &playerName, bool isGameAdmin)
 {
     qDebug()<<"SignalNetClientSelfJoined()";
+    emit myServer->SignalNetClientSelfJoined(playerId, QString::fromStdString(playerName), isGameAdmin);
 }
 void GuiWrapper::SignalNetClientPlayerJoined(unsigned playerId, const string &playerName, bool isGameAdmin)
 {
     qDebug()<<"SignalNetClientPlayerJoined()";
+    emit myServer->SignalNetClientPlayerJoined(playerId, QString::fromStdString(playerName), isGameAdmin);
 }
 void GuiWrapper::SignalNetClientPlayerChanged(unsigned playerId, const string &newPlayerName)
 {
     qDebug()<<"SignalNetClientPlayerChanged()";
+    emit myServer->SignalNetClientPlayerChanged(playerId, QString::fromStdString(newPlayerName));
 }
 void GuiWrapper::SignalNetClientPlayerLeft(unsigned playerId, const string &playerName, int removeReason)
 {
     qDebug()<<"SignalNetClientPlayerLeft()";
+    emit myServer->SignalNetClientPlayerLeft(playerId, QString::fromStdString(playerName), removeReason);
 }
 void GuiWrapper::SignalNetClientSpectatorJoined(unsigned playerId, const string &playerName)
 {
     qDebug()<<"SignalNetClientSpectatorJoined()";
+    emit myServer->SignalNetClientSpectatorJoined(playerId, QString::fromStdString(playerName));
 }
 void GuiWrapper::SignalNetClientSpectatorLeft(unsigned playerId, const string &playerName, int removeReason)
 {
     qDebug()<<"SignalNetClientSpectatorLeft()";
+    emit myServer->SignalNetClientSpectatorLeft(playerId, QString::fromStdString(playerName), removeReason);
 }
 void GuiWrapper::SignalNetClientNewGameAdmin(unsigned playerId, const string &playerName)
 {
     qDebug()<<"SignalNetClientNewGameAdmin()";
+    emit myServer->SignalNetClientNewGameAdmin(playerId, QString::fromStdString(playerName));
 }
 
 void GuiWrapper::SignalNetClientGameListNew(unsigned gameId)
 {
     qDebug()<<"SignalNetClientGameListNew()";
+    emit myServer->SignalNetClientGameListNew(gameId);
 }
 void GuiWrapper::SignalNetClientGameListRemove(unsigned gameId)
 {
     qDebug()<<"SignalNetClientGameListRemove()";
+    emit myServer->SignalNetClientGameListRemove(gameId);
 }
 void GuiWrapper::SignalNetClientGameListUpdateMode(unsigned gameId, GameMode mode)
 {
     qDebug()<<"SignalNetClientGameListUpdateMode()";
+    emit myServer->SignalNetClientGameListUpdateMode(gameId);
 }
 void GuiWrapper::SignalNetClientGameListUpdateAdmin(unsigned gameId, unsigned adminPlayerId)
 {
     qDebug()<<"SignalNetClientGameListUpdateAdmin()";
+    emit myServer->SignalNetClientGameListUpdateAdmin(gameId, adminPlayerId);
 }
 void GuiWrapper::SignalNetClientGameListPlayerJoined(unsigned gameId, unsigned playerId)
 {
     qDebug()<<"SignalNetClientGameListPlayerJoined()";
+    emit myServer->SignalNetClientGameListPlayerJoined(gameId, playerId);
 }
 void GuiWrapper::SignalNetClientGameListPlayerLeft(unsigned gameId, unsigned playerId)
 {
     qDebug()<<"SignalNetClientGameListPlayerLeft()";
+    emit myServer->SignalNetClientGameListPlayerLeft(gameId, playerId);
 }
 void GuiWrapper::SignalNetClientGameListSpectatorJoined(unsigned gameId, unsigned playerId)
 {
     qDebug()<<"SignalNetClientGameListSpectatorJoined()";
+    emit myServer->SignalNetClientGameListSpectatorJoined(gameId, playerId);
 }
 void GuiWrapper::SignalNetClientGameListSpectatorLeft(unsigned gameId, unsigned playerId)
 {
     qDebug()<<"SignalNetClientGameListSpectatorLeft()";
+    emit myServer->SignalNetClientGameListSpectatorLeft(gameId, playerId);
 }
 void GuiWrapper::SignalNetClientGameStart(boost::shared_ptr<Game> game)
 {
     qDebug()<<"SignalNetClientGameStart()";
+    myManager->getSession()->startClientGame(game);
 }
 
 void GuiWrapper::SignalNetClientWaitDialog()
 {
     qDebug()<<"SignalNetClientWaitDialog()";
 }
+void GuiWrapper::SignalLobbyPlayerJoined(unsigned playerId, const string &nickName)
+{
+    qDebug()<<"SignalLobbyPlayerJoined()";
+    emit myServer->SignalLobbyPlayerJoined(playerId, QString::fromStdString(nickName));
+}
+void GuiWrapper::SignalLobbyPlayerKicked(const std::string &nickName, const std::string &byWhom, const std::string &reason)
+{
+    qDebug()<<"SignalLobbyPlayerKicked()";
+}
+void GuiWrapper::SignalLobbyPlayerLeft(unsigned playerId)
+{
+    qDebug()<<"SignalLobbyPlayerLeft()";
+    emit myServer->SignalLobbyPlayerLeft(playerId);
+}
+
+//Chat
 void GuiWrapper::SignalNetClientGameChatMsg(const string &playerName, const string &msg)
 {
     qDebug()<<"SignalNetClientGameChatMsg()";
@@ -670,71 +525,52 @@ void GuiWrapper::SignalNetClientMsgBox(unsigned msgId)
     qDebug()<<"SignalNetClientMsgBox()";
 }
 
+//ServerError
 void GuiWrapper::SignalNetServerSuccess(int /*actionID*/) {
     qDebug()<<"SignalNetServerSuccess()";
 }
 void GuiWrapper::SignalNetServerError(int errorID, int osErrorID)
 {
-    qDebug()<<"SignalNetServerError()";
+    qDebug()<<"SignalNetServerError()"<<errorID;
+    emit myManager->getServer()->networkError(errorID, osErrorID);
 }
 
+// IRC not used
 void GuiWrapper::SignalIrcConnect(const string &/*server*/)
 {
     qDebug()<<"SignalIrcConnect()";
-    /*myManager->signalIrcConnect(QString::fromUtf8(server.c_str()));*/
 }
 void GuiWrapper::SignalIrcSelfJoined(const string &/*nickName*/, const string &/*channel*/)
 {
     qDebug()<<"SignalIrcSelfJoined()";
-    /*myManager->signalIrcSelfJoined(QString::fromUtf8(nickName.c_str()), QString::fromUtf8(channel.c_str()));*/
 }
 void GuiWrapper::SignalIrcPlayerJoined(const string &/*nickName*/)
 {
     qDebug()<<"SignalIrcPlayerJoined()";
-    /*myManager->signalIrcPlayerJoined(QString::fromUtf8(nickName.c_str()));*/
 }
 void GuiWrapper::SignalIrcPlayerChanged(const string &/*oldNick*/, const string &/*newNick*/)
 {
     qDebug()<<"SignalIrcPlayerChanged()";
-    /* myManager->signalIrcPlayerChanged(QString::fromUtf8(oldNick.c_str()), QString::fromUtf8(newNick.c_str()));*/
 }
 void GuiWrapper::SignalIrcPlayerKicked(const std::string &/*nickName*/, const std::string &/*byWhom*/, const std::string &/*reason*/)
 {
     qDebug()<<"SignalIrcPlayerKicked()";
-    /*myManager->signalIrcPlayerKicked(QString::fromUtf8(nickName.c_str()), QString::fromUtf8(byWhom.c_str()), QString::fromUtf8(reason.c_str()));*/
 }
 void GuiWrapper::SignalIrcPlayerLeft(const std::string &/*nickName*/)
 {
     qDebug()<<"SignalIrcPlayerLeft()";
-    /*myManager->signalIrcPlayerLeft(QString::fromUtf8(nickName.c_str()));*/
 }
 void GuiWrapper::SignalIrcChatMsg(const std::string &/*nickName*/, const std::string &/*msg*/)
 {
     qDebug()<<"SignalIrcChatMsg()";
-    /*myManager->signalIrcChatMessage(QString::fromUtf8(nickName.c_str()), QString::fromUtf8(msg.c_str()));*/
 }
 void GuiWrapper::SignalIrcError(int /*errorCode*/)
 {
     qDebug()<<"SignalIrcError()";
-    /*myManager->signalIrcError(errorCode);*/
 }
 void GuiWrapper::SignalIrcServerError(int /*errorCode*/)
 {
     qDebug()<<"SignalIrcServerError()";
-    /*myManager->signalIrcServerError(errorCode);*/
-}
-
-void GuiWrapper::SignalLobbyPlayerJoined(unsigned playerId, const string &nickName)
-{
-    qDebug()<<"SignalLobbyPlayerJoined()";
-}
-void GuiWrapper::SignalLobbyPlayerKicked(const std::string &nickName, const std::string &byWhom, const std::string &reason)
-{
-    qDebug()<<"SignalLobbyPlayerKicked()";
-}
-void GuiWrapper::SignalLobbyPlayerLeft(unsigned playerId)
-{
-    qDebug()<<"SignalLobbyPlayerLeft()";
 }
 
 void GuiWrapper::SignalSelfGameInvitation(unsigned gameId, unsigned playerIdFrom)

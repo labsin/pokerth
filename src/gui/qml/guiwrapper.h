@@ -45,7 +45,6 @@ class PlayerInterface;
 class Game;
 class QmlGame;
 class QmlServer;
-class ServerModel;
 
 class GuiWrapper : public QObject, public GuiInterface
 {
@@ -68,18 +67,6 @@ public:
 	}
 	guiLog* getMyGuiLog() const {
         return NULL;
-	}
-
-    QmlGame* getGame() const {
-        return myGame;
-    }
-
-    QmlServer *getServer() const {
-        return myServer;
-    }
-
-    ServerModel *getServerModel() const {
-        return myServerModel;
     }
 
 	void refreshSet() const;
@@ -91,16 +78,9 @@ public:
 	void refreshAll() const;
 	void refreshPlayerName() const;
 	void refreshButton() const;
-	void refreshGameLabels(GameState state) const;
+    void refreshGameLabels(GameState state) const;
 
-    void refreshActions() const;
-
-    void refreshPlayerAvatar() const;
-
-    void refreshStatus(boost::shared_ptr<PlayerInterface> player) const;
-
-	void setPlayerAvatar(int myUniqueID, const std::string &myAvatar) const;
-
+    void setPlayerAvatar(int myUniqueID, const std::string &myAvatar) const;
 	void waitForGuiUpdateDone() const;
 
 	void dealBeRoCards(int myBeRoID);
@@ -221,7 +201,6 @@ public slots:
 private:
     QmlGame *myGame;
     QmlServer *myServer;
-    ServerModel *myServerModel;
     ConfigFile *myConfig;
     Manager* myManager;
 };

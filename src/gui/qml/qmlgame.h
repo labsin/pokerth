@@ -5,6 +5,7 @@
 #include "manager.h"
 #include "guiwrapper.h"
 #include "qmlplayer.h"
+#include "QSemaphore"
 
 class PlayerModel;
 class QmlCard;
@@ -179,8 +180,6 @@ public:
         return m_blinkStartButton;
     }
 
-    void nextRoundCleanGui();
-
     void stopTimer();
 
     bool breakAfterCurrentHand() const
@@ -314,6 +313,8 @@ public slots:
 
     void flipHolecardsAllIn();
 
+    void nextRoundCleanGui();
+
     void setbets(int arg)
     {
         if (m_bets != arg) {
@@ -443,8 +444,25 @@ public slots:
         }
     }
 
+    void initGui(int speed);
+    void refreshSet();
+    void refreshCash();
+    void refreshAction(int playerID, int playerAction);
+    void refreshActions();
+    void refreshPlayerAvatar();
+    void refreshPot();
+    void refreshGroupbox(int playerID=-1, int status=-1);
+    void refreshPlayerName();
+    void refreshButton();
+    void refreshGameLabels(int gameState);
+    void setPlayerAvatar(int myUniqueID, QString myAvatar);
+    void disableMyButtons();
+
+    void guiUpdateDone();
+    void waitForGuiUpdateDone();
+
 signals:
-    void guiInitiated(int speed);
+    void guiInitiated();
 
     void titleChanged(QString arg);
 
@@ -474,8 +492,6 @@ signals:
 
     void breakAfterCurrentHandChanged(bool arg);
 
-    void nextPlayerAnimationSignal();
-
     void checkedButtonChanged(Buttons arg);
 
     void playingModeChanged(PlayingMode arg);
@@ -499,6 +515,47 @@ signals:
     void boardSetChanged(int arg);
 
     void nextRound();
+
+    void signalInitGui(int speed);
+    void signalRefreshSet();
+    void signalRefreshCash();
+    void signalRefreshAction(int playerID, int playerAction);
+    void signalRefreshPlayerAvatar();
+    void signalRefreshChangePlayer();
+    void signalRefreshAll();
+    void signalRefreshPot();
+    void signalRefreshGroupbox(int playerID, int status);
+    void signalRefreshPlayerName();
+    void signalRefreshButton();
+    void signalRefreshGameLabels(int gameState);
+
+    void signalSetPlayerAvatar(int myUniqueID, QString myAvatar);
+
+    void signalDealBeRoCards(int myBeRoID);
+    void signalDealHoleCards();
+    void signalDealFlopCards();
+    void signalDealTurnCards();
+    void signalDealRiverCards();
+    void signalNextPlayerAnimation();
+    void signalBeRoAnimation2(int myBeRoId);
+    void signalPreflopAnimation1();
+    void signalPreflopAnimation2();
+    void signalFlopAnimation1();
+    void signalFlopAnimation2();
+    void signalTurnAnimation1();
+    void signalTurnAnimation2();
+    void signalRiverAnimation1();
+    void signalRiverAnimation2();
+    void signalPostRiverAnimation1();
+    void signalPostRiverRunAnimation1();
+    void signalFlipHolecardsAllIn();
+    void signalHandSwitchRounds();
+    void signalNextRoundCleanGui();
+    void signalMeInAction();
+    void signalUpdateMyButtonsState();
+    void signalDisableMyButtons();
+
+    void signalGuiUpdateDone();
 
 private:
     PlayerModel* myPlayerModel;
@@ -584,6 +641,8 @@ private:
     QmlGameState m_gameState;
     bool m_myTurn;
     int m_boardSet;
+
+    QSemaphore guiUpdateSemaphore;
 };
 
 #endif // QMLGAME_H

@@ -72,8 +72,6 @@ QmlGame::QmlGame(QObject *parent) :
     potDistributeTimer = new QTimer(this);
     voteOnKickTimeoutTimer = new QTimer(this);
 
-    connect(this, SIGNAL(nextPlayerAnimationSignal()), this, SLOT(nextPlayerAnimation()));
-
     dealFlopCards0Timer->setSingleShot(true);
     dealFlopCards1Timer->setSingleShot(true);
     dealFlopCards2Timer->setSingleShot(true);
@@ -138,6 +136,55 @@ QmlGame::QmlGame(QObject *parent) :
 
     connect(potDistributeTimer, SIGNAL(timeout()), this, SLOT(postRiverRunAnimation5()));
     //    connect(voteOnKickTimeoutTimer, SIGNAL(timeout()), this, SLOT(nextVoteOnKickTimeoutAnimationFrame()));
+
+    connect(this, SIGNAL(signalInitGui(int)), this, SLOT(initGui(int)));
+    connect(this, SIGNAL(signalRefreshSet()), this, SLOT(refreshSet()));
+    connect(this, SIGNAL(signalRefreshCash()), this, SLOT(refreshCash()));
+    connect(this, SIGNAL(signalRefreshAction(int, int)), this, SLOT(refreshAction(int,int)));
+    connect(this, SIGNAL(signalRefreshPlayerAvatar()), this, SLOT(refreshPlayerAvatar()));
+    connect(this, SIGNAL(signalRefreshChangePlayer()), this, SLOT(refreshSet()));
+    connect(this, SIGNAL(signalRefreshChangePlayer()), this, SLOT(refreshActions()));
+    connect(this, SIGNAL(signalRefreshChangePlayer()), this, SLOT(refreshCash()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshSet()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshButton()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshActions()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshCash()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshGroupbox()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshPlayerName()));
+    connect(this, SIGNAL(signalRefreshAll()), this, SLOT(refreshPlayerAvatar()));
+    connect(this, SIGNAL(signalRefreshPot()), this, SLOT(refreshPot()));
+    connect(this, SIGNAL(signalRefreshGroupbox(int, int)), this, SLOT(refreshGroupbox(int, int)));
+    connect(this, SIGNAL(signalRefreshPlayerName()), this, SLOT(refreshPlayerName()));
+    connect(this, SIGNAL(signalRefreshButton()), this, SLOT(refreshButton()));
+    connect(this, SIGNAL(signalRefreshGameLabels(int)), this, SLOT(refreshGameLabels(int)));
+
+    connect(this, SIGNAL(signalSetPlayerAvatar(int,QString)), this, SLOT(setPlayerAvatar(int,QString)));
+
+    connect(this, SIGNAL(signalDealBeRoCards(int)), this, SLOT(dealBeRoCards(int)));
+    connect(this, SIGNAL(signalBeRoAnimation2(int)), this, SLOT(beRoAnimation2(int)));
+    connect(this, SIGNAL(signalDealHoleCards()), this, SLOT(dealHoleCards()));
+    connect(this, SIGNAL(signalDealFlopCards()), this, SLOT(dealFlopCards0()));
+    connect(this, SIGNAL(signalDealTurnCards()), this, SLOT(dealTurnCards0()));
+    connect(this, SIGNAL(signalDealRiverCards()), this, SLOT(dealRiverCards0()));
+    connect(this, SIGNAL(signalNextPlayerAnimation()), this, SLOT(nextPlayerAnimation()));
+    connect(this, SIGNAL(signalPreflopAnimation1()), this, SLOT(preflopAnimation1()));
+    connect(this, SIGNAL(signalPreflopAnimation2()), this, SLOT(preflopAnimation2()));
+    connect(this, SIGNAL(signalFlopAnimation1()), this, SLOT(flopAnimation1()));
+    connect(this, SIGNAL(signalFlopAnimation2()), this, SLOT(flopAnimation2()));
+    connect(this, SIGNAL(signalTurnAnimation1()), this, SLOT(turnAnimation1()));
+    connect(this, SIGNAL(signalTurnAnimation2()), this, SLOT(turnAnimation2()));
+    connect(this, SIGNAL(signalRiverAnimation1()), this, SLOT(riverAnimation1()));
+    connect(this, SIGNAL(signalRiverAnimation2()), this, SLOT(riverAnimation2()));
+    connect(this, SIGNAL(signalPostRiverAnimation1()), this, SLOT(postRiverAnimation1()));
+    connect(this, SIGNAL(signalPostRiverRunAnimation1()), this, SLOT(postRiverRunAnimation1()));
+    connect(this, SIGNAL(signalFlipHolecardsAllIn()), this, SLOT(flipHolecardsAllIn()));
+    connect(this, SIGNAL(signalHandSwitchRounds()), this, SLOT(handSwitchRounds()));
+    connect(this, SIGNAL(signalNextRoundCleanGui()), this, SLOT(nextRoundCleanGui()));
+    connect(this, SIGNAL(signalMeInAction()), this, SLOT(meInAction()));
+    connect(this, SIGNAL(signalUpdateMyButtonsState()), this, SLOT(updateMyButtonsState()));
+    connect(this, SIGNAL(signalDisableMyButtons()), this, SLOT(disableMyButtons()));
+
+    connect(this, SIGNAL(signalGuiUpdateDone()), this, SLOT(guiUpdateDone()));
 }
 
 QmlGame::~QmlGame() {
@@ -1169,4 +1216,206 @@ void QmlGame::provideMyActions(int mode)
             }
         }
     }
+}
+
+void QmlGame::initGui(int speed)
+{
+    stopTimer();
+    assert(myManager->getSession());
+    //set WindowTitle dynamically
+    QString titleString = "";
+    if(myManager->getSession()->getGameType() == Session::GAME_TYPE_INTERNET || myManager->getSession()->getGameType() == Session::GAME_TYPE_NETWORK) {
+        GameInfo info(myManager->getSession()->getClientGameInfo(myManager->getSession()->getClientCurrentGameId()));
+        titleString = QString::fromUtf8(info.name.c_str())+" - ";
+    }
+    settitle(QString(titleString + tr("PokerTH %1 - The Open-Source Texas Holdem Engine").arg(POKERTH_BETA_RELEASE_STRING)));
+
+    //set speeds for local game and for first network game
+    if( !myManager->getSession()->isNetworkClientRunning() || (myManager->getSession()->isNetworkClientRunning() && !myManager->getSession()->getCurrentGame()) ) {
+        setgameSpeed(speed);
+    }
+
+    // TODO: is there an other way?
+    //    myPlayerModel->addRows(myManager->getSession()->getCurrentGame()->getActivePlayerList()->size());
+    emit guiInitiated();
+
+}
+
+void QmlGame::refreshSet()
+{
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        myPlayerModel->at((*it_c)->getMyID())->setSet((*it_c)->getMySet());
+    }
+}
+
+void QmlGame::refreshCash()
+{
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        QmlPlayer *tmp = myPlayerModel->at((*it_c)->getMyID());
+        tmp->setActiveStatus((*it_c)->getMyActiveStatus());
+        tmp->setStayOnTableStatus((*it_c)->getMyStayOnTableStatus());
+        tmp->setIsSessionActive((*it_c)->isSessionActive());
+        tmp->setIsKicked((*it_c)->isKicked());
+        tmp->setIsMuted((*it_c)->isMuted());
+        tmp->setCash((*it_c)->getMyCash());
+    }
+}
+
+void QmlGame::refreshAction(int playerID, int playerAction)
+{
+    myPlayerModel->at(playerID)->setAction(static_cast<PlayerAction>(playerAction));
+}
+
+void QmlGame::refreshActions()
+{
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        refreshAction( (*it_c)->getMyID(), (*it_c)->getMyAction());
+    }
+}
+
+void QmlGame::refreshPlayerAvatar()
+{
+    qDebug()<<"refreshPlayerAvatar()";
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        setPlayerAvatar((*it_c)->getMyUniqueID(), QString::fromStdString((*it_c)->getMyAvatar()));
+    }
+}
+
+void QmlGame::refreshPot()
+{
+    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+
+    setboardSet(currentHand->getBoard()->getSets());
+    setpot(currentHand->getBoard()->getPot());
+}
+
+void QmlGame::refreshGroupbox(int playerID, int status)
+{
+    if(playerID == -1 || status == -1) {
+
+        boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+        PlayerList seatsList = currentGame->getSeatsList();
+        for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+            QmlPlayer *tmp = myPlayerModel->at((*it_c)->getMyID());
+
+            tmp->setTurn((*it_c)->getMyTurn());
+            tmp->setActiveStatus((*it_c)->getMyActiveStatus());
+        }
+    } else {
+        QmlPlayer *tmp = myPlayerModel->at(playerID);
+        switch(status) {
+
+            //inactive
+        case 0: {
+            tmp->setActiveStatus(false);
+        }
+        break;
+        //active but fold
+        case 1: {
+            tmp->setActiveStatus(true);
+            tmp->setTurn(false);
+//            tmp->setAction(PLAYER_ACTION_FOLD);
+        }
+        break;
+        //active in action
+        case 2:  {
+            tmp->setActiveStatus(true);
+            //Is below right?
+            tmp->setTurn(true);
+        }
+        break;
+        //active not in action
+        case 3:  {
+            tmp->setActiveStatus(true);
+            //Is below right?
+            tmp->setTurn(false);
+        }
+        break;
+        default:
+        {}
+        }
+    }
+}
+
+void QmlGame::refreshPlayerName()
+{
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        QmlPlayer *tmp = myPlayerModel->at((*it_c)->getMyID());
+        QString name = QString::fromUtf8((*it_c)->getMyName().c_str());
+        QString guid = QString::fromUtf8((*it_c)->getMyGuid().c_str());
+        qDebug()<<"Name: "<<name<<" Guid: "<<guid;
+        bool guest = myManager->getSession()->getClientPlayerInfo((*it_c)->getMyUniqueID()).isGuest;
+        tmp->setButton((*it_c)->getMyButton());
+        tmp->setGuest(guest);
+        tmp->setPlayerType((*it_c)->getMyType());
+        tmp->setName(name);
+        tmp->setGuid(guid);
+    }
+}
+
+void QmlGame::refreshButton()
+{
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+
+    PlayerList seatsList = currentGame->getSeatsList();
+    for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+        myPlayerModel->at((*it_c)->getMyID())->setButton((*it_c)->getMyButton());
+    }
+}
+
+void QmlGame::refreshGameLabels(int gameState)
+{
+    setgameState(static_cast<QmlGameState>(gameState));
+
+    sethandNr(myManager->getSession()->getCurrentGame()->getCurrentHand()->getMyID());
+    setgameNr(myManager->getSession()->getCurrentGame()->getMyGameID());
+
+}
+
+void QmlGame::setPlayerAvatar(int myUniqueID, QString myAvatar)
+{
+    boost::shared_ptr<PlayerInterface> tmpPlayer = myManager->getSession()->getCurrentGame()->getPlayerByUniqueId(myUniqueID);
+    qDebug()<<"Avatar: "<<myAvatar;
+    if (tmpPlayer.get()) {
+        QString countryString(QString(myManager->getSession()->getClientPlayerInfo(myUniqueID).countryCode.c_str()).toLower());
+        QmlPlayer* tmp = myPlayerModel->at(tmpPlayer->getMyID());
+        tmp->setCountry(countryString);
+
+        QFile myAvatarFile(myAvatar);
+        if(myAvatarFile.exists()) {
+            tmp->setAvatar(myAvatar);
+        } else {
+            tmp->setAvatar(QString(""));
+        }
+    }
+}
+
+void QmlGame::disableMyButtons()
+{
+    setbuttonsCheckable(false);
+}
+
+void QmlGame::guiUpdateDone()
+{
+    guiUpdateSemaphore.release();
+}
+
+void QmlGame::waitForGuiUpdateDone()
+{
+    guiUpdateSemaphore.acquire();
 }

@@ -9,14 +9,42 @@
 #include "qmlgame.h"
 #include "qmlcard.h"
 #include "qmlplayer.h"
+#include "storeplayers.h"
+#include "playermodel.h"
 #include "guiwrapper.h"
 #include "configfile.h"
 #include "configwrapper.h"
 #include "qmlserver.h"
-#include "servermodel.h"
+#include "roleitemmodel.h"
+#include "qmlroles.h"
+#include "QFile"
+
+Manager::Manager() {
+    connect(this,SIGNAL(afterInit()),this,SIGNAL(gameChanged()));
+    connect(this,SIGNAL(afterInit()),this,SIGNAL(serverChanged()));
+    connect(this,SIGNAL(afterInit()),this,SIGNAL(serversChanged()));
+    connect(this, SIGNAL(SignalNetClientServerListAdd(uint)), this, SLOT(serverListAdd(uint)));
+    connect(this, SIGNAL(SignalNetClientServerListClear()), this, SLOT(serverListClear()));
+    connect(this, SIGNAL(signalSetPlayerAvatar(int,QString)), this, SLOT(setPlayerAvatar(int,QString)));
+}
+
+Manager::~Manager()
+{
+    delete myGame;
+    delete myServer;
+    delete myServerModel;
+}
 
 void Manager::Init(ConfigFile *c, Log *l)
 {
+    myGame = new QmlGame(this);
+    myServer = new QmlServer(this);
+
+    QHash<int, QByteArray> serverRoleNames;
+    serverRoleNames[ServerEntry::NameRole] =  "name";
+    serverRoleNames[ServerEntry::CountryRole] =  "country";
+    serverRoleNames[ServerEntry::IdRole] =  "id";
+    myServerModel = new RoleItemModel(serverRoleNames, this);
     myConfig = c;
     myLog = l;
     myGuiInterface.reset(new GuiWrapper());
@@ -58,18 +86,24 @@ void Manager::startGame(QObject* obj)
     }
 }
 
+void Manager::joinGame(unsigned gameId, QString password)
+{
+    qDebug() << "joinGame()";
+    mySession->clientJoinGame(gameId, password.toUtf8().constData());
+}
+
 void Manager::joinGameLobby()
 {
     cancelConnect();
 
-    //start internet client with config values for user and pw TODO
+    //start internet client with config values for user and pw
     mySession->startInternetClient();
     emit getServer()->connectingToServer();
 }
 
 void Manager::cancelConnect()
 {
-    dynamic_cast<GuiWrapper *>(myGuiInterface.get())->getGame()->stopTimer();
+    myGame->stopTimer();
     mySession->terminateNetworkClient();
     if (myServerGuiInterface)
         myServerGuiInterface->getSession()->terminateNetworkServer();
@@ -79,17 +113,54 @@ void Manager::cancelConnect()
 
 QmlGame *Manager::getGame()
 {
-    return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getGame();
+    return myGame;
 }
 
 QmlServer *Manager::getServer()
 {
-    return dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getServer();
+    return myServer;
 }
 
-QAbstractTableModel *Manager::getServerModel()
+QObject *Manager::getServerModel()
 {
-    return dynamic_cast<QAbstractTableModel*>(dynamic_cast<GuiWrapper*>(myGuiInterface.get())->getServerModel());
+    return myServerModel;
+}
+
+void Manager::serverListAdd(unsigned serverId)
+{
+    ServerInfo info = getSession()->getClientServerInfo(serverId);
+    QStandardItem* item = new QStandardItem();
+    item->setData(info.id, ServerEntry::IdRole);
+    item->setData(QString::fromStdString(info.name), ServerEntry::NameRole);
+    item->setData(QString::fromStdString(info.country), ServerEntry::CountryRole);
+    myServerModel->appendRow(item);
+}
+
+void Manager::serverListClear()
+{
+    myServerModel->clear();
+}
+
+void Manager::setPlayerAvatar(int myUniqueID, QString myAvatar)
+{
+    if(mySession->getCurrentGame()) {
+        boost::shared_ptr<PlayerInterface> tmpPlayer = mySession->getCurrentGame()->getPlayerByUniqueId(myUniqueID);
+        qDebug()<<"Avatar: "<<myAvatar;
+        if (tmpPlayer.get()) {
+            QString countryString(QString::fromLatin1(mySession->getClientPlayerInfo(myUniqueID).countryCode.c_str()).toLower());
+            QmlPlayer* tmp = myGame->getPlayerModel()->at(tmpPlayer->getMyID());
+            if(tmp) {
+                tmp->setCountry(countryString);
+
+                QFile myAvatarFile(myAvatar);
+                if(myAvatarFile.exists()) {
+                    tmp->setAvatar(myAvatar);
+                } else {
+                    tmp->setAvatar(QString(""));
+                }
+            }
+        }
+    }
 }
 
 GuiWrapper *Manager::getGui() {

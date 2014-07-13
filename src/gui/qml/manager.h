@@ -18,6 +18,7 @@ class Game;
 class QmlGame;
 class QmlServer;
 class QAbstractTableModel;
+class RoleItemModel;
 
 class ConfigFile;
 
@@ -26,8 +27,12 @@ class Log;
 class Manager: public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QObject* servers READ getServerModel NOTIFY serversChanged)
+    Q_PROPERTY(QmlServer* server READ getServer NOTIFY serverChanged)
+    Q_PROPERTY(QmlGame* game READ getGame NOTIFY gameChanged)
 public:
-    Manager() {}
+    Manager();
+    ~Manager();
 
     void Init(ConfigFile *c, Log *l);
 
@@ -47,20 +52,36 @@ public:
     }
 
     Q_INVOKABLE void startGame(QObject *obj);
+    Q_INVOKABLE void joinGame(unsigned gameId, QString password = QString());
     Q_INVOKABLE void joinGameLobby();
     Q_INVOKABLE void cancelConnect();
-    Q_INVOKABLE QmlGame *getGame();
-    Q_INVOKABLE QmlServer *getServer();
-    Q_INVOKABLE QAbstractTableModel *getServerModel();
 
     GuiWrapper* getGui();
 
+public slots:
+    QmlGame *getGame();
+    QmlServer *getServer();
+    QObject *getServerModel();
+    void serverListAdd(unsigned serverId);
+    void serverListClear();
+    void setPlayerAvatar(int myUniqueID, QString myAvatar);
+
 signals:
     void guiInitiated();
+    void serversChanged();
+    void gameChanged();
+    void serverChanged();
+    void afterInit();
+    void SignalNetClientServerListAdd(unsigned serverId);
+    void SignalNetClientServerListClear();
+    void signalSetPlayerAvatar(int myUniqueID, QString myAvatar);
 
 private:
     ConfigFile *myConfig;
     Log *myLog;
+    QmlGame *myGame;
+    QmlServer *myServer;
+    RoleItemModel *myServerModel;
 
     boost::shared_ptr<GuiInterface> myGuiInterface;
     boost::shared_ptr<Session> mySession;
