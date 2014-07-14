@@ -210,9 +210,21 @@ StartWindow {
 
 
                 break
+            case PokerTH.Server.ConnErrIPv6Failed:
+
+                errorString = "Count not connect to the server.\n\nPlease note: IPv6 is enabled in the settings. The connection fails if your provider does not support IPv6.\nThis may be fixed by unchecking the \"Use IPv6\" checkbox in the settings."
+
+
+                break
             case PokerTH.Server.ConnErrConnectTimeout:
 
                 errorString = "Connection timed out.\nPlease check the server address.\n\nIf the server is behind a NAT-Router, make sure port forwarding has been set up on server side."
+
+
+                break
+            case PokerTH.Server.ConnErrIPv6Failed:
+
+                errorString = "Connection timed out.\nPlease check the server address.\n\nPlease note: IPv6 is enabled in the settings. The connection fails if your provider does not support IPv6.\nThis may be fixed by unchecking the \"Use IPv6\" checkbox in the settings."
 
 
                 break

@@ -325,15 +325,6 @@ void GuiWrapper::logPlayerWinGame(std::string playerName, int gameID)
 {
     qDebug()<<"logPlayerWinGame()";
 }
-void GuiWrapper::flushLogAtGame(int gameID)
-{
-    qDebug()<<"flushLogAtGame()";
-}
-void GuiWrapper::flushLogAtHand()
-{
-    qDebug()<<"flushLogAtHand()";
-}
-
 
 void GuiWrapper::SignalNetClientConnect(int actionID)
 {
