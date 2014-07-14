@@ -525,7 +525,7 @@ void QmlGame::dealHoleCards()
     PlayerList seatsList = currentGame->getSeatsList();
     int tempCardsIntArray[2];
     for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        (*it_c)->getMyCards(tempCardsIntArray);
+        (*it_c)->getMyHoleCards(tempCardsIntArray);
         if((*it_c)->getMyActiveStatus()) {
             myPlayerModel->at((*it_c)->getMyID())->setcardsDealt(true);
             myPlayerModel->at((*it_c)->getMyID())->setCards(tempCardsIntArray);
