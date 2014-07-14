@@ -55,6 +55,7 @@ set(pokerth_lib_HDRS
     ${CMAKE_SOURCE_DIR}/src/net/senderhelper.h
     ${CMAKE_SOURCE_DIR}/src/net/sendercallback.h
     ${CMAKE_SOURCE_DIR}/src/net/serverexception.h
+    ${CMAKE_SOURCE_DIR}/src/core/openssl_wrapper.h
     ${CMAKE_SOURCE_DIR}/src/net/serveracceptinterface.h
     ${CMAKE_SOURCE_DIR}/src/net/serveraccepthelper.h
     ${CMAKE_SOURCE_DIR}/src/net/serveracceptwebhelper.h

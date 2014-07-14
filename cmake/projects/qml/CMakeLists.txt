@@ -88,7 +88,7 @@ set(pokerth_qml_HDRS
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlgame.h
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlplayer.h
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlserver.h
-    ${CMAKE_SOURCE_DIR}/src/gui/qml/servermodel.h
+    ${CMAKE_SOURCE_DIR}/src/gui/qml/roleitemmodel.h
     ${CMAKE_SOURCE_DIR}/src/gui/qml/storeplayers.h
     ${CMAKE_SOURCE_DIR}/src/gui/qml/styles/gametablestylereader.h
     ${CMAKE_SOURCE_DIR}/src/gui/qt/qttools/qthelper/qthelper.h
@@ -111,6 +111,7 @@ set(pokerth_qml_HDRS
     ${CMAKE_SOURCE_DIR}/src/playerdata.h
     ${CMAKE_SOURCE_DIR}/src/session.h
     ${CMAKE_SOURCE_DIR}/src/singleton.h
+    ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlroles.h
     )
 
 set(pokerth_qml_SRCS
@@ -127,7 +128,7 @@ set(pokerth_qml_SRCS
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlgame.cpp
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlplayer.cpp
     ${CMAKE_SOURCE_DIR}/src/gui/qml/qmlserver.cpp
-    ${CMAKE_SOURCE_DIR}/src/gui/qml/servermodel.cpp
+    ${CMAKE_SOURCE_DIR}/src/gui/qml/roleitemmodel.cpp
     ${CMAKE_SOURCE_DIR}/src/gui/qml/storeplayers.cpp
     ${CMAKE_SOURCE_DIR}/src/gui/qml/styles/gametablestylereader.cpp
     ${CMAKE_SOURCE_DIR}/src/gui/qt/qttools/qthelper/qthelper.cpp
