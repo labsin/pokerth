@@ -15,23 +15,15 @@ StartWindow {
         target: Manager.game
         onGuiInitiated: {
             print("Starting Game")
-            if(!gameWindow)
-                gameWindow = Create.createObject("GameWindow.qml",startWindow)
-            if(gameWindow) {
-                gameWindow.show()
-                gameWindow.closing.connect(
-                            function(){
-                                startWindow.show();
-                            })
-                if(startWindow)
-                    startWindow.hide()
-                if(loadingWindow)
-                    loadingWindow.hide()
-                if(loginWindow)
-                    loginWindow.hide()
-                if(lobbyWindow)
-                    lobbyWindow.hide()
-            }
+            showGame()
+            hideStart()
+            hideLoading()
+            hideLogin()
+            hideLobby()
+        }
+        onGameStopped: {
+            hideGame()
+            showStart()
         }
     }
 
@@ -39,60 +31,28 @@ StartWindow {
         target: Manager.server
         onConnectedToServer: {
             print("Connected to Server")
-            if(!lobbyWindow)
-                lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
-            if(lobbyWindow) {
-                lobbyWindow.closing.connect(
-                            function(){
-                                startWindow.show();
-                                Manager.cancelConnect()
-                            })
-                lobbyWindow.show()
-                if(loadingWindow)
-                    loadingWindow.hide()
-                if(loginWindow)
-                    loginWindow.hide()
-                if(startWindow)
-                    startWindow.hide()
-                if(gameWindow)
-                    gameWindow.hide()
-            }
+            showLobby()
+            hideLoading()
+            hideLogin()
+            hideStart()
         }
         onConnectingToServer: {
             print("Connecting to Server")
-            if(!loadingWindow)
-                loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
-            if(loadingWindow) {
-                loadingWindow.show()
-                if(loginWindow)
-                    loginWindow.hide()
-                if(lobbyWindow)
-                    lobbyWindow.hide()
-                if(gameWindow)
-                    gameWindow.hide()
-            }
+            showLoading()
+            hideLogin()
+            hideLobby()
         }
 
         onStopConnecting: {
             print("Stop Connecting")
-            if(loadingWindow) {
-                loadingWindow.hide()
-            }
-            if(loginWindow)
-                loginWindow.hide()
-            if(lobbyWindow)
-                lobbyWindow.hide()
-            startWindow.show()
+            hideLoading()
+            hideLogin()
+            hideLobby()
+            showStart()
         }
         onLoginNeeded: {
             print("Login Needed")
-            if(!loginWindow)
-                if(loadingWindow)
-                    loginWindow = Create.createObject("LoginWindow.qml",loadingWindow)
-                else
-                    loginWindow = Create.createObject("LoginWindow.qml",startWindow)
-
-            loginWindow.show()
+            showlogin()
         }
         onNetworkNotification: {
             print("Network Notificaion")
@@ -453,5 +413,68 @@ StartWindow {
 
             print(errorString)
         }
+    }
+
+    function showStart() {
+        startWindow.show()
+    }
+    function hideStart() {
+        startWindow.hide()
+    }
+
+    function showGame() {
+        if(!gameWindow) {
+            gameWindow = Create.createObject("GameWindow.qml",startWindow)
+            gameWindow.closing.connect(
+                        function(){
+                            Manager.stopGame()
+                        })
+        }
+        gameWindow.show()
+    }
+    function hideGame() {
+        if(gameWindow)
+            gameWindow.hide()
+    }
+
+    function showLobby() {
+        if(!lobbyWindow) {
+            lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
+            lobbyWindow.closing.connect(
+                        function(){
+                            showStart()
+                            Manager.cancelConnect()
+                        })
+        }
+        lobbyWindow.show()
+    }
+    function hideLobby() {
+        if(lobbyWindow) {
+            lobbyWindow.hide()
+        }
+    }
+
+    function showLoading() {
+        if(!loadingWindow)
+            loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
+        loadingWindow.show()
+    }
+    function hideLoading() {
+        if(loadingWindow)
+            loadingWindow.hide()
+    }
+
+    function showLogin() {
+        if(!loginWindow)
+            if(loadingWindow)
+                loginWindow = Create.createObject("LoginWindow.qml",loadingWindow)
+            else
+                loginWindow = Create.createObject("LoginWindow.qml",startWindow)
+
+        loginWindow.show()
+    }
+    function hideLogin() {
+        if(loginWindow)
+            loginWindow.hide()
     }
 }
