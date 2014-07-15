@@ -463,6 +463,7 @@ public slots:
 
 signals:
     void guiInitiated();
+    void gameStopped();
 
     void titleChanged(QString arg);
 

@@ -86,6 +86,14 @@ void Manager::startGame(QObject* obj)
     }
 }
 
+void Manager::stopGame()
+{
+    mySession->terminateNetworkClient();
+    myGame->stopTimer();
+    emit myGame->gameStopped();
+    //myGame->saveGameTableGeometry();
+}
+
 void Manager::joinGame(unsigned gameId, QString password)
 {
     qDebug() << "joinGame()";
@@ -109,6 +117,11 @@ void Manager::cancelConnect()
         myServerGuiInterface->getSession()->terminateNetworkServer();
 
     emit getServer()->stopConnecting();
+}
+
+bool Manager::isHosting()
+{
+    return (myServerGuiInterface && myServerGuiInterface->getSession()->isNetworkServerRunning());
 }
 
 QmlGame *Manager::getGame()

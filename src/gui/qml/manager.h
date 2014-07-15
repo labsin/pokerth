@@ -52,9 +52,12 @@ public:
     }
 
     Q_INVOKABLE void startGame(QObject *obj);
+    Q_INVOKABLE void stopGame();
     Q_INVOKABLE void joinGame(unsigned gameId, QString password = QString());
     Q_INVOKABLE void joinGameLobby();
     Q_INVOKABLE void cancelConnect();
+
+    Q_INVOKABLE bool isHosting();
 
     GuiWrapper* getGui();
 
