@@ -284,10 +284,6 @@ ApplicationWindow {
             property bool actionButtonsEnabled: CurrentGame.buttonsCheckable || CurrentGame.myTurn
             property int stepSize: 50
 
-            ExclusiveGroup {
-                id: actionButtons
-            }
-
             RowLayout {
                 id: row_raiseSpinBox
                 anchors.left: parent.left
@@ -315,10 +311,8 @@ ApplicationWindow {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     enabled: buttonContainer.actionButtonsEnabled
-                    checkable: CurrentGame.buttonsCheckable
-                    exclusiveGroup: actionButtons
                     onClicked: {
-                        if(CurrentGame.buttonsCheckable) {
+                        if(!CurrentGame.myTurn) {
                             if(CurrentGame.checkedButton==PokerTH.Game.AllInButton) {
                                 CurrentGame.checkedButton=PokerTH.Game.NoButton
                             }
@@ -349,11 +343,9 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: slider_raise.bottom
-                checkable: CurrentGame.buttonsCheckable
-                exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(CurrentGame.buttonsCheckable) {
+                    if(!CurrentGame.myTurn) {
                         if(CurrentGame.checkedButton==PokerTH.Game.BetRaiseButton) {
                             CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
@@ -372,11 +364,9 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_betRaise.bottom
-                checkable: CurrentGame.buttonsCheckable
-                exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(CurrentGame.buttonsCheckable) {
+                    if(!CurrentGame.myTurn) {
                         if(CurrentGame.checkedButton==PokerTH.Game.CallButton) {
                             CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
@@ -400,11 +390,9 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_call.bottom
-                checkable: CurrentGame.buttonsCheckable
-                exclusiveGroup: actionButtons
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
-                    if(CurrentGame.buttonsCheckable) {
+                    if(!CurrentGame.myTurn) {
                         if(CurrentGame.checkedButton==PokerTH.Game.FoldButton) {
                             CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
@@ -423,7 +411,10 @@ ApplicationWindow {
                 onCheckedButtonChanged: {
                     switch(CurrentGame.checkedButton) {
                     case PokerTH.Game.NoButton:
-                        actionButtons.current.checked=false;
+                        button_betRaise.checked=false;
+                        button_call.checked=false;
+                        button_fold.checked=false;
+                        button_allIn.checked=false;
                         break;
                     case PokerTH.Game.BetRaiseButton:
                         button_betRaise.checked=true;

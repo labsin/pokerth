@@ -320,10 +320,9 @@ void QmlGame::stopTimer()
 
 bool QmlGame::check()
 {
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-    boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    boost::shared_ptr<PlayerInterface> currentPlayer = myManager->getSession()->getCurrentGame()->getCurrentPlayer();
-    if(humanPlayer == currentPlayer) {
+    if(buttonsCheckable()) {
+        boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+        boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
         humanPlayer->setMyAction(PLAYER_ACTION_CHECK,true);
         humanPlayer->setMyTurn(0);
 
@@ -339,10 +338,9 @@ bool QmlGame::check()
 
 bool QmlGame::call()
 {
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-    boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    boost::shared_ptr<PlayerInterface> currentPlayer = myManager->getSession()->getCurrentGame()->getCurrentPlayer();
-    if(humanPlayer == currentPlayer) {
+    if(buttonsCheckable()) {
+        boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+        boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
         int tempHighestSet = currentHand->getCurrentBeRo()->getHighestSet();
 
         if (humanPlayer->getMyCash() + humanPlayer->getMySet() <= tempHighestSet) {
@@ -371,10 +369,9 @@ bool QmlGame::call()
 
 bool QmlGame::fold()
 {
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-    boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    boost::shared_ptr<PlayerInterface> currentPlayer = myManager->getSession()->getCurrentGame()->getCurrentPlayer();
-    if(humanPlayer == currentPlayer) {
+    if(buttonsCheckable()) {
+        boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+        boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
         humanPlayer->setMyAction(PLAYER_ACTION_FOLD,true);
         humanPlayer->setMyTurn(0);
 
@@ -390,10 +387,9 @@ bool QmlGame::fold()
 
 bool QmlGame::allIn()
 {
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-    boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    boost::shared_ptr<PlayerInterface> currentPlayer = myManager->getSession()->getCurrentGame()->getCurrentPlayer();
-    if(humanPlayer == currentPlayer) {
+    if(buttonsCheckable()) {
+        boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+        boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
         humanPlayer->setMySet(humanPlayer->getMyCash());
         humanPlayer->setMyCash(0);
         humanPlayer->setMyAction(PLAYER_ACTION_ALLIN,true);
@@ -430,10 +426,9 @@ bool QmlGame::allIn()
 
 bool QmlGame::betRaise()
 {
-    boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
-    boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    boost::shared_ptr<PlayerInterface> currentPlayer = myManager->getSession()->getCurrentGame()->getCurrentPlayer();
-    if(humanPlayer == currentPlayer) {
+    if(buttonsCheckable()) {
+        boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
+        boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
         int tempCash = humanPlayer->getMyCash();
         humanPlayer->setMySet(m_bets);
 
@@ -1102,6 +1097,8 @@ void QmlGame::startNewHand()
 
 void QmlGame::meInAction()
 {
+    qDebug() << "meInAction";
+    setmyTurn(true);
     bool needAction = false;
     switch(m_playingMode) {
     case AutoCheckCallMode:
@@ -1198,13 +1195,8 @@ void QmlGame::provideMyActions(int mode)
     setminimumRaise(currentHand->getCurrentBeRo()->getMinimumRaise());
     setsmallBlind(currentHand->getSmallBlind());
 
-    if(humanPlayer == myManager->getSession()->getCurrentGame()->getCurrentPlayer()) {
-        qDebug() << "I'm current";
-        setbuttonsCheckable(false);
-        setmyTurn(true);
-    }
     //really disabled buttons if human player is fold/all-in or server-autofold... and not called from dealberocards
-    else if(/*pushButton_BetRaise->isCheckable() && */(mode != 0 && (humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN || humanPlayer->getMyAction() == PLAYER_ACTION_FOLD || (humanPlayer->getMySet() == currentHand->getCurrentBeRo()->getHighestSet() && (humanPlayer->getMyAction() != PLAYER_ACTION_NONE)))) || !humanPlayer->isSessionActive() /*server-autofold*/) {
+    if(/*pushButton_BetRaise->isCheckable() && */(mode != 0 && (humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN || humanPlayer->getMyAction() == PLAYER_ACTION_FOLD || (humanPlayer->getMySet() == currentHand->getCurrentBeRo()->getHighestSet() && (humanPlayer->getMyAction() != PLAYER_ACTION_NONE)))) || !humanPlayer->isSessionActive() /*server-autofold*/) {
         qDebug() << "Fold/All-int or I have highest set";
         setbuttonsCheckable(false);
     } else {
