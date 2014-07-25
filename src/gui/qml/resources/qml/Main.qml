@@ -4,12 +4,76 @@ import PokerTH 1.0 as PokerTH
 
 StartWindow {
     id: startWindow
-    visible: true
 
     property variant gameWindow
     property variant loadingWindow
     property variant loginWindow
     property variant lobbyWindow
+
+    visible: true
+
+    function showStart() {
+        startWindow.show()
+    }
+    function hideStart() {
+        startWindow.hide()
+    }
+
+    function showGame() {
+        if(!gameWindow) {
+            gameWindow = Create.createObject("GameWindow.qml",startWindow)
+            gameWindow.closing.connect(
+                        function(){
+                            Manager.stopGame()
+                        })
+        }
+        gameWindow.show()
+    }
+    function hideGame() {
+        if(gameWindow)
+            gameWindow.hide()
+    }
+
+    function showLobby() {
+        if(!lobbyWindow) {
+            lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
+            lobbyWindow.closing.connect(
+                        function(){
+                            showStart()
+                            Manager.cancelConnect()
+                        })
+        }
+        lobbyWindow.show()
+    }
+    function hideLobby() {
+        if(lobbyWindow) {
+            lobbyWindow.hide()
+        }
+    }
+
+    function showLoading() {
+        if(!loadingWindow)
+            loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
+        loadingWindow.show()
+    }
+    function hideLoading() {
+        if(loadingWindow)
+            loadingWindow.hide()
+    }
+
+    function showLogin() {
+        if(!loginWindow)
+            if(loadingWindow)
+                loginWindow = Create.createObject("LoginWindow.qml",loadingWindow)
+            else
+                loginWindow = Create.createObject("LoginWindow.qml",startWindow)
+
+        loginWindow.show()
+    }
+    function hideLogin() {
+        if(loginWindow)
+            loginWindow.hide()
+    }
 
     Connections {
         target: Manager.game
@@ -52,7 +116,7 @@ StartWindow {
         }
         onLoginNeeded: {
             print("Login Needed")
-            showlogin()
+            showLogin()
         }
         onNetworkNotification: {
             print("Network Notificaion")
@@ -413,68 +477,5 @@ StartWindow {
 
             print(errorString)
         }
-    }
-
-    function showStart() {
-        startWindow.show()
-    }
-    function hideStart() {
-        startWindow.hide()
-    }
-
-    function showGame() {
-        if(!gameWindow) {
-            gameWindow = Create.createObject("GameWindow.qml",startWindow)
-            gameWindow.closing.connect(
-                        function(){
-                            Manager.stopGame()
-                        })
-        }
-        gameWindow.show()
-    }
-    function hideGame() {
-        if(gameWindow)
-            gameWindow.hide()
-    }
-
-    function showLobby() {
-        if(!lobbyWindow) {
-            lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
-            lobbyWindow.closing.connect(
-                        function(){
-                            showStart()
-                            Manager.cancelConnect()
-                        })
-        }
-        lobbyWindow.show()
-    }
-    function hideLobby() {
-        if(lobbyWindow) {
-            lobbyWindow.hide()
-        }
-    }
-
-    function showLoading() {
-        if(!loadingWindow)
-            loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
-        loadingWindow.show()
-    }
-    function hideLoading() {
-        if(loadingWindow)
-            loadingWindow.hide()
-    }
-
-    function showLogin() {
-        if(!loginWindow)
-            if(loadingWindow)
-                loginWindow = Create.createObject("LoginWindow.qml",loadingWindow)
-            else
-                loginWindow = Create.createObject("LoginWindow.qml",startWindow)
-
-        loginWindow.show()
-    }
-    function hideLogin() {
-        if(loginWindow)
-            loginWindow.hide()
     }
 }
