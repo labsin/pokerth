@@ -136,8 +136,8 @@ void GuiWrapper::setPlayerAvatar(int myUniqueID, const std::string &myAvatar) co
 void GuiWrapper::waitForGuiUpdateDone() const
 {
     qDebug()<<"waitForGuiUpdateDone()";
+    emit myGame->signalWaitForGuiUpdateDone();
     emit myGame->signalGuiUpdateDone();
-    emit myGame->waitForGuiUpdateDone();
 }
 
 void GuiWrapper::dealBeRoCards(int myBeRoID)

@@ -185,6 +185,7 @@ QmlGame::QmlGame(QObject *parent) :
     connect(this, SIGNAL(signalDisableMyButtons()), this, SLOT(disableMyButtons()));
 
     connect(this, SIGNAL(signalGuiUpdateDone()), this, SLOT(guiUpdateDone()));
+    connect(this, SIGNAL(signalWaitForGuiUpdateDone()), this, SLOT(waitForGuiUpdateDone()));
 }
 
 QmlGame::~QmlGame() {
@@ -1412,10 +1413,10 @@ void QmlGame::disableMyButtons()
 
 void QmlGame::guiUpdateDone()
 {
-    guiUpdateSemaphore.release();
+    //guiUpdateSemaphore.release();
 }
 
 void QmlGame::waitForGuiUpdateDone()
 {
-    guiUpdateSemaphore.acquire();
+    //guiUpdateSemaphore.acquire();
 }

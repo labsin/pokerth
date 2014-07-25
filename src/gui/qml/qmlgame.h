@@ -5,7 +5,7 @@
 #include "manager.h"
 #include "guiwrapper.h"
 #include "qmlplayer.h"
-#include "QSemaphore"
+//#include "QSemaphore"
 
 class PlayerModel;
 class QmlCard;
@@ -557,6 +557,7 @@ signals:
     void signalDisableMyButtons();
 
     void signalGuiUpdateDone();
+    void signalWaitForGuiUpdateDone();
 
 private:
     PlayerModel* myPlayerModel;
@@ -643,7 +644,7 @@ private:
     bool m_myTurn;
     int m_boardSet;
 
-    QSemaphore guiUpdateSemaphore;
+    //QSemaphore guiUpdateSemaphore;
 };
 
 #endif // QMLGAME_H
