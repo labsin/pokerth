@@ -260,6 +260,7 @@ Window {
             height: button_cancel.height
             text: "OK"
             iconSource: "../gfx/dialog_ok_apply.png"
+            isDefault: true
             onClicked: {
                 keepBlinds()
             }

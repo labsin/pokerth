@@ -93,7 +93,7 @@ Window {
                     CurrentServer.setLoginData(groubBox_registeredUser.checked, textField_username.text, textField_password.text, checkBox_rememberPW.checked)
                     window.hide()
                 }
-                focus: true
+                isDefault: true
             }
             Button {
                 id: button_cancel
