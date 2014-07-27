@@ -20,7 +20,7 @@ class QmlGame : public QObject
     Q_PROPERTY(QString title READ title WRITE settitle NOTIFY titleChanged)
     Q_PROPERTY(int pot READ pot NOTIFY potChanged)
     Q_PROPERTY(int bets READ bets WRITE setbets NOTIFY betsChanged)
-    Q_PROPERTY(QObject * myPlayer READ myPlayer NOTIFY myPlayerChanged)
+    Q_PROPERTY(QmlPlayer * myPlayer READ myPlayer NOTIFY myPlayerChanged)
     Q_PROPERTY(int highestSet READ highestSet WRITE sethighestSet NOTIFY highestSetChanged)
     Q_PROPERTY(int set READ boardSet WRITE setboardSet NOTIFY boardSetChanged)
     Q_PROPERTY(int minimumRaise READ minimumRaise WRITE setminimumRaise NOTIFY minimumRaiseChanged)
@@ -42,6 +42,7 @@ class QmlGame : public QObject
     Q_PROPERTY(bool buttonsCheckable READ buttonsCheckable WRITE setbuttonsCheckable NOTIFY buttonsCheckableChanged)
     Q_PROPERTY(bool fullBetRule READ fullBetRule WRITE setfullBetRule NOTIFY fullBetRuleChanged)
     Q_PROPERTY(bool myTurn READ myTurn WRITE setmyTurn NOTIFY myTurnChanged)
+    Q_PROPERTY(bool showMyCardsButton READ showMyCardsButton WRITE setShowMyCardsButton NOTIFY showMyCardsButtonChanged)
 
 public:
     explicit QmlGame(QObject *parent = 0);
@@ -165,16 +166,6 @@ public:
         }
     }
 
-    void setflopCard1(QmlCard* arg);
-
-    void setflopCard2(QmlCard* arg);
-
-    void setflopCard3(QmlCard* arg);
-
-    void setturnCard(QmlCard* arg);
-
-    void setriverCard(QmlCard* arg);
-
     bool blinkStartButton() const
     {
         return m_blinkStartButton;
@@ -202,7 +193,7 @@ public:
         return m_buttonsCheckable;
     }
 
-    QObject * myPlayer() const
+    QmlPlayer * myPlayer() const
     {
         return m_myPlayer;
     }
@@ -248,6 +239,11 @@ public:
     int boardSet() const
     {
         return m_boardSet;
+    }
+
+    bool showMyCardsButton() const
+    {
+        return m_showMyCardsButton;
     }
 
 public slots:
@@ -379,15 +375,6 @@ public slots:
         }
     }
 
-    void setmyPlayer(QmlPlayer * arg)
-    {
-        QObject * tmpObj = dynamic_cast<QObject *>(arg);
-        if (m_myPlayer != tmpObj) {
-            m_myPlayer = tmpObj;
-            emit myPlayerChanged(tmpObj);
-        }
-    }
-
     void sethighestSet(int arg)
     {
         if (m_highestSet != arg) {
@@ -461,6 +448,17 @@ public slots:
     void guiUpdateDone();
     void waitForGuiUpdateDone();
 
+    void setShowMyCardsButton(bool arg)
+    {
+        if (m_showMyCardsButton != arg) {
+            m_showMyCardsButton = arg;
+            emit showMyCardsButtonChanged(arg);
+        }
+    }
+
+    void showMyCards();
+    void showHoleCards(unsigned playerId, bool allIn = false);
+
 signals:
     void guiInitiated();
     void gameStopped();
@@ -499,7 +497,7 @@ signals:
 
     void buttonsCheckableChanged(bool arg);
 
-    void myPlayerChanged(QObject * arg);
+    void myPlayerChanged(QmlPlayer * arg);
 
     void highestSetChanged(int arg);
 
@@ -549,6 +547,7 @@ signals:
     void signalRiverAnimation2();
     void signalPostRiverAnimation1();
     void signalPostRiverRunAnimation1();
+    void signalPostRiverShowCards(unsigned playerId);
     void signalFlipHolecardsAllIn();
     void signalHandSwitchRounds();
     void signalNextRoundCleanGui();
@@ -558,8 +557,12 @@ signals:
 
     void signalGuiUpdateDone();
     void signalWaitForGuiUpdateDone();
+    void signalNetClientPlayerLeft(unsigned playerId, QString playerName, int removeReason);
+
+    void showMyCardsButtonChanged(bool arg);
 
 private:
+
     PlayerModel* myPlayerModel;
     Manager* myManager;
 
@@ -635,7 +638,7 @@ private:
     Buttons m_checkedButton;
     PlayingMode m_playingMode;
     bool m_buttonsCheckable;
-    QObject * m_myPlayer;
+    QmlPlayer * m_myPlayer;
     int m_highestSet;
     int m_minimumRaise;
     bool m_fullBetRule;
@@ -645,6 +648,7 @@ private:
     int m_boardSet;
 
     //QSemaphore guiUpdateSemaphore;
+    bool m_showMyCardsButton;
 };
 
 #endif // QMLGAME_H

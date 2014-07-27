@@ -24,7 +24,7 @@ QmlGame::QmlGame(QObject *parent) :
   , currentGameOver(false), m_breakAfterCurrentHand(false)
   , m_blinkStartButton(false), m_checkedButton(NoButton), m_playingMode(ManualMode)
   , m_buttonsCheckable(false), m_highestSet(0), m_minimumRaise(0), m_fullBetRule(false)
-  , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP)
+  , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP), m_myPlayer(NULL), m_showMyCardsButton(false)
 {
     myPlayerModel = new PlayerModel(this);
     myManager = ManagerSingleton::Instance();
@@ -180,12 +180,17 @@ QmlGame::QmlGame(QObject *parent) :
     connect(this, SIGNAL(signalFlipHolecardsAllIn()), this, SLOT(flipHolecardsAllIn()));
     connect(this, SIGNAL(signalHandSwitchRounds()), this, SLOT(handSwitchRounds()));
     connect(this, SIGNAL(signalNextRoundCleanGui()), this, SLOT(nextRoundCleanGui()));
+    connect(this, SIGNAL(signalNextRoundCleanGui()), this, SIGNAL(signalRefreshAll()));
     connect(this, SIGNAL(signalMeInAction()), this, SLOT(meInAction()));
     connect(this, SIGNAL(signalUpdateMyButtonsState()), this, SLOT(updateMyButtonsState()));
     connect(this, SIGNAL(signalDisableMyButtons()), this, SLOT(disableMyButtons()));
 
     connect(this, SIGNAL(signalGuiUpdateDone()), this, SLOT(guiUpdateDone()));
     connect(this, SIGNAL(signalWaitForGuiUpdateDone()), this, SLOT(waitForGuiUpdateDone()));
+
+    connect(this, SIGNAL(signalPostRiverShowCards(unsigned)), this, SLOT(showHoleCards(unsigned)));
+    connect(this, SIGNAL(signalNetClientPlayerLeft(uint,QString,int)), SLOT(refreshPlayerAvatar()));
+    connect(this, SIGNAL(signalNetClientPlayerLeft(uint,QString,int)), SLOT(refreshPlayerName()));
 }
 
 QmlGame::~QmlGame() {
@@ -223,63 +228,21 @@ PlayerModel *QmlGame::getPlayerModel() const
     return myPlayerModel;
 }
 
-void QmlGame::setflopCard1(QmlCard *arg)
-{
-    if (m_flopCard1 != arg) {
-        delete m_flopCard1;
-        m_flopCard1 = arg;
-        emit flopCard1Changed(arg);
-    }
-}
-
-void QmlGame::setflopCard2(QmlCard *arg)
-{
-    if (m_flopCard2 != arg) {
-        delete m_flopCard2;
-        m_flopCard2 = arg;
-        emit flopCard2Changed(arg);
-    }
-}
-
-void QmlGame::setflopCard3(QmlCard *arg)
-{
-    if (m_flopCard3 != arg) {
-        delete m_flopCard3;
-        m_flopCard3 = arg;
-        emit flopCard3Changed(arg);
-    }
-}
-
-void QmlGame::setturnCard(QmlCard *arg)
-{
-    if (m_turnCard != arg) {
-        delete m_turnCard;
-        m_turnCard = arg;
-        emit turnCardChanged(arg);
-    }
-}
-
-void QmlGame::setriverCard(QmlCard *arg)
-{
-    if (m_riverCard != arg) {
-        delete m_riverCard;
-        m_riverCard = arg;
-        emit riverCardChanged(arg);
-    }
-}
-
 void QmlGame::nextRoundCleanGui()
 {
     myPlayerModel->nextRound();
     setblinkStartButton(false);
-    // TODO check
-    setflopCard1(new QmlCard(this));
-    setflopCard2(new QmlCard(this));
-    setflopCard3(new QmlCard(this));
-    setturnCard(new QmlCard(this));
-    setriverCard(new QmlCard(this));
+    m_flopCard1->init();
+    m_flopCard2->init();
+    m_flopCard3->init();
+    m_turnCard->init();
+    m_riverCard->init();
     setbuttonsCheckable(false);
     setbets(0);
+
+    setShowMyCardsButton(false);
+
+    flipHolecardsAllInAlreadyDone = false;
     emit nextRound();
 }
 
@@ -823,16 +786,23 @@ void QmlGame::postRiverRunAnimation2()
 
             for (it_c=activePlayerList->begin(); it_c!=activePlayerList->end(); ++it_c) {
                 if((*it_c)->getMyAction() != PLAYER_ACTION_FOLD && (*it_c)->checkIfINeedToShowCards()) {
-                    myPlayerModel->at((*it_c)->getMyID())->setFlip(true);
+                    showHoleCards((*it_c)->getMyUniqueID());
                 }
 
                 //if human player dont need to show cards he gets the button "show cards" in internet or network game
                 if( internetOrNetworkGame && (*it_c)->getMyID() == 0 && (*it_c)->getMyAction() != PLAYER_ACTION_FOLD && !(*it_c)->checkIfINeedToShowCards()) {
-                    //showShowMyCardsButton();
+                    setShowMyCardsButton(true);
                 }
             }
             //Wenn einmal umgedreht dann fertig!!
             flipHolecardsAllInAlreadyDone = true;
+        } else {
+            for (it_c=activePlayerList->begin(); it_c!=activePlayerList->end(); ++it_c) {
+                if((*it_c)->getMyAction() != PLAYER_ACTION_FOLD) {
+                    //set Player value (logging) for all in already shown cards
+                    (*it_c)->setMyHoleCardsFlip(1,3);
+                }
+            }
         }
         postRiverRunAnimation2Timer->start(postRiverRunAnimationSpeed);
     } else {
@@ -840,8 +810,7 @@ void QmlGame::postRiverRunAnimation2()
         //display show! button if human player is active and the latest non foldedone
         boost::shared_ptr<PlayerInterface> humanPlayer = myManager->getSession()->getCurrentGame()->getCurrentHand()->getSeatsList()->front();
         if( internetOrNetworkGame && humanPlayer->getMyActiveStatus() && humanPlayer->getMyAction() != PLAYER_ACTION_FOLD) {
-
-            //showShowMyCardsButton();
+            setShowMyCardsButton(true);
         }
 
         postRiverRunAnimation3();
@@ -1156,7 +1125,7 @@ void QmlGame::flipHolecardsAllIn()
         if(nonfoldPlayersCounter!=1) {
             for (it_c=activePlayerList->begin(); it_c!=activePlayerList->end(); ++it_c) {
                 if((*it_c)->getMyAction() != PLAYER_ACTION_FOLD) {
-                    myPlayerModel->at((*it_c)->getMyID())->setFlip(true);
+                    showHoleCards((*it_c)->getMyUniqueID());
                 }
             }
         }
@@ -1187,9 +1156,11 @@ void QmlGame::provideMyActions(int mode)
     qDebug() << "provideMyActions";
     boost::shared_ptr<HandInterface> currentHand = myManager->getSession()->getCurrentGame()->getCurrentHand();
     boost::shared_ptr<PlayerInterface> humanPlayer = currentHand->getSeatsList()->front();
-    PlayerList activePlayerList = currentHand->getActivePlayerList();
 
-    setmyPlayer(myPlayerModel->at(humanPlayer->getMyID()));
+    if(!m_myPlayer || m_myPlayer->getId() != humanPlayer->getMyID()) {
+        m_myPlayer = myPlayerModel->at(humanPlayer->getMyID());
+        emit myPlayerChanged(m_myPlayer);
+    }
     sethighestSet(currentHand->getCurrentBeRo()->getHighestSet());
     setfullBetRule(currentHand->getCurrentBeRo()->getFullBetRule());
     setminimumRaise(currentHand->getCurrentBeRo()->getMinimumRaise());
@@ -1200,13 +1171,14 @@ void QmlGame::provideMyActions(int mode)
         qDebug() << "Fold/All-int or I have highest set";
         setbuttonsCheckable(false);
     } else {
-        setbuttonsCheckable(true);
-
         if(mode == 0) {
-            if( humanPlayer->getMyAction() == PLAYER_ACTION_FOLD ) {
+            if( humanPlayer->getMyAction() == PLAYER_ACTION_ALLIN ) {
                 qDebug() << "All in from dealberocards";
                 setbuttonsCheckable(false);
             }
+        }
+        else {
+            setbuttonsCheckable(true);
         }
     }
 }
@@ -1296,10 +1268,10 @@ void QmlGame::refreshPot()
 
 void QmlGame::refreshGroupbox(int playerID, int status)
 {
+    qDebug() << "refreshGroupbox: " << playerID << ","<<status;
+    boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
+    PlayerList seatsList = currentGame->getSeatsList();
     if(playerID == -1 || status == -1) {
-
-        boost::shared_ptr<Game> currentGame = myManager->getSession()->getCurrentGame();
-        PlayerList seatsList = currentGame->getSeatsList();
         for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
             QmlPlayer *tmp = myPlayerModel->at((*it_c)->getMyID());
 
@@ -1309,35 +1281,33 @@ void QmlGame::refreshGroupbox(int playerID, int status)
     } else {
         QmlPlayer *tmp = myPlayerModel->at(playerID);
         switch(status) {
-
+        case 0:
             //inactive
-        case 0: {
             tmp->setActiveStatus(false);
-        }
-        break;
-        //active but fold
-        case 1: {
+            break;
+        case 1:
+        {
+            //active but fold
+            PlayerListConstIterator it_c;
+            for (it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
+                if(playerID == (*it_c)->getMyID())
+                    break;
+            }
             tmp->setActiveStatus(true);
             tmp->setTurn(false);
-//            tmp->setAction(PLAYER_ACTION_FOLD);
+            tmp->setAction((*it_c)->getMyAction());
         }
-        break;
-        //active in action
-        case 2:  {
+            break;
+        case 2:
+            //active in action
             tmp->setActiveStatus(true);
-            //Is below right?
             tmp->setTurn(true);
-        }
-        break;
-        //active not in action
-        case 3:  {
+            break;
+        case 3:
+            //active not in action
             tmp->setActiveStatus(true);
-            //Is below right?
             tmp->setTurn(false);
-        }
-        break;
-        default:
-        {}
+            break;
         }
     }
 }
@@ -1411,4 +1381,32 @@ void QmlGame::guiUpdateDone()
 void QmlGame::waitForGuiUpdateDone()
 {
     //guiUpdateSemaphore.acquire();
+}
+
+void QmlGame::showMyCards()
+{
+    if(showMyCardsButton()) {
+        myManager->getSession()->showMyCards();
+        setShowMyCardsButton(false);
+    }
+}
+
+void QmlGame::showHoleCards(unsigned playerId, bool allIn)
+{
+    PlayerListConstIterator it_c;
+    PlayerList activePlayerList = myManager->getSession()->getCurrentGame()->getActivePlayerList();
+    for (it_c=activePlayerList->begin(); it_c!=activePlayerList->end(); ++it_c) {
+        if((*it_c)->getMyID() == playerId) {
+            int tempCardsIntArray[2];
+            (*it_c)->getMyHoleCards(tempCardsIntArray);
+            myPlayerModel->at((*it_c)->getMyID())->setCards(tempCardsIntArray);
+            myPlayerModel->at((*it_c)->getMyID())->setFlip(true);
+            //set Player value (logging)
+            if(myManager->getSession()->getCurrentGame()->getCurrentHand()->getCurrentRound() < GAME_STATE_RIVER || allIn) {
+                (*it_c)->setMyHoleCardsFlip(1,2); //for bero before postriver or allin just log the hole cards
+            } else {
+                (*it_c)->setMyHoleCardsFlip(1,1); //for postriver log the value
+            }
+        }
+    }
 }

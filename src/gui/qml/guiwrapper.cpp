@@ -357,6 +357,7 @@ void GuiWrapper::SignalNetClientRejoinPossible(unsigned gameId)
 }
 void GuiWrapper::SignalNetClientPostRiverShowCards(unsigned playerId)
 {
+    emit myGame->signalPostRiverShowCards(playerId);
     qDebug()<<"SignalNetClientPostRiverShowCards()";
 }
 void GuiWrapper::SignalNetClientGameInfo(int actionID)
@@ -412,6 +413,7 @@ void GuiWrapper::SignalNetClientPlayerLeft(unsigned playerId, const string &play
 {
     qDebug()<<"SignalNetClientPlayerLeft()";
     emit myServer->SignalNetClientPlayerLeft(playerId, QString::fromStdString(playerName), removeReason);
+    emit myGame->signalNetClientPlayerLeft(playerId, QString::fromStdString(playerName), removeReason);
 }
 void GuiWrapper::SignalNetClientSpectatorJoined(unsigned playerId, const string &playerName)
 {

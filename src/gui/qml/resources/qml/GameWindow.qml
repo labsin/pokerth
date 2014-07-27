@@ -430,6 +430,12 @@ ApplicationWindow {
                         break;
                     }
                 }
+                onNextRound: {
+                    slider_raise.value = 0
+                }
+                onButtonsCheckableChanged: {
+                    slider_raise.value = 0
+                }
             }
 
             function setFromSpin(spin) {

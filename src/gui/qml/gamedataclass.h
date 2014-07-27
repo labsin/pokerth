@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 #include "gamedata.h"
+#include "QQmlListProperty"
 
 class GameDataClass : public QObject
 {
@@ -19,7 +20,7 @@ class GameDataClass : public QObject
     Q_PROPERTY(int raiseSmallBlindEveryHandsValue READ raiseSmallBlindEveryHandsValue WRITE setraiseSmallBlindEveryHandsValue NOTIFY raiseSmallBlindEveryHandsValueChanged)
     Q_PROPERTY(int raiseSmallBlindEveryMinutesValue READ raiseSmallBlindEveryMinutesValue WRITE setraiseSmallBlindEveryMinutesValue NOTIFY raiseSmallBlindEveryMinutesValueChanged)
     Q_PROPERTY(RaiseMode raiseMode READ raiseMode WRITE setraiseMode NOTIFY raiseModeChanged)
-    Q_PROPERTY(QVariantList manualBlindsList READ manualBlindsList WRITE setmanualBlindsList NOTIFY manualBlindsListChanged)
+    Q_PROPERTY(QList<int> manualBlindsList READ manualBlindsList WRITE setmanualBlindsList NOTIFY manualBlindsListChanged)
     Q_PROPERTY(AfterManualBlindsMode afterManualBlindsMode READ afterManualBlindsMode WRITE setafterManualBlindsMode NOTIFY afterManualBlindsModeChanged)
     Q_PROPERTY(int afterMBAlwaysRaiseValue READ afterMBAlwaysRaiseValue WRITE setafterMBAlwaysRaiseValue NOTIFY afterMBAlwaysRaiseValueChanged)
     Q_PROPERTY(int guiSpeed READ guiSpeed WRITE setguiSpeed NOTIFY guiSpeedChanged)
@@ -56,9 +57,9 @@ public:
 
     static void registerType();
 
-    Q_INVOKABLE void setToDefault();
+    Q_INVOKABLE void setToDefault(bool net=false);
 
-    Q_INVOKABLE void resetBlinds();
+    Q_INVOKABLE void resetBlinds(bool net=false);
 
     int maxNumberOfPlayers() const
     {
@@ -95,7 +96,7 @@ public:
         return (enum RaiseMode)gd.raiseMode;
     }
 
-    QVariantList manualBlindsList() const;
+    QList<int> manualBlindsList() const;
 
     AfterManualBlindsMode afterManualBlindsMode() const
     {
@@ -148,7 +149,7 @@ signals:
 
     void raiseModeChanged(RaiseMode arg);
 
-    void manualBlindsListChanged(QVariantList arg);
+    void manualBlindsListChanged(QList<int> arg);
 
     void afterManualBlindsModeChanged(AfterManualBlindsMode arg);
 
@@ -178,7 +179,7 @@ public slots:
 
     void setraiseMode(RaiseMode arg);
 
-    void setmanualBlindsList(QVariantList arg);
+    void setmanualBlindsList(QList<int> arg);
 
     void setafterManualBlindsMode(AfterManualBlindsMode arg);
 
