@@ -17,14 +17,16 @@ class QmlGame : public QObject
     Q_ENUMS(Buttons)
     Q_ENUMS(QmlGameState)
     Q_ENUMS(PlayingMode)
-    Q_PROPERTY(QString title READ title WRITE settitle NOTIFY titleChanged)
+    Q_ENUMS(CheckCallRule)
+    Q_ENUMS(BetRaiseRule)
+    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(int pot READ pot NOTIFY potChanged)
     Q_PROPERTY(int bets READ bets WRITE setbets NOTIFY betsChanged)
     Q_PROPERTY(QmlPlayer * myPlayer READ myPlayer NOTIFY myPlayerChanged)
-    Q_PROPERTY(int highestSet READ highestSet WRITE sethighestSet NOTIFY highestSetChanged)
-    Q_PROPERTY(int set READ boardSet WRITE setboardSet NOTIFY boardSetChanged)
-    Q_PROPERTY(int minimumRaise READ minimumRaise WRITE setminimumRaise NOTIFY minimumRaiseChanged)
-    Q_PROPERTY(int smallBlind READ smallBlind WRITE setsmallBlind NOTIFY smallBlindChanged)
+    Q_PROPERTY(int highestSet READ highestSet NOTIFY highestSetChanged)
+    Q_PROPERTY(int set READ boardSet NOTIFY boardSetChanged)
+    Q_PROPERTY(int minimumRaise READ minimumRaise NOTIFY minimumRaiseChanged)
+    Q_PROPERTY(int smallBlind READ smallBlind NOTIFY smallBlindChanged)
     Q_PROPERTY(int gameNr READ gameNr NOTIFY gameNrChanged)
     Q_PROPERTY(int handNr READ handNr NOTIFY handNrChanged)
     Q_PROPERTY(QmlCard* flopCard1 READ flopCard1 NOTIFY flopCard1Changed)
@@ -34,15 +36,17 @@ class QmlGame : public QObject
     Q_PROPERTY(QmlCard* riverCard READ riverCard NOTIFY riverCardChanged)
     Q_PROPERTY(int gameSpeed READ getGameSpeed WRITE setgameSpeed NOTIFY gameSpeedChanged)
     Q_PROPERTY(QObject* model READ getModel NOTIFY modelChanged)
-    Q_PROPERTY(bool blinkStartButton READ blinkStartButton WRITE setblinkStartButton NOTIFY blinkStartButtonChanged)
+    Q_PROPERTY(bool blinkStartButton READ blinkStartButton NOTIFY blinkStartButtonChanged)
     Q_PROPERTY(bool breakAfterCurrentHand READ breakAfterCurrentHand WRITE setbreakAfterCurrentHand NOTIFY breakAfterCurrentHandChanged)
     Q_PROPERTY(Buttons checkedButton READ checkedButton WRITE setcheckedButton NOTIFY checkedButtonChanged)
     Q_PROPERTY(PlayingMode playingMode READ playingMode WRITE setplayingMode NOTIFY playingModeChanged)
     Q_PROPERTY(QmlGameState gameState READ gameState WRITE setgameState NOTIFY gameStateChanged)
-    Q_PROPERTY(bool buttonsCheckable READ buttonsCheckable WRITE setbuttonsCheckable NOTIFY buttonsCheckableChanged)
-    Q_PROPERTY(bool fullBetRule READ fullBetRule WRITE setfullBetRule NOTIFY fullBetRuleChanged)
-    Q_PROPERTY(bool myTurn READ myTurn WRITE setmyTurn NOTIFY myTurnChanged)
-    Q_PROPERTY(bool showMyCardsButton READ showMyCardsButton WRITE setShowMyCardsButton NOTIFY showMyCardsButtonChanged)
+    Q_PROPERTY(bool buttonsCheckable READ buttonsCheckable NOTIFY buttonsCheckableChanged)
+    Q_PROPERTY(bool fullBetRule READ fullBetRule NOTIFY fullBetRuleChanged)
+    Q_PROPERTY(bool myTurn READ myTurn NOTIFY myTurnChanged)
+    Q_PROPERTY(bool showMyCardsButton READ showMyCardsButton NOTIFY showMyCardsButtonChanged)
+    Q_PROPERTY(CheckCallRule checkCallRule READ checkCallRule WRITE setCheckCallRule NOTIFY checkCallRuleChanged)
+    Q_PROPERTY(BetRaiseRule betRaiseRule READ betRaiseRule WRITE setBetRaiseRule NOTIFY betRaiseRuleChanged)
 
 public:
     explicit QmlGame(QObject *parent = 0);
@@ -51,7 +55,7 @@ public:
     enum Buttons {
         NoButton = 0,
         BetRaiseButton,
-        CallButton,
+        CheckCallButton,
         FoldButton,
         AllInButton
     };
@@ -70,6 +74,16 @@ public:
         QML_GAME_STATE_POST_RIVER,
         QML_GAME_STATE_PREFLOP_SMALL_BLIND = 0xF0,
         QML_GAME_STATE_PREFLOP_BIG_BLIND = 0xF1
+    };
+
+    enum CheckCallRule {
+        NoCheckCall = 0,
+        CheckCall
+    };
+
+    enum BetRaiseRule {
+        NoBetRaise = 0,
+        BetRaise
     };
 
     static void registerType();
@@ -244,6 +258,16 @@ public:
     bool showMyCardsButton() const
     {
         return m_showMyCardsButton;
+    }
+
+    CheckCallRule checkCallRule() const
+    {
+        return m_checkCallRule;
+    }
+
+    BetRaiseRule betRaiseRule() const
+    {
+        return m_betRaiseRule;
     }
 
 public slots:
@@ -459,6 +483,26 @@ public slots:
     void showMyCards();
     void showHoleCards(unsigned playerId, bool allIn = false);
 
+    void setCheckCallRule(CheckCallRule arg)
+    {
+        if(arg < NoCheckCall || arg > CheckCall)
+            return;
+        if (m_checkCallRule != arg) {
+            m_checkCallRule = arg;
+            emit checkCallRuleChanged(arg);
+        }
+    }
+
+    void setBetRaiseRule(BetRaiseRule arg)
+    {
+        if(arg < NoBetRaise || arg > BetRaise)
+            return;
+        if (m_betRaiseRule != arg) {
+            m_betRaiseRule = arg;
+            emit betRaiseRuleChanged(arg);
+        }
+    }
+
 signals:
     void guiInitiated();
     void gameStopped();
@@ -561,6 +605,10 @@ signals:
 
     void showMyCardsButtonChanged(bool arg);
 
+    void checkCallRuleChanged(CheckCallRule arg);
+
+    void betRaiseRuleChanged(BetRaiseRule arg);
+
 private:
 
     PlayerModel* myPlayerModel;
@@ -649,6 +697,8 @@ private:
 
     //QSemaphore guiUpdateSemaphore;
     bool m_showMyCardsButton;
+    CheckCallRule m_checkCallRule;
+    BetRaiseRule m_betRaiseRule;
 };
 
 #endif // QMLGAME_H

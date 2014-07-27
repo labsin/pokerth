@@ -24,7 +24,8 @@ QmlGame::QmlGame(QObject *parent) :
   , currentGameOver(false), m_breakAfterCurrentHand(false)
   , m_blinkStartButton(false), m_checkedButton(NoButton), m_playingMode(ManualMode)
   , m_buttonsCheckable(false), m_highestSet(0), m_minimumRaise(0), m_fullBetRule(false)
-  , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP), m_myPlayer(NULL), m_showMyCardsButton(false)
+  , m_smallBlind(0), m_gameState(QML_GAME_STATE_PREFLOP), m_myPlayer(NULL)
+  , m_showMyCardsButton(false), m_checkCallRule(NoCheckCall), m_betRaiseRule(NoBetRaise)
 {
     myPlayerModel = new PlayerModel(this);
     myManager = ManagerSingleton::Instance();
@@ -446,6 +447,7 @@ bool QmlGame::betRaise()
 
 void QmlGame::myActionDone()
 {
+    qDebug() << "myActionDone";
     // If a network client is running, we need
     // to transfer the action to the server.
     myManager->getSession()->sendClientPlayerAction();
@@ -1066,7 +1068,7 @@ void QmlGame::startNewHand()
 
 void QmlGame::meInAction()
 {
-    qDebug() << "meInAction";
+    qDebug() << "meInAction()";
     setmyTurn(true);
     bool needAction = false;
     switch(m_playingMode) {
@@ -1080,7 +1082,7 @@ void QmlGame::meInAction()
             case BetRaiseButton:
                 betRaise();
                 break;
-            case CallButton:
+            case CheckCallButton:
                 if(m_highestSet != 0) {
                     call();
                 }
@@ -1145,7 +1147,7 @@ void QmlGame::updateMyButtonsState(int mode)
         setbuttonsCheckable(false);
     } else {
         if(currentHand->getSeatsList()->front()->getMyAction() != PLAYER_ACTION_ALLIN) { // dont show pre-actions after flip cards when allin
-            setbuttonsCheckable(true);
+//            setbuttonsCheckable(true);
             provideMyActions(mode);
         }
     }
@@ -1161,7 +1163,11 @@ void QmlGame::provideMyActions(int mode)
         m_myPlayer = myPlayerModel->at(humanPlayer->getMyID());
         emit myPlayerChanged(m_myPlayer);
     }
-    sethighestSet(currentHand->getCurrentBeRo()->getHighestSet());
+    if(highestSet() != currentHand->getCurrentBeRo()->getHighestSet()) {
+        sethighestSet(currentHand->getCurrentBeRo()->getHighestSet());
+        if((checkCallRule() == NoCheckCall && checkedButton() == CheckCallButton) || (betRaiseRule() == NoBetRaise && checkedButton() == BetRaiseButton))
+            setcheckedButton(NoButton);
+    }
     setfullBetRule(currentHand->getCurrentBeRo()->getFullBetRule());
     setminimumRaise(currentHand->getCurrentBeRo()->getMinimumRaise());
     setsmallBlind(currentHand->getSmallBlind());
@@ -1200,8 +1206,6 @@ void QmlGame::initGui(int speed)
         setgameSpeed(speed);
     }
 
-    // TODO: is there an other way?
-    //    myPlayerModel->addRows(myManager->getSession()->getCurrentGame()->getActivePlayerList()->size());
     emit guiInitiated();
 
 }

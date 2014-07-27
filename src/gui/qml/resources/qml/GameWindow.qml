@@ -73,6 +73,7 @@ ApplicationWindow {
                 Label {
                     id: label_textPot
                     text: "Pot"
+                    color: "black"
                     font.pointSize: 18
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -85,6 +86,7 @@ ApplicationWindow {
                     Label {
                         id: label_textTotal
                         text: "Total: "
+                        color: "black"
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
@@ -95,6 +97,7 @@ ApplicationWindow {
                     Label {
                         id: label_potTotal
                         text: CurrentGame.pot
+                        color: "silver"
                         anchors.left: label_textTotal.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -109,6 +112,7 @@ ApplicationWindow {
                     height: 10
                     Label {
                         id: label_textBets
+                        color: "black"
                         text: "Bets: "
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -120,6 +124,7 @@ ApplicationWindow {
                     Label {
                         id: label_bets
                         text: CurrentGame.set
+                        color: "silver"
                         anchors.left: label_textBets.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -191,6 +196,7 @@ ApplicationWindow {
                 spacing: 10
                 Label {
                     id: label_textStatus
+                    color: "black"
                     text: gameStateString(CurrentGame.gameState)
                     font.pointSize: 18
                     horizontalAlignment: Text.AlignHCenter
@@ -222,6 +228,7 @@ ApplicationWindow {
                     height: 10
                     Label {
                         id: label_textGame
+                        color: "black"
                         text: "Game: "
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -232,6 +239,7 @@ ApplicationWindow {
                     }
                     Label {
                         id: label_game
+                        color: "silver"
                         text: CurrentGame.gameNr
                         anchors.left: label_textGame.right
                         anchors.right: parent.right
@@ -248,6 +256,7 @@ ApplicationWindow {
                     Label {
                         id: label_textHand
                         text: "Hand: "
+                        color: "black"
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
@@ -258,6 +267,7 @@ ApplicationWindow {
                     Label {
                         id: label_hand
                         text: CurrentGame.handNr
+                        color: "silver"
                         anchors.left: label_textHand.right
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -310,6 +320,7 @@ ApplicationWindow {
                     anchors.left: spinBox_raise.right
                     anchors.right: parent.right
                     anchors.top: parent.top
+                    checkable: true
                     enabled: buttonContainer.actionButtonsEnabled
                     onClicked: {
                         if(!CurrentGame.myTurn) {
@@ -334,6 +345,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: row_raiseSpinBox.bottom
+                enabled: buttonContainer.actionButtonsEnabled
                 onValueChanged: {
                     buttonContainer.setFromSlider(value)
                 }
@@ -343,6 +355,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: slider_raise.bottom
+                checkable: true
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(!CurrentGame.myTurn) {
@@ -364,14 +377,15 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_betRaise.bottom
+                checkable: true
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(!CurrentGame.myTurn) {
-                        if(CurrentGame.checkedButton==PokerTH.Game.CallButton) {
+                        if(CurrentGame.checkedButton==PokerTH.Game.CheckCallButton) {
                             CurrentGame.checkedButton=PokerTH.Game.NoButton
                         }
                         else {
-                            CurrentGame.checkedButton=PokerTH.Game.CallButton
+                            CurrentGame.checkedButton=PokerTH.Game.CheckCallButton
                         }
                     }
                     else {
@@ -390,6 +404,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: button_call.bottom
+                checkable: true
                 enabled: buttonContainer.actionButtonsEnabled
                 onClicked: {
                     if(!CurrentGame.myTurn) {
@@ -409,31 +424,16 @@ ApplicationWindow {
             Connections {
                 target: CurrentGame
                 onCheckedButtonChanged: {
-                    switch(CurrentGame.checkedButton) {
-                    case PokerTH.Game.NoButton:
-                        button_betRaise.checked=false;
-                        button_call.checked=false;
-                        button_fold.checked=false;
-                        button_allIn.checked=false;
-                        break;
-                    case PokerTH.Game.BetRaiseButton:
-                        button_betRaise.checked=true;
-                        break;
-                    case PokerTH.Game.CallButton:
-                        button_call.checked=true;
-                        break;
-                    case PokerTH.Game.FoldButton:
-                        button_fold.checked=true;
-                        break;
-                    case PokerTH.Game.AllInButton:
-                        button_allIn.checked=true
-                        break;
-                    }
+                    setCheckedButton()
                 }
                 onNextRound: {
                     slider_raise.value = 0
                 }
                 onButtonsCheckableChanged: {
+                    slider_raise.value = 0
+                    if(checkable) {
+                        setCheckedButton()
+                    }
                     slider_raise.value = 0
                 }
             }
@@ -459,6 +459,40 @@ ApplicationWindow {
             }
             function fromSpinToSlider(spin) {
                 return (spin - spinBox_raise.minimumValue)/(spinBox_raise.maximumValue-spinBox_raise.minimumValue)
+            }
+            function setCheckedButton() {
+                switch(CurrentGame.checkedButton) {
+                case PokerTH.Game.NoButton:
+                    button_betRaise.checked=false;
+                    button_call.checked=false;
+                    button_fold.checked=false;
+                    button_allIn.checked=false;
+                    break;
+                case PokerTH.Game.BetRaiseButton:
+                    button_call.checked=false;
+                    button_fold.checked=false;
+                    button_allIn.checked=false;
+                    button_betRaise.checked=true;
+                    break;
+                case PokerTH.Game.CheckCallButton:
+                    button_betRaise.checked=false;
+                    button_fold.checked=false;
+                    button_allIn.checked=false;
+                    button_call.checked=true;
+                    break;
+                case PokerTH.Game.FoldButton:
+                    button_betRaise.checked=false;
+                    button_call.checked=false;
+                    button_allIn.checked=false;
+                    button_fold.checked=true;
+                    break;
+                case PokerTH.Game.AllInButton:
+                    button_betRaise.checked=false;
+                    button_call.checked=false;
+                    button_fold.checked=false;
+                    button_allIn.checked=true
+                    break;
+                }
             }
         }
         Slider {
