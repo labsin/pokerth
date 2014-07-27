@@ -74,6 +74,11 @@ QVariantMap RoleItemModel::getModelData(const QAbstractItemModel* mdl, int row)
      return res;
 }
 
+int RoleItemModel::role(QString roleName)
+{
+    return m_roleNames.key(roleName.toLatin1());
+}
+
 QHash<int, QByteArray> RoleItemModel::roleNames() const
 {
     return m_roleNames;
@@ -83,6 +88,8 @@ void RoleItemModel::init()
 {
     connect(this,SIGNAL(rowsInserted(QModelIndex,int,int)),this,SIGNAL(rowCountChanged()));
     connect(this,SIGNAL(rowsRemoved(QModelIndex,int,int)),this,SIGNAL(rowCountChanged()));
+    connect(this,SIGNAL(columnsInserted(QModelIndex,int,int)),this,SIGNAL(columnCountChanged()));
+    connect(this,SIGNAL(columnsRemoved(QModelIndex,int,int)),this,SIGNAL(columnCountChanged()));
 
 }
 

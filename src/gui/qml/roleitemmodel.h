@@ -14,6 +14,7 @@ class RoleItemModel : public QStandardItemModel
 {
     Q_OBJECT
     Q_PROPERTY(int rowCount READ rowCount NOTIFY rowCountChanged)
+    Q_PROPERTY(int columnCount READ columnCount NOTIFY columnCountChanged)
 public:
     /* Ctor. roleNames is a map describing when role id (e.g. Qt::UserRole+1)
       is associated with what name on QML side (e.g. 'bookTitle')
@@ -26,8 +27,11 @@ public:
     // e.g. { "bookTitle" : QVariant("Bible"), "year" : QVariant(-2000) }
     static QVariantMap getModelData(const QAbstractItemModel *mdl, int row);
 
+    int role(QString roleName);
+
 signals:
     void rowCountChanged();
+    void columnCountChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const;
