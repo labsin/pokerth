@@ -15,6 +15,7 @@ StorePlayers::~StorePlayers()
         delete it.value();
     }
     m_players.clear();
+    m_activePlayers.clear();
 }
 
 void StorePlayers::add(QmlPlayer *player) {

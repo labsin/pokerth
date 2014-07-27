@@ -277,9 +277,6 @@ void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
     GameInfo info(ManagerSingleton::Instance()->getSession()->getClientGameInfo(gameId));
     QVariant gi;
     QObject* giClass = new GameInfoClass(info, this);
-    // TODO check
-//    giClass->moveToThread(m_gameModel->thread());
-//    giClass->setParent(m_gameModel);
     gi.setValue(dynamic_cast<QObject*>(giClass));
     item->setData(gi, GameEntry::GameInfoRole);
 }

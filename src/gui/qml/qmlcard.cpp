@@ -7,6 +7,14 @@ QmlCard::QmlCard(QObject *parent) :
 {
 }
 
+void QmlCard::init()
+{
+    setcard(-1);
+    setdealt(false);
+    setblur(false);
+    setflipped(false);
+}
+
 void QmlCard::registerType()
 {
     qmlRegisterType<QmlCard>("PokerTH",1,0,"Card");

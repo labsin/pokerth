@@ -19,8 +19,8 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 
-    bool addPlayer(int index, QmlPlayer* player);
-    bool addPlayer(QmlPlayer* player);
+    void addPlayer(int index);
+    void addPlayer();
 
     QmlPlayer * const &at(int index);
 

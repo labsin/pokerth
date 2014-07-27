@@ -34,6 +34,8 @@ public:
         return m_blur;
     }
 
+    void init();
+
     static void registerType();
 
 signals:

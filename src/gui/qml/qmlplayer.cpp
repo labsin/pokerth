@@ -17,6 +17,7 @@ QmlPlayer::~QmlPlayer()
 {
     delete myCards[0];
     delete myCards[1];
+    myCards.clear();
 }
 
 void QmlPlayer::registerType()
@@ -30,7 +31,7 @@ void QmlPlayer::setHand(HandInterface *br)
 }
 
 QmlCard *QmlPlayer::getCard(int index) {
-    return dynamic_cast<QmlCard *>(myCards[index]);
+    return myCards[index];
 }
 
 QQmlListProperty<QmlCard> QmlPlayer::getCards() {
@@ -39,17 +40,8 @@ QQmlListProperty<QmlCard> QmlPlayer::getCards() {
 
 void QmlPlayer::initCards()
 {
-    getCard(0)->setcard(-1);
-    getCard(1)->setcard(-1);
-
-    getCard(0)->setdealt(false);
-    getCard(1)->setdealt(false);
-
-    getCard(0)->setflipped(false);
-    getCard(1)->setflipped(false);
-
-    getCard(0)->setblur(false);
-    getCard(1)->setblur(false);
+    getCard(0)->init();
+    getCard(1)->init();
 }
 
 void QmlPlayer::setFlip(bool flipped) {

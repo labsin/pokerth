@@ -29,60 +29,48 @@ QVariant PlayerModel::data(const QModelIndex &index, int role) const
     }
 
     if(role == PlayerRole) {
-        QmlPlayer *returnObj = (*m_storePlayers).activeAt(index.row());
+        QmlPlayer *returnObj = m_storePlayers->activeAt(index.row());
         if(returnObj)
             return QVariant::fromValue<QmlPlayer*>(returnObj);
     }
     return QVariant();
 }
 
-bool PlayerModel::addPlayer(int index, QmlPlayer* player)
+void PlayerModel::addPlayer(int index)
 {
     qDebug()<<"add player at "<<index;
-    if(player) {
-        player->setId(index);
-        if(m_storePlayers->validIndex(index)) {
-            beginRemoveRows(QModelIndex(), index, index);
-            m_storePlayers->removeAt(index);
-            endRemoveRows();
-        }
-        if(player->getActiveStatus()) {
-            beginInsertRows(QModelIndex(), index, index);
-            m_storePlayers->add(player);
-            endInsertRows();
-        }
-        else {
-            m_storePlayers->add(player);
-        }
-        return true;
+    QmlPlayer* player = new QmlPlayer(m_storePlayers);
+    player->setId(index);
+    if(m_storePlayers->validIndex(index)) {
+        beginRemoveRows(QModelIndex(), index, index);
+        m_storePlayers->removeAt(index);
+        endRemoveRows();
+    }
+    if(player->getActiveStatus()) {
+        beginInsertRows(QModelIndex(), index, index);
+        m_storePlayers->add(player);
+        endInsertRows();
     }
     else {
-        qDebug()<<"invalid player";
-        return false;
+        m_storePlayers->add(player);
     }
 }
 
-bool PlayerModel::addPlayer(QmlPlayer* player)
+void PlayerModel::addPlayer()
 {
     qDebug()<<"add player";
-    if(player) {
-        int existing_count = m_storePlayers->count();
-        player->setId(existing_count);
-        beginInsertRows(QModelIndex(), existing_count, existing_count);
-        m_storePlayers->add(player);
-        endInsertRows();
-        return true;
-    }
-    else {
-        qDebug()<<"invalid player";
-        return false;
-    }
+    QmlPlayer* player = new QmlPlayer(m_storePlayers);
+    int existing_count = m_storePlayers->count();
+    player->setId(existing_count);
+    beginInsertRows(QModelIndex(), existing_count, existing_count);
+    m_storePlayers->add(player);
+    endInsertRows();
 }
 
 QmlPlayer * const &PlayerModel::at(int index)
 {
     if(!m_storePlayers->validIndex(index)) {
-        addPlayer(index,new QmlPlayer(m_storePlayers));
+        addPlayer(index);
     }
     return m_storePlayers->at(index);
 }
