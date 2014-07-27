@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QtWidgets/QApplication>
 #include <QQuickView>
 #include <QQmlContext>
 #include <QQmlComponent>
@@ -18,7 +18,7 @@
 int main(int argc, char *argv[])
 {
     /////// can be removed for non-qt-guis ////////////
-    QGuiApplication app( argc, argv );
+    QApplication app( argc, argv );
 
 #ifdef __APPLE__
     // The following needs to be done directly after the application is created.
