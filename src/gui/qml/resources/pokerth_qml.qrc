@@ -16,5 +16,6 @@
         <file alias="Star.qml">qml/Star.qml</file>
         <file alias="Stars.qml">qml/Stars.qml</file>
         <file alias="StartWindow.qml">qml/StartWindow.qml</file>
+        <file alias="LobbyWindow.qml">qml/LobbyWindow.qml</file>
     </qresource>
 </RCC>

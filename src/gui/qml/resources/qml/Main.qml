@@ -22,12 +22,17 @@ StartWindow {
     function showGame() {
         if(!gameWindow) {
             gameWindow = Create.createObject("GameWindow.qml",startWindow)
-            gameWindow.closing.connect(
-                        function(){
-                            Manager.stopGame()
-                        })
+            if(gameWindow)
+                gameWindow.closing.connect(
+                            function(){
+                                Manager.stopGame()
+                            })
         }
-        gameWindow.show()
+        if(gameWindow){
+            gameWindow.show()
+            return true
+        }
+        return false
     }
     function hideGame() {
         if(gameWindow)
@@ -37,13 +42,18 @@ StartWindow {
     function showLobby() {
         if(!lobbyWindow) {
             lobbyWindow = Create.createObject("LobbyWindow.qml",startWindow)
-            lobbyWindow.closing.connect(
-                        function(){
-                            showStart()
-                            Manager.cancelConnect()
-                        })
+            if(lobbyWindow)
+                lobbyWindow.closing.connect(
+                            function(){
+                                showStart()
+                                Manager.cancelConnect()
+                            })
         }
-        lobbyWindow.show()
+        if(lobbyWindow) {
+            lobbyWindow.show()
+            return true
+        }
+        return false
     }
     function hideLobby() {
         if(lobbyWindow) {
@@ -54,7 +64,11 @@ StartWindow {
     function showLoading() {
         if(!loadingWindow)
             loadingWindow = Create.createObject("LoadingWindow.qml",startWindow)
-        loadingWindow.show()
+        if(loadingWindow){
+            loadingWindow.show()
+            return true
+        }
+        return false
     }
     function hideLoading() {
         if(loadingWindow)
@@ -68,7 +82,11 @@ StartWindow {
             else
                 loginWindow = Create.createObject("LoginWindow.qml",startWindow)
 
-        loginWindow.show()
+        if(loginWindow){
+            loginWindow.show()
+            return true
+        }
+        return false
     }
     function hideLogin() {
         if(loginWindow)
@@ -79,11 +97,12 @@ StartWindow {
         target: Manager.game
         onGuiInitiated: {
             print("Starting Game")
-            showGame()
-            hideStart()
             hideLoading()
             hideLogin()
             hideLobby()
+            if(showGame()){
+                hideStart()
+            }
         }
         onGameStopped: {
             hideGame()
@@ -95,16 +114,17 @@ StartWindow {
         target: Manager.server
         onConnectedToServer: {
             print("Connected to Server")
-            showLobby()
             hideLoading()
             hideLogin()
-            hideStart()
+            if(showLobby()){
+                hideStart()
+            }
         }
         onConnectingToServer: {
             print("Connecting to Server")
-            showLoading()
             hideLogin()
             hideLobby()
+            showLoading()
         }
 
         onStopConnecting: {
@@ -125,44 +145,44 @@ StartWindow {
             switch(notificationID) {
 
             case PokerTH.Server.NetNotJoinIpBlocked:
-            errorString = "You cannot join this game, because another player in that game has your network address."
-            break;
+                errorString = "You cannot join this game, because another player in that game has your network address."
+                break;
             case PokerTH.Server.NetNotRemovedStartFailed:
                 errorString = "Your connection to the server is very slow, the game had to start without you."
-            break;
+                break;
             case PokerTH.Server.NetNotRemovedKicked:
                 errorString = "You were kicked from the game."
-            break;
+                break;
             case PokerTH.Server.NetNotRemovedGameFull:
             case PokerTH.Server.NetNotJoinGameFull:
                 errorString = "Sorry, this game is already full."
-            break;
+                break;
             case PokerTH.Server.NetNotRemovedAlreadyRunning:
             case PokerTH.Server.NetNotJoinAlreadyRunning:
                 errorString = "Unable to join - the server has already started the game."
-            break;
+                break;
             case PokerTH.Server.NetNotJoinNotInvited:
                 errorString = "This game is of type invite-only. You cannot join this game without being invited."
-            break;
+                break;
             case PokerTH.Server.NetNotJoinGameNameInUse:
             case PokerTH.Server.NetNotJoinGameBadName:
                 errorString = "TODO"
-            break;
+                break;
             case PokerTH.Server.NetNotRemovedTimeout:
                 errorString = "Your admin state timed out due to inactivity. Feel free to create a new game!"
-            break;
+                break;
             case PokerTH.Server.NetNotJoinInvalidPassword:
                 errorString = "Invalid password when joining the game.\nPlease reenter the password and try again."
-            break;
+                break;
             case PokerTH.Server.NetNotJoinGuestForbidden:
                 errorString = "You cannot join this type of game as guest."
-            break;
+                break;
             case PokerTH.Server.NetNotJoinInvalidSettings:
                 errorString = "The settings are invalid for this type of game."
-            break;
+                break;
             case PokerTH.Server.NetNotNewReleaseAvailable:
                 errorString = "A new release of PokerTH is available.<br>Please go to <a href=\"http://www.pokerth.net/\" target=\"_blank\">http://www.pokerth.net</a> and download the latest version."
-            break;
+                break;
             case PokerTH.Server.NetNotOutdatedBeta:
                 errorString = "This beta release of PokerTH is outdated.<br>Please go to <a href=\"http://www.pokerth.net/\" target=\"_blank\">http://www.pokerth.net</a> and download the latest version."
             }
