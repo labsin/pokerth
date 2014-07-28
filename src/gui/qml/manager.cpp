@@ -17,7 +17,8 @@
 #include "qmlserver.h"
 #include "roleitemmodel.h"
 #include "qmlroles.h"
-#include "QFile"
+#include <QFile>
+#include "playersortmodel.h"
 
 Manager::Manager() {
     connect(this,SIGNAL(afterInit()),this,SIGNAL(gameChanged()));
@@ -60,6 +61,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     QmlCard::registerType();
     QmlGame::registerType();
     QmlServer::registerType();
+    PlayerSortModel::registerType();
 }
 
 void Manager::startGame(QObject* obj)

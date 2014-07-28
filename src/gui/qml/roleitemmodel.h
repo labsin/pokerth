@@ -27,7 +27,7 @@ public:
     // e.g. { "bookTitle" : QVariant("Bible"), "year" : QVariant(-2000) }
     static QVariantMap getModelData(const QAbstractItemModel *mdl, int row);
 
-    int role(QString roleName);
+    Q_INVOKABLE int role(QString roleName);
 
 signals:
     void rowCountChanged();
