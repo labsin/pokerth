@@ -4,7 +4,7 @@
 #include "qmlserver.h"
 
 PlayerSortModel::PlayerSortModel(QObject *parent):
-    QSortFilterProxyModel(parent), m_hideActive(false), m_wildcardExpression("*")
+    SortFilterProxyModel(parent), m_hideActive(false)
 {
     setFilterCaseSensitivity(Qt::CaseInsensitive);
     setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -16,11 +16,6 @@ PlayerSortModel::PlayerSortModel(QObject *parent):
 void PlayerSortModel::registerType()
 {
     qmlRegisterType<PlayerSortModel>("PokerTH",1, 0, "PlayerSortModel");
-}
-
-QObject *PlayerSortModel::sourceModel() const
-{
-    return qobject_cast<QObject*>(QSortFilterProxyModel::sourceModel());
 }
 
 bool PlayerSortModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
@@ -42,22 +37,4 @@ void PlayerSortModel::sortByName()
 void PlayerSortModel::sortByCountry()
 {
     setSortRole(NickEntry::CountryRole);
-}
-
-
-
-void PlayerSortModel::setsourceModel(QObject *arg)
-{
-    if (QSortFilterProxyModel::sourceModel() != arg) {
-        if(QAbstractItemModel* model = qobject_cast<QAbstractItemModel*>(arg)) {
-            QSortFilterProxyModel::setSourceModel(model);
-            sort();
-            emit sourceModelChanged(arg);
-        }
-    }
-}
-
-void PlayerSortModel::sort(int column, Qt::SortOrder order)
-{
-    QSortFilterProxyModel::sort(column, order);
 }
