@@ -16,7 +16,7 @@
 #include "configwrapper.h"
 #include "qmlserver.h"
 #include "roleitemmodel.h"
-#include "qmlroles.h"
+#include "qmlenums.h"
 #include <QFile>
 #include "playersortmodel.h"
 
@@ -42,9 +42,9 @@ void Manager::Init(ConfigFile *c, Log *l)
     myServer = new QmlServer(this);
 
     QHash<int, QByteArray> serverRoleNames;
-    serverRoleNames[ServerEntry::NameRole] =  "name";
-    serverRoleNames[ServerEntry::CountryRole] =  "country";
-    serverRoleNames[ServerEntry::IdRole] =  "id";
+    serverRoleNames[QmlEnums::ServerNameRole] =  "name";
+    serverRoleNames[QmlEnums::ServerCountryRole] =  "country";
+    serverRoleNames[QmlEnums::ServerIdRole] =  "id";
     myServerModel = new RoleItemModel(serverRoleNames, this);
     myConfig = c;
     myLog = l;
@@ -62,6 +62,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     QmlGame::registerType();
     QmlServer::registerType();
     PlayerSortModel::registerType();
+    QmlEnums::registerType();
 }
 
 void Manager::startGame(QObject* obj)
@@ -145,9 +146,9 @@ void Manager::serverListAdd(unsigned serverId)
 {
     ServerInfo info = getSession()->getClientServerInfo(serverId);
     QStandardItem* item = new QStandardItem();
-    item->setData(info.id, ServerEntry::IdRole);
-    item->setData(QString::fromStdString(info.name), ServerEntry::NameRole);
-    item->setData(QString::fromStdString(info.country), ServerEntry::CountryRole);
+    item->setData(info.id, QmlEnums::ServerIdRole);
+    item->setData(QString::fromStdString(info.name), QmlEnums::ServerNameRole);
+    item->setData(QString::fromStdString(info.country), QmlEnums::ServerCountryRole);
     myServerModel->appendRow(item);
 }
 

@@ -7,7 +7,7 @@
 #include "configfile.h"
 #include "tools.h"
 #include "roleitemmodel.h"
-#include "qmlroles.h"
+#include "qmlenums.h"
 #include "gamedataclass.h"
 #include <net/socket_msg.h>
 
@@ -20,22 +20,22 @@ QmlServer::QmlServer(QObject *parent) :
     m_connectToServerTimeout->setSingleShot(true);
     connect(m_connectToServerTimeout, SIGNAL(timeout()), this, SLOT(connectedToServerTimeout()));
 
-    gameRoleNames[GameEntry::NameRole] =  "name";
-    gameRoleNames[GameEntry::IdRole] = "id";
-    gameRoleNames[GameEntry::MeInThisGameRole] = "meInThisGame";
-    gameRoleNames[GameEntry::GameInfoRole] = "info";
-    gameRoleNames[GameEntry::PlayerModelRole] = "players";
-    gameRoleNames[GameEntry::SpectatorModelRole] = "spectators";
+    gameRoleNames[QmlEnums::GameNameRole] =  "name";
+    gameRoleNames[QmlEnums::GameIdRole] = "id";
+    gameRoleNames[QmlEnums::GameMeInThisGameRole] = "meInThisGame";
+    gameRoleNames[QmlEnums::GameGameInfoRole] = "info";
+    gameRoleNames[QmlEnums::GamePlayerModelRole] = "players";
+    gameRoleNames[QmlEnums::GameSpectatorModelRole] = "spectators";
 
     m_gameModel = new RoleItemModel(gameRoleNames, this);
     gamesChanged(m_gameModel);
 
-    playerRoleNames[NickEntry::NameRole] =  "name";
-    playerRoleNames[NickEntry::IdRole] = "id";
-    playerRoleNames[NickEntry::CountryRole] = "country";
-    playerRoleNames[NickEntry::IsGuestRole] = "isGuest";
-    playerRoleNames[NickEntry::IdleRole] = "idle";
-    playerRoleNames[NickEntry::IsAdminRole] = "isAdmin";
+    playerRoleNames[QmlEnums::NickNameRole] =  "name";
+    playerRoleNames[QmlEnums::NickIdRole] = "id";
+    playerRoleNames[QmlEnums::NickCountryRole] = "country";
+    playerRoleNames[QmlEnums::NickIsGuestRole] = "isGuest";
+    playerRoleNames[QmlEnums::NickIdleRole] = "idle";
+    playerRoleNames[QmlEnums::NickIsAdminRole] = "isAdmin";
 
     m_lobbyPlayerModel = new RoleItemModel(playerRoleNames, this);
     m_connectedPlayerModel = new RoleItemModel(playerRoleNames, this);
@@ -173,11 +173,11 @@ void QmlServer::joinedNetworkGame(unsigned playerId, QString playerName, bool is
 
 void QmlServer::updatePlayer(unsigned playerId, QString playerName)
 {
-    QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         updatePlayerItem(m_lobbyPlayerModel->itemFromIndex(*i), playerId);
     }
-    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         updatePlayerItem(m_connectedPlayerModel->itemFromIndex(*i), playerId);
     }
@@ -187,19 +187,19 @@ void QmlServer::updatePlayer(unsigned playerId, QString playerName)
         QStandardItem* item = m_gameModel->item(it);
         int it1 = 0;
         bool found = false;
-        QVariant var = item->data(GameEntry::PlayerModelRole);
+        QVariant var = item->data(QmlEnums::GamePlayerModelRole);
         if(var.canConvert<QObject*>()) {
             RoleItemModel* model = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
-            indexes = model->match(model->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+            indexes = model->match(model->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
             for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
                 updatePlayerItem(model->itemFromIndex(*i), playerId);
                 found = true;
             }
         }
-        var = item->data(GameEntry::SpectatorModelRole);
+        var = item->data(QmlEnums::GameSpectatorModelRole);
         if(var.canConvert<QObject*>()) {
             RoleItemModel* model = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
-            indexes = model->match(model->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+            indexes = model->match(model->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
             for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
                 updatePlayerItem(model->itemFromIndex(*i), playerId);
                 found = true;
@@ -217,12 +217,12 @@ void QmlServer::addConnectedPlayer(unsigned playerId, QString playerName, bool i
     QStandardItem *item = new QStandardItem();
     m_connectedPlayerModel->appendRow(item);
     updatePlayerItem(item, playerId);
-    item->setData(Idle, NickEntry::IdleRole);
+    item->setData(Idle, QmlEnums::NickIdleRole);
 }
 
 void QmlServer::removeConnectedPlayer(unsigned playerId, QString playerName)
 {
-    QModelIndexList indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         m_connectedPlayerModel->removeRow((*i).row());;
     }
@@ -233,12 +233,12 @@ void QmlServer::addConnectedSpectator(unsigned playerId, QString playerName)
     QStandardItem *item = new QStandardItem();
     m_connectedSpectatorModel->appendRow(item);
     updatePlayerItem(item, playerId);
-    item->setData(Idle, NickEntry::IdleRole);
+    item->setData(Idle, QmlEnums::NickIdleRole);
 }
 
 void QmlServer::removeConnectedSpectator(unsigned playerId, QString playerName)
 {
-    QModelIndexList indexes = m_connectedSpectatorModel->match(m_connectedSpectatorModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_connectedSpectatorModel->match(m_connectedSpectatorModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         m_connectedSpectatorModel->removeRow((*i).row());;
     }
@@ -248,10 +248,10 @@ void QmlServer::newGameAdmin(unsigned playerId, QString playerName)
 {
     int it = 0;
     while (m_connectedPlayerModel->item(it)) {
-        if (m_connectedPlayerModel->item(it)->data(NickEntry::IdRole) == playerId) {
+        if (m_connectedPlayerModel->item(it)->data(QmlEnums::NickIdRole) == playerId) {
             updatePlayerItem(m_connectedPlayerModel->item(it),it);
         }
-        else if(m_connectedPlayerModel->item(it)->data(NickEntry::IsAdminRole).toBool()) {
+        else if(m_connectedPlayerModel->item(it)->data(QmlEnums::NickIsAdminRole).toBool()) {
             updatePlayerItem(m_connectedPlayerModel->item(it),it);
         }
         it++;
@@ -266,12 +266,12 @@ void QmlServer::updatePlayerItem(QStandardItem* item, unsigned playerId)
 {
     PlayerInfo playerInfo(ManagerSingleton::Instance()->getSession()->getClientPlayerInfo(playerId));
 
-    item->setData(QString::fromUtf8(playerInfo.playerName.c_str()), NickEntry::NameRole);
-    item->setData(QString::fromUtf8(playerInfo.countryCode.c_str()), NickEntry::CountryRole);
-    item->setData(playerId, NickEntry::IdRole);
-    item->setData(playerInfo.isGuest, NickEntry::IsGuestRole);
-//    item->setData(Idle, NickEntry::IdleRole);
-    item->setData(playerInfo.isAdmin, NickEntry::IsAdminRole);
+    item->setData(QString::fromUtf8(playerInfo.playerName.c_str()), QmlEnums::NickNameRole);
+    item->setData(QString::fromUtf8(playerInfo.countryCode.c_str()), QmlEnums::NickCountryRole);
+    item->setData(playerId, QmlEnums::NickIdRole);
+    item->setData(playerInfo.isGuest, QmlEnums::NickIsGuestRole);
+//    item->setData(Idle, QmlEnums::NickIdleRole);
+    item->setData(playerInfo.isAdmin, QmlEnums::NickIsAdminRole);
 }
 
 void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
@@ -280,20 +280,20 @@ void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
     QVariant gi;
     QObject* giClass = new GameInfoClass(info, this);
     gi.setValue(dynamic_cast<QObject*>(giClass));
-    item->setData(gi, GameEntry::GameInfoRole);
+    item->setData(gi, QmlEnums::GameGameInfoRole);
 }
 
 void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
 {
     GameInfo info(ManagerSingleton::Instance()->getSession()->getClientGameInfo(gameId));
-    item->setData(gameId, GameEntry::IdRole);
-    item->setData(QString::fromUtf8(info.name.c_str()), GameEntry::NameRole);
+    item->setData(gameId, QmlEnums::GameIdRole);
+    item->setData(QString::fromUtf8(info.name.c_str()), QmlEnums::GameNameRole);
     updateGameItemData(item,gameId);
 
     PlayerIdList::const_iterator i = info.players.begin();
     PlayerIdList::const_iterator end = info.players.end();
 
-    QVariant var = item->data(GameEntry::PlayerModelRole);
+    QVariant var = item->data(QmlEnums::GamePlayerModelRole);
     if(var.canConvert<QObject*>()) {
         RoleItemModel* model = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
         model->clear();
@@ -301,12 +301,12 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
             QStandardItem *player = new QStandardItem();
             model->appendRow(player);
             updatePlayerItem(player, *i);
-            item->setData(Active, NickEntry::IdleRole);
+            item->setData(Active, QmlEnums::NickIdleRole);
 
             if(m_playerId == *i) {
-                item->setData( true, GameEntry::MeInThisGameRole);
+                item->setData( true, QmlEnums::GameMeInThisGameRole);
             } else {
-                item->setData( false, GameEntry::MeInThisGameRole);
+                item->setData( false, QmlEnums::GameMeInThisGameRole);
             }
             ++i;
         }
@@ -315,7 +315,7 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
     i = info.spectators.begin();
     end = info.spectators.end();
 
-    var = item->data(GameEntry::SpectatorModelRole);
+    var = item->data(QmlEnums::GameSpectatorModelRole);
     if(var.canConvert<QObject*>()) {
         RoleItemModel* model = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
         model->clear();
@@ -323,12 +323,12 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
             QStandardItem *player = new QStandardItem();
             model->appendRow(player);
             updatePlayerItem(player, *i);
-            item->setData(Active, NickEntry::IdleRole);
+            item->setData(Active, QmlEnums::NickIdleRole);
 
             if(m_playerId == *i) {
-                item->setData( true, GameEntry::MeInThisGameRole);
+                item->setData( true, QmlEnums::GameMeInThisGameRole);
             } else {
-                item->setData( false, GameEntry::MeInThisGameRole);
+                item->setData( false, QmlEnums::GameMeInThisGameRole);
             }
             ++i;
         }
@@ -339,13 +339,13 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
     end = info.players.end();
     while (i != end) {
         //mark players as active
-        QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,*i,1,Qt::MatchExactly);
+        QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,*i,1,Qt::MatchExactly);
         for (QModelIndexList::iterator i2 = indexes.begin(); i2 != indexes.end(); ++i2) {
-            m_lobbyPlayerModel->itemFromIndex(*i2)->setData(Active, NickEntry::IdleRole);
+            m_lobbyPlayerModel->itemFromIndex(*i2)->setData(Active, QmlEnums::NickIdleRole);
         }
-        indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),NickEntry::IdRole,*i,1,Qt::MatchExactly);
+        indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),QmlEnums::NickIdRole,*i,1,Qt::MatchExactly);
         for (QModelIndexList::iterator i2 = indexes.begin(); i2 != indexes.end(); ++i2) {
-            m_connectedPlayerModel->itemFromIndex(*i2)->setData(Active, NickEntry::IdleRole);
+            m_connectedPlayerModel->itemFromIndex(*i2)->setData(Active, QmlEnums::NickIdleRole);
         }
         ++i;
     }
@@ -353,13 +353,13 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
     end = info.spectators.end();
     while (i != end) {
         //mark spectators as active
-        QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,*i,1,Qt::MatchExactly);
+        QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,*i,1,Qt::MatchExactly);
         for (QModelIndexList::iterator i2 = indexes.begin(); i2 != indexes.end(); ++i2) {
-            m_lobbyPlayerModel->itemFromIndex(*i2)->setData(Active, NickEntry::IdleRole);
+            m_lobbyPlayerModel->itemFromIndex(*i2)->setData(Active, QmlEnums::NickIdleRole);
         }
-        indexes = m_connectedSpectatorModel->match(m_connectedSpectatorModel->index(0,0),NickEntry::IdRole,*i,1,Qt::MatchExactly);
+        indexes = m_connectedSpectatorModel->match(m_connectedSpectatorModel->index(0,0),QmlEnums::NickIdRole,*i,1,Qt::MatchExactly);
         for (QModelIndexList::iterator i2 = indexes.begin(); i2 != indexes.end(); ++i2) {
-            m_connectedSpectatorModel->itemFromIndex(*i2)->setData(Active, NickEntry::IdleRole);
+            m_connectedSpectatorModel->itemFromIndex(*i2)->setData(Active, QmlEnums::NickIdleRole);
         }
         ++i;
     }
@@ -373,14 +373,14 @@ void QmlServer::addGame(unsigned gameId)
     playerModelObj->moveToThread(m_gameModel->thread());
     playerModelObj->setParent(m_gameModel);
     playerModel.setValue(dynamic_cast<QObject*>(playerModelObj));
-    item->setData(playerModel, GameEntry::PlayerModelRole);
+    item->setData(playerModel, QmlEnums::GamePlayerModelRole);
 
     QVariant spectatorModel;
     RoleItemModel *spectatorModelObj = new RoleItemModel(playerRoleNames, this);
     spectatorModelObj->moveToThread(m_gameModel->thread());
     spectatorModelObj->setParent(m_gameModel);
     spectatorModel.setValue(dynamic_cast<QObject*>(spectatorModelObj));
-    item->setData(spectatorModel, GameEntry::SpectatorModelRole);
+    item->setData(spectatorModel, QmlEnums::GameSpectatorModelRole);
 
     updateGameItem(item, gameId);
 
@@ -389,7 +389,7 @@ void QmlServer::addGame(unsigned gameId)
 
 void QmlServer::removeGame(unsigned gameId)
 {
-    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),GameEntry::IdRole,gameId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),QmlEnums::GameIdRole,gameId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         m_gameModel->removeRow((*i).row());
     }
@@ -397,7 +397,7 @@ void QmlServer::removeGame(unsigned gameId)
 
 void QmlServer::updateGameMode(unsigned gameId /* GameMode gameMode*/)
 {
-    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),GameEntry::IdRole,gameId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),QmlEnums::GameIdRole,gameId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         updateGameItemData(m_gameModel->itemFromIndex(*i),gameId);
     }
@@ -408,7 +408,7 @@ void QmlServer::updateGameAdmin(unsigned gameId, unsigned adminPlayerId)
     if (m_inGame && m_playerId == adminPlayerId) {
         setIsAdmin(true);
     }
-    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),GameEntry::IdRole,gameId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),QmlEnums::GameIdRole,gameId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         updateGameItemData(m_gameModel->itemFromIndex(*i),gameId);
     }
@@ -416,76 +416,76 @@ void QmlServer::updateGameAdmin(unsigned gameId, unsigned adminPlayerId)
 
 void QmlServer::gameAddPlayer(unsigned gameId, unsigned playerId, bool spectator)
 {
-    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),GameEntry::IdRole,gameId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),QmlEnums::GameIdRole,gameId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         QStandardItem* item = m_gameModel->itemFromIndex(*i);
         QVariant var;
         if(!spectator) {
-            var = item->data(GameEntry::PlayerModelRole);
+            var = item->data(QmlEnums::GamePlayerModelRole);
         }
         else {
-            var = item->data(GameEntry::SpectatorModelRole);
+            var = item->data(QmlEnums::GameSpectatorModelRole);
         }
         if(var.canConvert<QObject*>()) {
             RoleItemModel* playerModel = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
-            QModelIndexList indexes2 = playerModel->match(playerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+            QModelIndexList indexes2 = playerModel->match(playerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
             if(indexes2.count()==0) {
                 QStandardItem *player = new QStandardItem();
                 playerModel->appendRow(player);
                 updatePlayerItem(player, playerId);
-                item->setData(Active, NickEntry::IdleRole);
+                item->setData(Active, QmlEnums::NickIdleRole);
 
                 if(m_playerId == playerId) {
-                    item->setData( true, GameEntry::MeInThisGameRole);
+                    item->setData( true, QmlEnums::GameMeInThisGameRole);
                 } else {
-                    item->setData( false, GameEntry::MeInThisGameRole);
+                    item->setData( false, QmlEnums::GameMeInThisGameRole);
                 }
             }
             else {
                 updatePlayerItem(playerModel->itemFromIndex(indexes2[0]), playerId);
-                item->setData(Active, NickEntry::IdleRole);
+                item->setData(Active, QmlEnums::NickIdleRole);
             }
         }
     }
     //mark player as active
-    indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
-        m_lobbyPlayerModel->itemFromIndex(*i)->setData(Active, NickEntry::IdleRole);
+        m_lobbyPlayerModel->itemFromIndex(*i)->setData(Active, QmlEnums::NickIdleRole);
     }
-    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
-        m_connectedPlayerModel->itemFromIndex(*i)->setData(Active, NickEntry::IdleRole);
+        m_connectedPlayerModel->itemFromIndex(*i)->setData(Active, QmlEnums::NickIdleRole);
     }
 }
 
 void QmlServer::gameRemovePlayer(unsigned gameId, unsigned playerId, bool spectator)
 {
-    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),GameEntry::IdRole,gameId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_gameModel->match(m_gameModel->index(0,0),QmlEnums::GameIdRole,gameId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         QStandardItem* item = m_gameModel->itemFromIndex(*i);
         QVariant var;
         if(!spectator) {
-            var = item->data(GameEntry::PlayerModelRole);
+            var = item->data(QmlEnums::GamePlayerModelRole);
         }
         else {
-            var = item->data(GameEntry::SpectatorModelRole);
+            var = item->data(QmlEnums::GameSpectatorModelRole);
         }
         if(var.canConvert<QObject*>()) {
             RoleItemModel* playerModel = dynamic_cast<RoleItemModel*>(var.value<QObject*>());
-            QModelIndexList indexes2 = playerModel->match(playerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+            QModelIndexList indexes2 = playerModel->match(playerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
             for (QModelIndexList::iterator i2 = indexes2.begin(); i2 != indexes2.end(); ++i2) {
                 playerModel->removeRow((*i2).row());
             }
         }
     }
     //mark player as idle
-    indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
-        m_lobbyPlayerModel->itemFromIndex(*i)->setData(Idle, NickEntry::IdleRole);
+        m_lobbyPlayerModel->itemFromIndex(*i)->setData(Idle, QmlEnums::NickIdleRole);
     }
-    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    indexes = m_connectedPlayerModel->match(m_connectedPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
-        m_connectedPlayerModel->itemFromIndex(*i)->setData(Idle, NickEntry::IdleRole);
+        m_connectedPlayerModel->itemFromIndex(*i)->setData(Idle, QmlEnums::NickIdleRole);
     }
 }
 
@@ -516,13 +516,13 @@ void QmlServer::lobbyAddPlayer(unsigned playerId, QString playerName)
     QStandardItem *item = new QStandardItem();
     m_lobbyPlayerModel->appendRow(item);
     updatePlayerItem(item, playerId);
-    item->setData(Idle, NickEntry::IdleRole);
+    item->setData(Idle, QmlEnums::NickIdleRole);
 }
 
 void QmlServer::lobbyRemovePlayer(unsigned playerId)
 {
     int it1 = 0;
-    QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),NickEntry::IdRole,playerId,1,Qt::MatchExactly);
+    QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickIdRole,playerId,1,Qt::MatchExactly);
     for (QModelIndexList::iterator i = indexes.begin(); i != indexes.end(); ++i) {
         m_lobbyPlayerModel->removeRow((*i).row());
     }

@@ -1,6 +1,6 @@
 #include <QtQml>
 #include "playersortmodel.h"
-#include "qmlroles.h"
+#include "qmlenums.h"
 #include "qmlserver.h"
 
 PlayerSortModel::PlayerSortModel(QObject *parent):
@@ -8,7 +8,7 @@ PlayerSortModel::PlayerSortModel(QObject *parent):
 {
     setFilterCaseSensitivity(Qt::CaseInsensitive);
     setSortCaseSensitivity(Qt::CaseInsensitive);
-    setFilterRole(NickEntry::NameRole);
+    setFilterRole(QmlEnums::NickNameRole);
     setFilterKeyColumn(0);
     sortByName();
 }
@@ -24,17 +24,17 @@ bool PlayerSortModel::filterAcceptsRow(int source_row, const QModelIndex &source
 //    bool ret = true;
     if(m_hideActive && ret) {
         QModelIndex index = QSortFilterProxyModel::sourceModel()->index(source_row, 0, source_parent);
-        ret = static_cast<QmlServer::IdleRole>(QSortFilterProxyModel::sourceModel()->data(index,NickEntry::IdleRole).toInt(0))==QmlServer::Idle;
+        ret = static_cast<QmlServer::IdleRole>(QSortFilterProxyModel::sourceModel()->data(index,QmlEnums::NickIdleRole).toInt(0))==QmlServer::Idle;
     }
     return ret;
 }
 
 void PlayerSortModel::sortByName()
 {
-    setSortRole(NickEntry::NameRole);
+    setSortRole(QmlEnums::NickNameRole);
 }
 
 void PlayerSortModel::sortByCountry()
 {
-    setSortRole(NickEntry::CountryRole);
+    setSortRole(QmlEnums::NickCountryRole);
 }
