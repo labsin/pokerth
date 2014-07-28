@@ -158,7 +158,7 @@ HEADERS += \
 	src/session.h \
     src/singleton.h \
     src/gui/qml/qmlroles.h \
-    src/gui/qml/qmlchat.h
+#    src/gui/qml/qmlchat.h
 
 SOURCES += \
     src/core/common/loghelper_client.cpp \
@@ -182,7 +182,7 @@ SOURCES += \
     src/net/common/net_helper_client.cpp \
     src/net/common/servermanagerfactoryclient.cpp \
     src/pokerth_qml.cpp \
-    src/gui/qml/qmlchat.cpp
+#    src/gui/qml/qmlchat.cpp
 
 TRANSLATIONS = ts/pokerth_af.ts \
 	ts/pokerth_bg.ts \
