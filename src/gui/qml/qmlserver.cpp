@@ -217,6 +217,7 @@ void QmlServer::addConnectedPlayer(unsigned playerId, QString playerName, bool i
     QStandardItem *item = new QStandardItem();
     m_connectedPlayerModel->appendRow(item);
     updatePlayerItem(item, playerId);
+    item->setData(Idle, NickEntry::IdleRole);
 }
 
 void QmlServer::removeConnectedPlayer(unsigned playerId, QString playerName)
@@ -232,6 +233,7 @@ void QmlServer::addConnectedSpectator(unsigned playerId, QString playerName)
     QStandardItem *item = new QStandardItem();
     m_connectedSpectatorModel->appendRow(item);
     updatePlayerItem(item, playerId);
+    item->setData(Idle, NickEntry::IdleRole);
 }
 
 void QmlServer::removeConnectedSpectator(unsigned playerId, QString playerName)
@@ -268,7 +270,7 @@ void QmlServer::updatePlayerItem(QStandardItem* item, unsigned playerId)
     item->setData(QString::fromUtf8(playerInfo.countryCode.c_str()), NickEntry::CountryRole);
     item->setData(playerId, NickEntry::IdRole);
     item->setData(playerInfo.isGuest, NickEntry::IsGuestRole);
-    item->setData(Idle, NickEntry::IdleRole);
+//    item->setData(Idle, NickEntry::IdleRole);
     item->setData(playerInfo.isAdmin, NickEntry::IsAdminRole);
 }
 
@@ -299,6 +301,7 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
             QStandardItem *player = new QStandardItem();
             model->appendRow(player);
             updatePlayerItem(player, *i);
+            item->setData(Active, NickEntry::IdleRole);
 
             if(m_playerId == *i) {
                 item->setData( true, GameEntry::MeInThisGameRole);
@@ -320,6 +323,7 @@ void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
             QStandardItem *player = new QStandardItem();
             model->appendRow(player);
             updatePlayerItem(player, *i);
+            item->setData(Active, NickEntry::IdleRole);
 
             if(m_playerId == *i) {
                 item->setData( true, GameEntry::MeInThisGameRole);
@@ -429,6 +433,7 @@ void QmlServer::gameAddPlayer(unsigned gameId, unsigned playerId, bool spectator
                 QStandardItem *player = new QStandardItem();
                 playerModel->appendRow(player);
                 updatePlayerItem(player, playerId);
+                item->setData(Active, NickEntry::IdleRole);
 
                 if(m_playerId == playerId) {
                     item->setData( true, GameEntry::MeInThisGameRole);
@@ -438,6 +443,7 @@ void QmlServer::gameAddPlayer(unsigned gameId, unsigned playerId, bool spectator
             }
             else {
                 updatePlayerItem(playerModel->itemFromIndex(indexes2[0]), playerId);
+                item->setData(Active, NickEntry::IdleRole);
             }
         }
     }
@@ -510,6 +516,7 @@ void QmlServer::lobbyAddPlayer(unsigned playerId, QString playerName)
     QStandardItem *item = new QStandardItem();
     m_lobbyPlayerModel->appendRow(item);
     updatePlayerItem(item, playerId);
+    item->setData(Idle, NickEntry::IdleRole);
 }
 
 void QmlServer::lobbyRemovePlayer(unsigned playerId)
