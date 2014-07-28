@@ -12,20 +12,52 @@ Window {
     height: 600
 
     modality: Qt.WindowModal
+    PokerTH.PlayerSortModel {
+        id: psm
+        sortRole: sourceModel.role("country")
+        sourceModel: Manager.server.lobbyPlayers
+    }
+    PokerTH.PlayerSortModel {
+        id: psm2
+        sourceModel: Manager.server.lobbyPlayers
+        hideActive: true
+        wildcardExpression: "labsin2"
+    }
 
     ScrollView {
-        anchors.fill: parent
+        id: sv1
+        anchors {left: parent.left;
+            top: parent.top; bottom: parent.bottom}
+        width: parent.width/2
         ListView {
             id: lv
             width: parent.width
-            model: Manager.server.games
+            model: psm
             delegate: Text {
-                property GameInfo gameInfo: info
-                text: name+" players:"+players.rowCount+"/"+info.data.maxNumberOfPlayers+" "+(gameInfo.mode==GameInfo.GAME_MODE_CREATED?"open":"closed")+" pwprotected "+gameInfo.isPasswordProtected
+//                property GameInfo gameInfo: info
+                text: name+" country:"+country + " Idle:"+idle
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        Manager.joinGame(id)
+                    }
+                }
+            }
+        }
+    }
+    ScrollView {
+        id: sv2
+        anchors {left: sv1.right; right: parent.right;
+            top: parent.top; bottom: parent.bottom}
+        ListView {
+            id: lv2
+            width: parent.width
+            model: psm2
+            delegate: Text {
+//                property GameInfo gameInfo: info
+                text: name+" country:"+country
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
                     }
                 }
             }
