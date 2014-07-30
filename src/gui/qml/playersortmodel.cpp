@@ -20,8 +20,7 @@ void PlayerSortModel::registerType()
 
 bool PlayerSortModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
-    bool ret = QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);;
-//    bool ret = true;
+    bool ret = SortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
     if(m_hideActive && ret) {
         QModelIndex index = QSortFilterProxyModel::sourceModel()->index(source_row, 0, source_parent);
         ret = static_cast<QmlServer::IdleRole>(QSortFilterProxyModel::sourceModel()->data(index,QmlEnums::NickIdleRole).toInt(0))==QmlServer::Idle;
