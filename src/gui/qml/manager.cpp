@@ -18,6 +18,7 @@
 #include "roleitemmodel.h"
 #include "qmlenums.h"
 #include <QFile>
+#include "sortfilterproxymodel.h"
 #include "playersortmodel.h"
 
 Manager::Manager() {
@@ -61,6 +62,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     QmlCard::registerType();
     QmlGame::registerType();
     QmlServer::registerType();
+    SortFilterProxyModel::registerType();
     PlayerSortModel::registerType();
     QmlEnums::registerType();
 }
