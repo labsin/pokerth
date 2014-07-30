@@ -23,11 +23,16 @@ void GameDataClass::registerType()
     qmlRegisterType<VoteKickDataClass>("PokerTH.GameData",1,0,"VoteKickData");
 }
 
-void GameDataClass::setToDefault(bool net)
+void GameDataClass::setToDefault(int net)
 {
     ConfigFile* myConfig = ManagerSingleton::Instance()->getConfig();
     // Set Game Data
-    if(net) {
+    if(net==2) {
+        setgameType((enum GameType)myConfig->readConfigInt("InternetGameType"));
+        setGameName(QString::fromStdString(myConfig->readConfigString("InternetGameName")));
+        setallowSpectators((bool)myConfig->readConfigInt("InternetGameAllowSpectators"));
+    }
+    if(net>1) {
         setmaxNumberOfPlayers(myConfig->readConfigInt("NetNumberOfPlayers"));
         setstartMoney(myConfig->readConfigInt("NetStartCash"));
         setfirstSmallBlind(myConfig->readConfigInt("NetFirstSmallBlind"));
@@ -45,10 +50,10 @@ void GameDataClass::setToDefault(bool net)
     }
 
     setdefaultBlinds(true);
-    resetBlinds();
+    resetBlinds(net);
 }
 
-void GameDataClass::resetBlinds(bool net)
+void GameDataClass::resetBlinds(int net)
 {
     ConfigFile* myConfig = ManagerSingleton::Instance()->getConfig();
 
@@ -121,6 +126,22 @@ QList<int> GameDataClass::manualBlindsList() const
     return retList;
 }
 
+void GameDataClass::setgameType(GameDataClass::GameType arg)
+{
+    if (gameType() != arg) {
+        gd.gameType = (enum ::GameType)arg;
+        emit gameTypeChanged(arg);
+    }
+}
+
+void GameDataClass::setallowSpectators(bool arg)
+{
+    if (gd.allowSpectators != arg) {
+        gd.allowSpectators = arg;
+        emit allowSpectatorsChanged(arg);
+    }
+}
+
 void GameDataClass::setmaxNumberOfPlayers(int arg)
 {
     if (gd.maxNumberOfPlayers != arg) {
@@ -171,7 +192,7 @@ void GameDataClass::setraiseSmallBlindEveryMinutesValue(int arg)
 
 void GameDataClass::setraiseMode(GameDataClass::RaiseMode arg)
 {
-    if ((int) gd.raiseMode != arg) {
+    if (raiseMode() != arg) {
         gd.raiseMode = (enum ::RaiseMode) arg;
         emit raiseModeChanged(arg);
     }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QString>
 #include "gamedata.h"
 #include "QQmlListProperty"
 
@@ -13,6 +14,8 @@ class GameDataClass : public QObject
     Q_ENUMS(RaiseIntervalMode)
     Q_ENUMS(RaiseMode)
     Q_ENUMS(AfterManualBlindsMode)
+    Q_PROPERTY(GameType gameType READ gameType WRITE setgameType NOTIFY gameTypeChanged)
+    Q_PROPERTY(bool allowSpectators READ allowSpectators WRITE setallowSpectators NOTIFY allowSpectatorsChanged)
     Q_PROPERTY(int maxNumberOfPlayers READ maxNumberOfPlayers WRITE setmaxNumberOfPlayers NOTIFY maxNumberOfPlayersChanged)
     Q_PROPERTY(int startMoney READ startMoney WRITE setstartMoney NOTIFY startMoneyChanged)
     Q_PROPERTY(int firstSmallBlind READ firstSmallBlind WRITE setfirstSmallBlind NOTIFY firstSmallBlindChanged)
@@ -27,6 +30,7 @@ class GameDataClass : public QObject
     Q_PROPERTY(int delayBetweenHandsSec READ delayBetweenHandsSec WRITE setdelayBetweenHandsSec NOTIFY delayBetweenHandsSecChanged)
     Q_PROPERTY(int playerActionTimeoutSec READ playerActionTimeoutSec WRITE setplayerActionTimeoutSec NOTIFY playerActionTimeoutSecChanged)
     Q_PROPERTY(bool defaultBlinds READ defaultBlinds WRITE setdefaultBlinds NOTIFY defaultBlindsChanged)
+    Q_PROPERTY(QString gameName READ gameName WRITE setGameName NOTIFY gameNameChanged)
 
 public:
     explicit GameDataClass(QObject *parent = 0);
@@ -57,9 +61,19 @@ public:
 
     static void registerType();
 
-    Q_INVOKABLE void setToDefault(bool net=false);
+    Q_INVOKABLE void setToDefault(int net=0); // 0 = local, 1 = net, 2 = internet
 
-    Q_INVOKABLE void resetBlinds(bool net=false);
+    Q_INVOKABLE void resetBlinds(int net=0);
+
+    GameType gameType() const
+    {
+        return (enum GameType) gd.gameType;
+    }
+
+    bool allowSpectators() const
+    {
+        return gd.allowSpectators;
+    }
 
     int maxNumberOfPlayers() const
     {
@@ -133,7 +147,16 @@ public:
         return m_defaultBlinds;
     }
 
+    QString gameName() const
+    {
+        return m_gameName;
+    }
+
 signals:
+
+    void gameTypeChanged(GameType arg);
+
+    void allowSpectatorsChanged(bool arg);
 
     void maxNumberOfPlayersChanged(int arg);
 
@@ -163,7 +186,13 @@ signals:
 
     void defaultBlindsChanged(bool arg);
 
+    void gameNameChanged(QString arg);
+
 public slots:
+
+    void setgameType(GameType arg);
+
+    void setallowSpectators(bool arg);
 
     void setmaxNumberOfPlayers(int arg);
 
@@ -193,9 +222,18 @@ public slots:
 
     void setdefaultBlinds(bool arg);
 
+    void setGameName(QString arg)
+    {
+        if (m_gameName != arg) {
+            m_gameName = arg;
+            emit gameNameChanged(arg);
+        }
+    }
+
 private:
     GameData gd;
     bool m_defaultBlinds;
+    QString m_gameName;
 };
 
 class GameInfoClass : public QObject
