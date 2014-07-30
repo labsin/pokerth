@@ -19,7 +19,7 @@ public:
         GameIdRole = Qt::UserRole + 1,
         GameNameRole,
         GameMeInThisGameRole,
-        GameGameInfoRole,
+        GameInfoRole,
         GamePlayerModelRole,
         GameSpectatorModelRole,
         //Used by sort filter

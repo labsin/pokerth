@@ -23,7 +23,7 @@ QmlServer::QmlServer(QObject *parent) :
     gameRoleNames[QmlEnums::GameNameRole] =  "name";
     gameRoleNames[QmlEnums::GameIdRole] = "id";
     gameRoleNames[QmlEnums::GameMeInThisGameRole] = "meInThisGame";
-    gameRoleNames[QmlEnums::GameGameInfoRole] = "info";
+    gameRoleNames[QmlEnums::GameInfoRole] = "info";
     gameRoleNames[QmlEnums::GamePlayerModelRole] = "players";
     gameRoleNames[QmlEnums::GameSpectatorModelRole] = "spectators";
 
@@ -280,7 +280,7 @@ void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
     QVariant gi;
     QObject* giClass = new GameInfoClass(info, this);
     gi.setValue(dynamic_cast<QObject*>(giClass));
-    item->setData(gi, QmlEnums::GameGameInfoRole);
+    item->setData(gi, QmlEnums::GameInfoRole);
 }
 
 void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
