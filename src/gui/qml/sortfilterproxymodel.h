@@ -10,6 +10,8 @@ class SortFilterProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(QString wildcardExpression READ wildcardExpression WRITE setwildcardExpression NOTIFY wildcardExpressionChanged)
 public:
     explicit SortFilterProxyModel(QObject *parent = 0);
+    static void registerType();
+
     QObject* sourceModel() const;
 
     QString wildcardExpression() const

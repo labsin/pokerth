@@ -1,8 +1,14 @@
 #include "sortfilterproxymodel.h"
+#include <QtQml>
 
 SortFilterProxyModel::SortFilterProxyModel(QObject *parent) :
     QSortFilterProxyModel(parent), m_wildcardExpression("*")
 {
+}
+
+void SortFilterProxyModel::registerType()
+{
+    qmlRegisterType<SortFilterProxyModel>();
 }
 
 QObject *SortFilterProxyModel::sourceModel() const
