@@ -10,6 +10,7 @@ PlayerSortModel::PlayerSortModel(QObject *parent):
     setSortCaseSensitivity(Qt::CaseInsensitive);
     setFilterRole(QmlEnums::NickNameRole);
     setFilterKeyColumn(0);
+    setDynamicSortFilter(true);
     sortByName();
 }
 
