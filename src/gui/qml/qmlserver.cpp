@@ -21,7 +21,7 @@ QmlServer::QmlServer(QObject *parent) :
     connect(m_connectToServerTimeout, SIGNAL(timeout()), this, SLOT(connectedToServerTimeout()));
 
     gameRoleNames[QmlEnums::GameNameRole] =  "name";
-    gameRoleNames[QmlEnums::GameIdRole] = "id";
+    gameRoleNames[QmlEnums::GameIdRole] = "gameId";
     gameRoleNames[QmlEnums::GameMeInThisGameRole] = "meInThisGame";
     gameRoleNames[QmlEnums::GameInfoRole] = "info";
     gameRoleNames[QmlEnums::GamePlayerModelRole] = "players";
@@ -31,7 +31,7 @@ QmlServer::QmlServer(QObject *parent) :
     gamesChanged(m_gameModel);
 
     playerRoleNames[QmlEnums::NickNameRole] =  "name";
-    playerRoleNames[QmlEnums::NickIdRole] = "id";
+    playerRoleNames[QmlEnums::NickIdRole] = "playerId";
     playerRoleNames[QmlEnums::NickCountryRole] = "country";
     playerRoleNames[QmlEnums::NickIsGuestRole] = "isGuest";
     playerRoleNames[QmlEnums::NickIdleRole] = "idle";
