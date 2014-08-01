@@ -22,8 +22,13 @@ public:
         GameInfoRole,
         GamePlayerModelRole,
         GameSpectatorModelRole,
-        //Used by sort filter
 
+        //Used by sort filter
+        GameSortPlayers = 0x1000,
+        GameSortStatus,
+        GameSortGameType,
+        GameSortPwProtect,
+        GameSortActionTimeout
     };
 
     enum ServerEntry {

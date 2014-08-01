@@ -20,6 +20,7 @@
 #include <QFile>
 #include "sortfilterproxymodel.h"
 #include "playersortmodel.h"
+#include "gamesortmodel.h"
 
 Manager::Manager() {
     connect(this,SIGNAL(afterInit()),this,SIGNAL(gameChanged()));
@@ -64,6 +65,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     QmlServer::registerType();
     SortFilterProxyModel::registerType();
     PlayerSortModel::registerType();
+    GameSortModel::registerType();
     QmlEnums::registerType();
 }
 

@@ -159,7 +159,8 @@ HEADERS += \
     src/singleton.h \
     src/gui/qml/playersortmodel.h \
     src/gui/qml/sortfilterproxymodel.h \
-    src/gui/qml/qmlenums.h
+    src/gui/qml/qmlenums.h \
+    src/gui/qml/gamesortmodel.h
 #    src/gui/qml/qmlchat.h
 
 SOURCES += \
@@ -186,7 +187,8 @@ SOURCES += \
     src/pokerth_qml.cpp \
     src/gui/qml/playersortmodel.cpp \
     src/gui/qml/sortfilterproxymodel.cpp \
-    src/gui/qml/qmlenums.cpp
+    src/gui/qml/qmlenums.cpp \
+    src/gui/qml/gamesortmodel.cpp
 #    src/gui/qml/qmlchat.cpp
 
 TRANSLATIONS = ts/pokerth_af.ts \
