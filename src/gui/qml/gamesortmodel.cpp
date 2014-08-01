@@ -77,7 +77,6 @@ bool GameSortModel::lessThan(const QModelIndex &left, const QModelIndex &right) 
         return gil->isPasswordProtected() < gir->isPasswordProtected();
     case QmlEnums::GameSortActionTimeout:
         return gdl->playerActionTimeoutSec() < gdr->playerActionTimeoutSec();
-        break;
     }
 
     return false;
