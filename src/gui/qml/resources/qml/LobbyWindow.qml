@@ -10,18 +10,18 @@ Window {
     title: "Lobby"
     width: 800
     height: 600
+    Component.onCompleted: {
+    }
 
     modality: Qt.WindowModal
-    PokerTH.PlayerSortModel {
+    PokerTH.GameSortModel {
         id: psm
-        sortRole: sourceModel.role("country")
-        sourceModel: Manager.server.lobbyPlayers
+        sourceModel: Manager.server.games
+        sortRole: PokerTH.Enums.GameSortStatus
     }
-    PokerTH.PlayerSortModel {
+    PokerTH.ChatSortModel {
         id: psm2
-        sourceModel: Manager.server.lobbyPlayers
-        hideActive: true
-        wildcardExpression: "labsin2"
+        sourceModel: Manager.server.chat
     }
 
     ScrollView {
@@ -29,13 +29,14 @@ Window {
         anchors {left: parent.left;
             top: parent.top; bottom: parent.bottom}
         width: parent.width/2
+        frameVisible: true
         ListView {
             id: lv
             width: parent.width
             model: psm
             delegate: Text {
-//                property GameInfo gameInfo: info
-                text: name+" country:"+country + " Idle:"+idle
+                property GameInfo gameInfo: info
+                text: name+" id: " + gameId + " mode:"+gameInfo.mode+" gameType:"+gameInfo.data.gameType
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -46,20 +47,22 @@ Window {
     }
     ScrollView {
         id: sv2
-        anchors {left: sv1.right; right: parent.right;
+        anchors {right: parent.right;
             top: parent.top; bottom: parent.bottom}
+        width: parent.width/2
+        frameVisible: true
         ListView {
             id: lv2
             width: parent.width
             model: psm2
             delegate: Text {
-//                property GameInfo gameInfo: info
-                text: name+" country:"+country
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                    }
-                }
+                text: playerName+" message: " + message + " fromLobby:"+fromLobby+" fromGame:"+fromGame
+//                MouseArea {
+//                    anchors.fill: parent
+//                    onClicked: {
+//                        print(message)
+//                    }
+//                }
             }
         }
     }
