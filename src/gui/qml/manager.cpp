@@ -41,6 +41,8 @@ Manager::~Manager()
 
 void Manager::Init(ConfigFile *c, Log *l)
 {
+    myConfig = c;
+    myLog = l;
     myGame = new QmlGame(this);
     myServer = new QmlServer(this);
 
@@ -49,8 +51,6 @@ void Manager::Init(ConfigFile *c, Log *l)
     serverRoleNames[QmlEnums::ServerCountryRole] =  "country";
     serverRoleNames[QmlEnums::ServerIdRole] =  "id";
     myServerModel = new RoleItemModel(serverRoleNames, this);
-    myConfig = c;
-    myLog = l;
     myGuiInterface.reset(new GuiWrapper());
     {
         mySession.reset(new Session(myGuiInterface.get(), myConfig, myLog));
