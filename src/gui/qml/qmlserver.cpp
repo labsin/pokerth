@@ -44,6 +44,22 @@ QmlServer::QmlServer(QObject *parent) :
     connectedPlayersChanged(m_connectedPlayerModel);
     connectedSpectatorsChanged(m_connectedSpectatorModel);
 
+    QHash<int, QByteArray> chatRoleNames;
+    chatRoleNames[QmlEnums::ChatPlayerName] = "playerName";
+    chatRoleNames[QmlEnums::ChatMessage] = "message";
+    chatRoleNames[QmlEnums::ChatPM] = "pm";
+    chatRoleNames[QmlEnums::ChatLobby] = "fromLobby";
+    chatRoleNames[QmlEnums::ChatGame] = "fromGame";
+    chatRoleNames[QmlEnums::ChatBot] = "fromBot";
+    chatRoleNames[QmlEnums::ChatMeReferred] = "meReferred";
+    chatRoleNames[QmlEnums::ChatMyMessage] = "myMessage";
+    chatRoleNames[QmlEnums::ChatOnIgnoreList] = "onIgnoreList";
+
+    m_chatModel = new RoleItemModel(chatRoleNames, this);
+    chatModelChanged(m_chatModel);
+    refreshIgnoreList();
+    refreshMynick();
+
     //Fix thread affinity
     connect(this, SIGNAL(SignalNetClientConnect(int)), this, SLOT(setconnectAction(int)));
     connect(this, SIGNAL(SignalNetClientServerListShow()), this, SIGNAL(serverChooseNeeded()));
@@ -66,6 +82,11 @@ QmlServer::QmlServer(QObject *parent) :
     connect(this, SIGNAL(SignalNetClientGameListSpectatorLeft(uint,uint)), this, SLOT(gameRemoveSpectator(uint,uint)));
     connect(this, SIGNAL(SignalLobbyPlayerJoined(uint,QString)), this, SLOT(lobbyAddPlayer(uint,QString)));
     connect(this, SIGNAL(SignalLobbyPlayerLeft(uint)), this, SLOT(lobbyRemovePlayer(uint)));
+
+    // Chat
+    connect(this, SIGNAL(SignalNetClientGameChatMsg(QString,QString)), this, SLOT(gameChatMsg(QString,QString)));
+    connect(this, SIGNAL(SignalNetClientLobbyChatMsg(QString,QString)), this, SLOT(lobbyChatMsg(QString,QString)));
+    connect(this, SIGNAL(SignalNetClientPrivateChatMsg(QString,QString)), this, SLOT(pmChatMsg(QString,QString)));
 }
 
 QmlServer::~QmlServer()
@@ -87,6 +108,7 @@ void QmlServer::setconnectAction(int arg)
 
         if(arg==static_cast<int>(ConnectActionLast)) {
             m_connectToServerTimeout->start(1000);
+            refreshMynick();
         }
     }
 }
@@ -97,6 +119,48 @@ void QmlServer::registerType()
     qRegisterMetaType<QmlServer::ConnectAction>("ConnectAction");
     qRegisterMetaType<QmlServer::NetworkError>("NetworkError");
     qRegisterMetaType<QmlServer::NetworkNotification>("NetworkNotification");
+}
+
+QString QmlServer::checkForEmotes(QString msg)
+{
+
+    //prevent links from beeing broken by :/ emoticon
+    if(!msg.contains("http://") && !msg.contains("https://")) {
+        msg.replace(":/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
+    }
+
+    msg.replace("0:-)", "<img src=\"qrc:/emotes/emotes/face-angel.png\" />");
+    msg.replace("X-(", "<img src=\"qrc:/emotes/emotes/face-angry.png\" />");
+    msg.replace("B-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
+    msg.replace("8-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
+    msg.replace(":'(", "<img src=\"qrc:/emotes/emotes/face-crying.png\" />");
+    msg.replace("&gt;:-)", "<img src=\"qrc:/emotes/emotes/face-devilish.png\" />");
+    msg.replace(":-[", "<img src=\"qrc:/emotes/emotes/face-embarrassed.png\" />");
+    msg.replace(":-*", "<img src=\"qrc:/emotes/emotes/face-kiss.png\" />");
+    msg.replace(":-))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
+    msg.replace(":))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
+    msg.replace(":-|", "<img src=\"qrc:/emotes/emotes/face-plain.png\" />");
+    msg.replace(":-P", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
+    msg.replace(":-p", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
+    msg.replace(":-(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
+    msg.replace(":(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
+    msg.replace(":-&", "<img src=\"qrc:/emotes/emotes/face-sick.png\" />");
+    msg.replace(":-D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
+    msg.replace(":D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
+    msg.replace(":-!", "<img src=\"qrc:/emotes/emotes/face-smirk.png\" />");
+    msg.replace(":-0", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-O", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-o", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
+
+    msg.replace(";-)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
+    msg.replace(";)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
+    msg.replace(":-S", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
+    msg.replace(":-s", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
+    msg.replace(":-)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
+    msg.replace(":)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
+
+    return msg;
 }
 
 QObject *QmlServer::getLobbyPlayers() const
@@ -117,6 +181,11 @@ QObject *QmlServer::getConnectedSpectators() const
 QObject *QmlServer::getGames() const
 {
     return dynamic_cast<QObject *>(m_gameModel);
+}
+
+QObject *QmlServer::getChatModel() const
+{
+    return dynamic_cast<QObject *>(m_chatModel);
 }
 
 void QmlServer::setLoginData(bool regUser, QString userName, QString password, bool rememberPassword)
@@ -272,6 +341,86 @@ void QmlServer::updatePlayerItem(QStandardItem* item, unsigned playerId)
     item->setData(playerInfo.isGuest, QmlEnums::NickIsGuestRole);
 //    item->setData(Idle, QmlEnums::NickIdleRole);
     item->setData(playerInfo.isAdmin, QmlEnums::NickIsAdminRole);
+}
+
+void QmlServer::addChatMessage(int type, QString playerName, QString message)
+{
+    QStandardItem* item = new QStandardItem();
+
+    item->setData(QVariant::fromValue(playerName), QmlEnums::ChatPlayerName);
+
+    switch(type) {
+    case 0: // PM
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatPM);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatGame);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatLobby);
+        break;
+    case 1: // Game
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatPM);
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatGame);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatLobby);
+        break;
+    case 2: // Lobby
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatPM);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatGame);
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatLobby);
+        break;
+    default:
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatPM);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatGame);
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatLobby);
+        break;
+    }
+
+    message = message.replace("<","&lt;");
+    message = message.replace(">","&gt;");
+    //doing the links
+    message = message.replace(QRegExp("((?:https?)://\\S+)"), "<a href=\"\\1\">\\1</a>");
+
+    if(!ManagerSingleton::Instance()->getConfig()->readConfigInt("DisableChatEmoticons")) {
+        message = checkForEmotes(message);
+    }
+    item->setData(QVariant::fromValue(message),QmlEnums::ChatMessage);
+
+    if(message.contains(myNick, Qt::CaseInsensitive)) {
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatMeReferred);
+    }
+    else {
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatMeReferred);
+    }
+
+    if(playerName == myNick) {
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatMyMessage);
+    }
+    else {
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatMyMessage);
+    }
+
+    bool isBot = playerName == "(chat bot)";
+    if(isBot) {
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatBot);
+    }
+    else {
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatBot);
+    }
+
+    bool found = false;
+    std::list<std::string>::iterator it1;
+    for(it1=ignoreList.begin(); it1 != ignoreList.end(); ++it1) {
+        if(playerName == QString::fromUtf8(it1->c_str())) {
+            found = true;
+            break;
+        }
+        if(isBot && message.startsWith(QString::fromUtf8(it1->c_str()))) {
+            found = true;
+            break;
+        }
+    }
+    if(found)
+        item->setData(QVariant::fromValue(true),QmlEnums::ChatOnIgnoreList);
+    else
+        item->setData(QVariant::fromValue(false),QmlEnums::ChatOnIgnoreList);
+    m_chatModel->appendRow(item);
 }
 
 void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
@@ -545,4 +694,15 @@ void QmlServer::processNotification(int notification)
     switch(static_cast<NetworkNotification>(notification)) {
     //TODO
     }
+}
+
+void QmlServer::refreshIgnoreList()
+{
+    ignoreList = ManagerSingleton::Instance()->getConfig()->readConfigStringList("PlayerIgnoreList");
+}
+
+void QmlServer::refreshMynick()
+{
+    //refresh myNick if it was changed during runtime
+    myNick = QString::fromUtf8(ManagerSingleton::Instance()->getConfig()->readConfigString("MyName").c_str());
 }

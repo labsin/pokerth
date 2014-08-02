@@ -500,14 +500,17 @@ void GuiWrapper::SignalLobbyPlayerLeft(unsigned playerId)
 void GuiWrapper::SignalNetClientGameChatMsg(const string &playerName, const string &msg)
 {
     qDebug()<<"SignalNetClientGameChatMsg()";
+    emit myServer->SignalNetClientGameChatMsg(QString::fromUtf8(playerName.c_str()), QString::fromUtf8(msg.c_str()));
 }
 void GuiWrapper::SignalNetClientLobbyChatMsg(const string &playerName, const string &msg)
 {
     qDebug()<<"SignalNetClientLobbyChatMsg()";
+    emit myServer->SignalNetClientLobbyChatMsg(QString::fromUtf8(playerName.c_str()), QString::fromUtf8(msg.c_str()));
 }
 void GuiWrapper::SignalNetClientPrivateChatMsg(const std::string &playerName, const std::string &msg)
 {
     qDebug()<<"SignalNetClientPrivateChatMsg()";
+    emit myServer->SignalNetClientPrivateChatMsg(QString::fromUtf8(playerName.c_str()), QString::fromUtf8(msg.c_str()));
 }
 void GuiWrapper::SignalNetClientMsgBox(const string &msg)
 {

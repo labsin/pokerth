@@ -9,6 +9,7 @@ class QmlEnums : public QObject
     Q_ENUMS(GameEntry)
     Q_ENUMS(NickEntry)
     Q_ENUMS(ServerEntry)
+    Q_ENUMS(ChatEntry)
 
 public:
     explicit QmlEnums(QObject *parent=0);
@@ -44,6 +45,18 @@ public:
         NickIsGuestRole,
         NickIdleRole,
         NickIsAdminRole
+    };
+
+    enum ChatEntry {
+        ChatPlayerName = Qt::UserRole + 1,
+        ChatMessage,
+        ChatPM,
+        ChatLobby,
+        ChatGame,
+        ChatBot,
+        ChatMeReferred,
+        ChatMyMessage,
+        ChatOnIgnoreList
     };
 };
 

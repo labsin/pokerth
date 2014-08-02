@@ -21,6 +21,7 @@
 #include "sortfilterproxymodel.h"
 #include "playersortmodel.h"
 #include "gamesortmodel.h"
+#include "chatsortmodel.h"
 
 Manager::Manager() {
     connect(this,SIGNAL(afterInit()),this,SIGNAL(gameChanged()));
@@ -66,6 +67,7 @@ void Manager::Init(ConfigFile *c, Log *l)
     SortFilterProxyModel::registerType();
     PlayerSortModel::registerType();
     GameSortModel::registerType();
+    ChatSortModel::registerType();
     QmlEnums::registerType();
 }
 

@@ -25,6 +25,7 @@ class QmlServer : public QObject
     Q_PROPERTY(QObject* connectedPlayers READ getConnectedPlayers NOTIFY connectedPlayersChanged)
     Q_PROPERTY(QObject* connectedSpectators READ getConnectedSpectators NOTIFY connectedSpectatorsChanged)
     Q_PROPERTY(QObject* games READ getGames NOTIFY gamesChanged)
+    Q_PROPERTY(QObject* chat READ getChatModel NOTIFY chatModelChanged)
 
 public:
     explicit QmlServer(QObject *parent = 0);
@@ -167,6 +168,8 @@ public:
         return m_isAdmin;
     }
 
+    QString checkForEmotes(QString msg);
+
 signals:
     void connectingToServer();
     void connectedToServer();
@@ -185,6 +188,7 @@ signals:
     void connectedPlayersChanged(QObject* model);
     void connectedSpectatorsChanged(QObject* model);
     void gamesChanged(QObject* model);
+    void chatModelChanged(QObject* model);
 
     //Fix thread affinity
     void SignalNetClientConnect(int actionID);
@@ -208,6 +212,10 @@ signals:
     void SignalNetClientGameListSpectatorLeft(unsigned gameId, unsigned playerId);
     void SignalLobbyPlayerJoined(unsigned playerId, QString nickName);
     void SignalLobbyPlayerLeft(unsigned playerId);
+    void SignalNetClientGameChatMsg(QString playerName, QString msg);
+    void SignalNetClientLobbyChatMsg(QString playerName, QString msg);
+    void SignalNetClientPrivateChatMsg(QString playerName, QString msg);
+    //Chat
 
 
 public slots:
@@ -247,13 +255,29 @@ public slots:
     void lobbyAddPlayer(unsigned playerId, QString playerName);
     void lobbyRemovePlayer(unsigned playerId);
 
+    void pmChatMsg(QString playerName, QString message)
+    {
+        addChatMessage(0,playerName,message);
+    }
+    void gameChatMsg(QString playerName, QString message)
+    {
+        addChatMessage(1,playerName,message);
+    }
+    void lobbyChatMsg(QString playerName, QString message)
+    {
+        addChatMessage(2,playerName,message);
+    }
+
     QObject *getLobbyPlayers() const;
     QObject *getConnectedPlayers() const;
     QObject *getConnectedSpectators() const;
     QObject *getGames() const;
+    QObject *getChatModel() const;
 
     void processError(int error);
     void processNotification(int notification);
+    void refreshIgnoreList();
+    void refreshMynick();
 
 private:
     
@@ -276,6 +300,7 @@ private:
     void updateGameItemData(QStandardItem *item, unsigned gameId);
     void updateGameItem(QStandardItem *item, unsigned gameId);
     void updatePlayerItem(QStandardItem *item, unsigned playerId);
+    void addChatMessage(int type /*0 pm, 1 game, 2 lobby*/, QString playerName, QString message);
 
     int m_connectAction;
     float m_connectProgress;
@@ -289,8 +314,12 @@ private:
     RoleItemModel* m_lobbyPlayerModel;
     RoleItemModel* m_connectedPlayerModel;
     RoleItemModel* m_connectedSpectatorModel;
+    RoleItemModel* m_chatModel;
     QHash<int, QByteArray> playerRoleNames;
     QHash<int, QByteArray> gameRoleNames;
+
+    std::list<std::string> ignoreList;
+    QString myNick;
 };
 
 #endif // QMLSERVER_H
