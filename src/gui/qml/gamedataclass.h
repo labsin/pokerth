@@ -258,7 +258,7 @@ public:
 
     QString name() const
     {
-        return QString::fromStdString(gi.name);
+        return QString::fromUtf8(gi.name.c_str());
     }
 
     GameDataClass* gameData() const

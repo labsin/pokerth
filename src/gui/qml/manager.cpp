@@ -151,8 +151,8 @@ void Manager::serverListAdd(unsigned serverId)
     ServerInfo info = getSession()->getClientServerInfo(serverId);
     QStandardItem* item = new QStandardItem();
     item->setData(info.id, QmlEnums::ServerIdRole);
-    item->setData(QString::fromStdString(info.name), QmlEnums::ServerNameRole);
-    item->setData(QString::fromStdString(info.country), QmlEnums::ServerCountryRole);
+    item->setData(QString::fromUtf8(info.name.c_str()), QmlEnums::ServerNameRole);
+    item->setData(QString::fromUtf8(info.country.c_str()), QmlEnums::ServerCountryRole);
     myServerModel->appendRow(item);
 }
 

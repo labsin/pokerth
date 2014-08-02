@@ -29,7 +29,7 @@ void GameDataClass::setToDefault(int net)
     // Set Game Data
     if(net==2) {
         setgameType((enum GameType)myConfig->readConfigInt("InternetGameType"));
-        setGameName(QString::fromStdString(myConfig->readConfigString("InternetGameName")));
+        setGameName(QString::fromUtf8(myConfig->readConfigString("InternetGameName").c_str()));
         setallowSpectators((bool)myConfig->readConfigInt("InternetGameAllowSpectators"));
     }
     if(net>1) {

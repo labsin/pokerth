@@ -1258,7 +1258,7 @@ void QmlGame::refreshPlayerAvatar()
 
     PlayerList seatsList = currentGame->getSeatsList();
     for (PlayerListConstIterator it_c=seatsList->begin(); it_c!=seatsList->end(); ++it_c) {
-        setPlayerAvatar((*it_c)->getMyUniqueID(), QString::fromStdString((*it_c)->getMyAvatar()));
+        setPlayerAvatar((*it_c)->getMyUniqueID(), QString::fromUtf8((*it_c)->getMyAvatar().c_str()));
     }
 }
 

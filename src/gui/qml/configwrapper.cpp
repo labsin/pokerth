@@ -14,7 +14,7 @@ ConfigWrapper::ConfigWrapper(ConfigFile *c, QObject *parent) :
 
 QString ConfigWrapper::readConfigString(QString varName) const
 {
-    return QString::fromStdString(myConfigFile->readConfigString(varName.toStdString()));
+    return QString::fromUtf8(myConfigFile->readConfigString(varName.toStdString()).c_str());
 }
 
 QString ConfigWrapper::readConfigBase64String(QString varName) const
@@ -27,7 +27,7 @@ QStringList ConfigWrapper::readConfigStringList(QString varName) const
     std::list<std::string>  stringList = myConfigFile->readConfigStringList(varName.toStdString());
     QStringList qStringList;
     for (std::list<std::string>::iterator it=stringList.begin(); it != stringList.end(); ++it)
-        qStringList.append(QString::fromStdString(*it));
+        qStringList.append(QString::fromUtf8(it->c_str()));
     return qStringList;
 }
 

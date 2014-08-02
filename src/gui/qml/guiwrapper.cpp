@@ -130,7 +130,7 @@ void GuiWrapper::refreshGameLabels(GameState gameState) const
 void GuiWrapper::setPlayerAvatar(int myUniqueID, const std::string &myAvatar) const
 {
     qDebug()<<"setPlayerAvatar()";
-    emit myGame->signalSetPlayerAvatar(myUniqueID, QString::fromStdString(myAvatar));
+    emit myGame->signalSetPlayerAvatar(myUniqueID, QString::fromUtf8(myAvatar.c_str()));
 }
 
 void GuiWrapper::waitForGuiUpdateDone() const
@@ -397,38 +397,38 @@ void GuiWrapper::SignalNetClientRemovedFromGame(int notificationId)
 void GuiWrapper::SignalNetClientSelfJoined(unsigned playerId, const string &playerName, bool isGameAdmin)
 {
     qDebug()<<"SignalNetClientSelfJoined()";
-    emit myServer->SignalNetClientSelfJoined(playerId, QString::fromStdString(playerName), isGameAdmin);
+    emit myServer->SignalNetClientSelfJoined(playerId, QString::fromUtf8(playerName.c_str()), isGameAdmin);
 }
 void GuiWrapper::SignalNetClientPlayerJoined(unsigned playerId, const string &playerName, bool isGameAdmin)
 {
     qDebug()<<"SignalNetClientPlayerJoined()";
-    emit myServer->SignalNetClientPlayerJoined(playerId, QString::fromStdString(playerName), isGameAdmin);
+    emit myServer->SignalNetClientPlayerJoined(playerId, QString::fromUtf8(playerName.c_str()), isGameAdmin);
 }
 void GuiWrapper::SignalNetClientPlayerChanged(unsigned playerId, const string &newPlayerName)
 {
     qDebug()<<"SignalNetClientPlayerChanged()";
-    emit myServer->SignalNetClientPlayerChanged(playerId, QString::fromStdString(newPlayerName));
+    emit myServer->SignalNetClientPlayerChanged(playerId, QString::fromUtf8(newPlayerName.c_str()));
 }
 void GuiWrapper::SignalNetClientPlayerLeft(unsigned playerId, const string &playerName, int removeReason)
 {
     qDebug()<<"SignalNetClientPlayerLeft()";
-    emit myServer->SignalNetClientPlayerLeft(playerId, QString::fromStdString(playerName), removeReason);
-    emit myGame->signalNetClientPlayerLeft(playerId, QString::fromStdString(playerName), removeReason);
+    emit myServer->SignalNetClientPlayerLeft(playerId, QString::fromUtf8(playerName.c_str()), removeReason);
+    emit myGame->signalNetClientPlayerLeft(playerId, QString::fromUtf8(playerName.c_str()), removeReason);
 }
 void GuiWrapper::SignalNetClientSpectatorJoined(unsigned playerId, const string &playerName)
 {
     qDebug()<<"SignalNetClientSpectatorJoined()";
-    emit myServer->SignalNetClientSpectatorJoined(playerId, QString::fromStdString(playerName));
+    emit myServer->SignalNetClientSpectatorJoined(playerId, QString::fromUtf8(playerName.c_str()));
 }
 void GuiWrapper::SignalNetClientSpectatorLeft(unsigned playerId, const string &playerName, int removeReason)
 {
     qDebug()<<"SignalNetClientSpectatorLeft()";
-    emit myServer->SignalNetClientSpectatorLeft(playerId, QString::fromStdString(playerName), removeReason);
+    emit myServer->SignalNetClientSpectatorLeft(playerId, QString::fromUtf8(playerName.c_str()), removeReason);
 }
 void GuiWrapper::SignalNetClientNewGameAdmin(unsigned playerId, const string &playerName)
 {
     qDebug()<<"SignalNetClientNewGameAdmin()";
-    emit myServer->SignalNetClientNewGameAdmin(playerId, QString::fromStdString(playerName));
+    emit myServer->SignalNetClientNewGameAdmin(playerId, QString::fromUtf8(playerName.c_str()));
 }
 
 void GuiWrapper::SignalNetClientGameListNew(unsigned gameId)
@@ -484,7 +484,7 @@ void GuiWrapper::SignalNetClientWaitDialog()
 void GuiWrapper::SignalLobbyPlayerJoined(unsigned playerId, const string &nickName)
 {
     qDebug()<<"SignalLobbyPlayerJoined()";
-    emit myServer->SignalLobbyPlayerJoined(playerId, QString::fromStdString(nickName));
+    emit myServer->SignalLobbyPlayerJoined(playerId, QString::fromUtf8(nickName.c_str()));
 }
 void GuiWrapper::SignalLobbyPlayerKicked(const std::string &nickName, const std::string &byWhom, const std::string &reason)
 {
