@@ -52,10 +52,7 @@ using namespace std;
 GuiWrapper::GuiWrapper()
 {
     myManager = ManagerSingleton::Instance();
-    myConfig = myManager->getConfig();
-    myGame = myManager->getGame();
-    myServer = myManager->getServer();
-    emit myManager->afterInit();
+    connect(myManager, SIGNAL(afterInit()), this, SLOT(init()));
 }
 
 
@@ -68,6 +65,8 @@ void GuiWrapper::initGui(int speed)
     qDebug()<<"initGui()";
     emit myGame->initGui(speed);
 }
+
+
 
 boost::shared_ptr<Session> GuiWrapper::getSession()
 {
@@ -270,61 +269,77 @@ void GuiWrapper::disableMyButtons()
 void GuiWrapper::startTimeoutAnimation(int playerNum, int timeoutSec)
 {
     qDebug()<<"startTimeoutAnimation()";
+    emit myGame->signalStartTimeoutAnimation(playerNum, timeoutSec);
 }
 void GuiWrapper::stopTimeoutAnimation(int playerNum)
 {
     qDebug()<<"stopTimeoutAnimation()";
+    emit myGame->signalStopTimeoutAnimation(playerNum);
 }
 
 void GuiWrapper::startVoteOnKick(unsigned playerId, unsigned voteStarterPlayerId, int timeoutSec, int numVotesNeededToKick)
 {
     qDebug()<<"startVoteOnKick()";
+    emit myGame->signalStartVoteOnKick(playerId, voteStarterPlayerId, timeoutSec, numVotesNeededToKick);
 }
 void GuiWrapper::changeVoteOnKickButtonsState(bool showHide)
 {
     qDebug()<<"changeVoteOnKickButtonsState()";
+    emit myGame->signalChangeVoteOnKickButtonsState(showHide);
 }
 void GuiWrapper::refreshVotesMonitor(int currentVotes, int numVotesNeededToKick)
 {
     qDebug()<<"refreshVotesMonitor()";
+    emit myGame->signalRefreshVotesMonitor(currentVotes, numVotesNeededToKick);
 }
 void GuiWrapper::endVoteOnKick()
 {
     qDebug()<<"endVoteOnKick()";
+    emit myGame->signalEndVoteOnKick();
 }
 
+// Logging
 void GuiWrapper::logPlayerActionMsg(string playerName, int action, int setValue)
 {
+    //TODO
     qDebug()<<"logPlayerActionMsg()";
 }
 void GuiWrapper::logNewGameHandMsg(int gameID, int handID)
 {
+    //TODO
     qDebug()<<"logNewGameHandMsg()";
 }
 void GuiWrapper::logNewBlindsSetsMsg(int sbSet, int bbSet, std::string sbName, std::string bbName)
 {
+    //TODO
     qDebug()<<"logNewBlindsSetsMsg()";
 }
 void GuiWrapper::logPlayerWinsMsg(std::string playerName, int pot, bool main)
 {
+    //TODO
     qDebug()<<"logPlayerWinsMsg()";
 }
 void GuiWrapper::logPlayerSitsOut(std::string playerName)
 {
+    //TODO
     qDebug()<<"logPlayerSitsOut()";
 }
 void GuiWrapper::logDealBoardCardsMsg(int roundID, int card1, int card2, int card3, int card4, int card5)
 {
+    //TODO
     qDebug()<<"logDealBoardCardsMsg()";
 }
 void GuiWrapper::logFlipHoleCardsMsg(string playerName, int card1, int card2, int cardsValueInt, string showHas)
 {
+    //TODO
     qDebug()<<"logFlipHoleCardsMsg()";
 }
 void GuiWrapper::logPlayerWinGame(std::string playerName, int gameID)
 {
+    //TODO
     qDebug()<<"logPlayerWinGame()";
 }
+
 
 void GuiWrapper::SignalNetClientConnect(int actionID)
 {
@@ -354,15 +369,18 @@ void GuiWrapper::SignalNetClientLoginShow()
 void GuiWrapper::SignalNetClientRejoinPossible(unsigned gameId)
 {
     qDebug()<<"SignalNetClientRejoinPossible()";
+    emit myServer->rejoinPossible(gameId);
 }
 void GuiWrapper::SignalNetClientPostRiverShowCards(unsigned playerId)
 {
-    emit myGame->signalPostRiverShowCards(playerId);
     qDebug()<<"SignalNetClientPostRiverShowCards()";
+    emit myGame->signalPostRiverShowCards(playerId);
 }
 void GuiWrapper::SignalNetClientGameInfo(int actionID)
 {
+    //TODO
     qDebug()<<"SignalNetClientGameInfo()";
+    emit myServer->refresh(actionID);
 }
 void GuiWrapper::SignalNetClientError(int errorID, int osErrorID)
 {
@@ -382,10 +400,12 @@ void GuiWrapper::SignalNetClientStatsUpdate(const ServerStats &stats)
 void GuiWrapper::SignalNetClientShowTimeoutDialog(NetTimeoutReason reason, unsigned remainingSec)
 {
     qDebug()<<"SignalNetClientShowTimeoutDialog()";
+    emit myServer->SignalSetTimeout((int)reason, remainingSec);
 }
 void GuiWrapper::SignalNetClientPingUpdate(unsigned minPing, unsigned avgPing, unsigned maxPing)
 {
     qDebug()<<"SignalNetClientPingUpdate()";
+    emit myServer->SignalSetPing(minPing, avgPing, maxPing);
 }
 
 void GuiWrapper::SignalNetClientRemovedFromGame(int notificationId)
@@ -479,7 +499,9 @@ void GuiWrapper::SignalNetClientGameStart(boost::shared_ptr<Game> game)
 
 void GuiWrapper::SignalNetClientWaitDialog()
 {
+    //TODO
     qDebug()<<"SignalNetClientWaitDialog()";
+    emit myServer->waitDialog();
 }
 void GuiWrapper::SignalLobbyPlayerJoined(unsigned playerId, const string &nickName)
 {
@@ -488,6 +510,7 @@ void GuiWrapper::SignalLobbyPlayerJoined(unsigned playerId, const string &nickNa
 }
 void GuiWrapper::SignalLobbyPlayerKicked(const std::string &nickName, const std::string &byWhom, const std::string &reason)
 {
+    //TODO: Not Used in Widget version
     qDebug()<<"SignalLobbyPlayerKicked()";
 }
 void GuiWrapper::SignalLobbyPlayerLeft(unsigned playerId)
@@ -515,14 +538,17 @@ void GuiWrapper::SignalNetClientPrivateChatMsg(const std::string &playerName, co
 void GuiWrapper::SignalNetClientMsgBox(const string &msg)
 {
     qDebug()<<"SignalNetClientMsgBox()";
+    emit myServer->networkMessage(-1,QString::fromUtf8(msg.c_str()));
 }
 void GuiWrapper::SignalNetClientMsgBox(unsigned msgId)
 {
     qDebug()<<"SignalNetClientMsgBox()";
+    emit myServer->networkMessage(msgId);
 }
 
 //ServerError
 void GuiWrapper::SignalNetServerSuccess(int /*actionID*/) {
+    //TODO not used in Widget version
     qDebug()<<"SignalNetServerSuccess()";
 }
 void GuiWrapper::SignalNetServerError(int errorID, int osErrorID)
@@ -572,12 +598,22 @@ void GuiWrapper::SignalIrcServerError(int /*errorCode*/)
 void GuiWrapper::SignalSelfGameInvitation(unsigned gameId, unsigned playerIdFrom)
 {
     qDebug()<<"SignalSelfGameInvitation()";
+    emit myServer->gameInvitation(gameId, playerIdFrom);
 }
 void GuiWrapper::SignalPlayerGameInvitation(unsigned gameId, unsigned playerIdWho, unsigned playerIdFrom)
 {
     qDebug()<<"SignalPlayerGameInvitation()";
+    emit myServer->SignalPlayerGameInvitation(gameId, playerIdWho, playerIdFrom);
 }
 void GuiWrapper::SignalRejectedGameInvitation(unsigned gameId, unsigned playerIdWho, DenyGameInvitationReason reason)
 {
     qDebug()<<"SignalRejectedGameInvitation()";
+    emit myServer->SignalRejectedGameInvitation(gameId, playerIdWho, reason);
+}
+
+void GuiWrapper::init()
+{
+    myConfig = myManager->getConfig();
+    myGame = myManager->getGame();
+    myServer = myManager->getServer();
 }

@@ -7,6 +7,8 @@
 #include "gamedata.h"
 #include "QQmlListProperty"
 
+class QmlPlayer;
+
 class GameDataClass : public QObject
 {
     Q_OBJECT
@@ -317,16 +319,107 @@ private:
 class VoteKickDataClass : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QmlPlayer* player READ player WRITE setplayer NOTIFY playerChanged)
+    Q_PROPERTY(QmlPlayer* voteStarterPlayer READ voteStarterPlayer WRITE setvoteStarterPlayer NOTIFY voteStarterPlayerChanged)
+    Q_PROPERTY(int timeOut READ timeOut WRITE setTimeOut NOTIFY timeOutChanged)
+    Q_PROPERTY(int numberVotesNeeded READ numberVotesNeeded WRITE setNumberVotesNeeded NOTIFY numberVotesNeededChanged)
+    Q_PROPERTY(int currentVotes READ currentVotes WRITE setCurrentVotes NOTIFY currentVotesChanged)
+    Q_PROPERTY(bool shown READ shown WRITE setShown NOTIFY shownChanged)
+
 public:
     explicit VoteKickDataClass(QObject *parent = 0);
-    VoteKickDataClass(VoteKickData voteKickData, QObject *parent = 0);
+    void reset();
+
+    QmlPlayer* player() const
+    {
+        return m_player;
+    }
+
+    QmlPlayer* voteStarterPlayer() const
+    {
+        return m_voteStarterPlayer;
+    }
+
+    int timeOut() const
+    {
+        return m_timeOut;
+    }
+
+    int numberVotesNeeded() const
+    {
+        return m_numberVotesNeeded;
+    }
+
+    int currentVotes() const
+    {
+        return m_currentVotes;
+    }
+
+    bool shown() const
+    {
+        return m_shown;
+    }
 
 signals:
 
+    void playerChanged(QmlPlayer* arg);
+
+    void voteStarterPlayerChanged(QmlPlayer* arg);
+
+    void timeOutChanged(int arg);
+
+    void numberVotesNeededChanged(int arg);
+
+    void currentVotesChanged(int arg);
+
+    void shownChanged(bool arg);
+
 public slots:
 
+    void setplayer(QmlPlayer* arg);
+
+    void setvoteStarterPlayer(QmlPlayer* arg);
+
+    void setTimeOut(int arg)
+    {
+        if(arg != m_timeOut) {
+            m_timeOut = arg;
+            emit timeOutChanged(arg);
+        }
+    }
+
+    void setNumberVotesNeeded(int arg)
+    {
+        if(arg != m_numberVotesNeeded) {
+            m_numberVotesNeeded = arg;
+            emit numberVotesNeededChanged(arg);
+        }
+    }
+
+    void setCurrentVotes(int arg)
+    {
+        if(arg != m_currentVotes) {
+            m_currentVotes = arg;
+            emit currentVotesChanged(arg);
+        }
+    }
+
+    void setShown(bool arg)
+    {
+        if(arg != m_shown) {
+            m_shown = arg;
+            emit shownChanged(arg);
+        }
+    }
+
 private:
-    VoteKickData vd;
+
+    QmlPlayer* m_player;
+    QmlPlayer* m_voteStarterPlayer;
+    int m_timeOut;
+    int m_numberVotesNeeded;
+    int m_currentVotes;
+    bool m_shown;
 };
 
 #endif // GAMEDATACLASS_H

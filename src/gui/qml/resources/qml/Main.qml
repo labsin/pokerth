@@ -140,7 +140,7 @@ StartWindow {
         }
         onNetworkNotification: {
             print("Network Notificaion")
-            var errorString
+            var errorString = ""
 
             switch(notificationID) {
 
@@ -189,9 +189,60 @@ StartWindow {
 
             print(errorString)
         }
+        onNetworkMessage: {
+            print("Network Message")
+            var errorString = ""
+
+            if(msgID == -1) {
+                errorString = msg
+            }
+            else {
+                switch(msgID) {
+
+                case PokerTH.Server.NetMsgAvatarAccepted:
+                    errorString = "The avatar report was accepted by the server. Thank you."
+                    break;
+                case PokerTH.Server.NetMsgAvatarDup:
+                    errorString = "This avatar was already reported by another player."
+                    break;
+                case PokerTH.Server.NetMsgAvatarRejected:
+                    errorString = "An error occurred while reporting the avatar."
+                    break;
+                case PokerTH.Server.NetMsgGameNameAccepted:
+                    errorString = "The game name report was accepted by the server. Thank you."
+                    break;
+                case PokerTH.Server.NetMsgGameNameDup:
+                    errorString = "This game name was already reported by another player."
+                    break;
+                case PokerTH.Server.NetMsgGameNameRejected:
+                    errorString = "An error occurred while reporting the game name."
+                    break;
+                case PokerTH.Server.NetMsgAdminRemoveGameAccepted:
+                    errorString = "The game was closed."
+                    break;
+                case PokerTH.Server.NetMsgAdminRemoveGameRejected:
+                    errorString = "The game could not be closed."
+                    break;
+                case PokerTH.Server.NetMsgAdminBanPlayerAccepted:
+                    errorString = "The player was kicked and banned permanently."
+                    break;
+                case PokerTH.Server.NetMsgAdminBanPlayerNoDB:
+                    errorString = "The player was kicked, but could not be banned because it was a guest player."
+                    break;
+                case PokerTH.Server.NetMsgAdminBanPlayerDBError:
+                    errorString = "The player was kicked, but could not be banned, \nbecause the nick could not be found in the database"
+                    break;
+                case PokerTH.Server.NetMsgAdminBanPlayerRejected:
+                    errorString = "The player could not be found."
+                    break;
+                }
+            }
+
+            print(errorString)
+        }
         onNetworkError: {
             print("Network Error")
-            var errorString
+            var errorString = ""
 
             switch (errorID) {
             case PokerTH.Server.ConnErrServerAddrNotSet:

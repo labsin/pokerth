@@ -161,7 +161,9 @@ HEADERS += \
     src/gui/qml/sortfilterproxymodel.h \
     src/gui/qml/qmlenums.h \
     src/gui/qml/gamesortmodel.h \
-    src/gui/qml/chatsortmodel.h
+    src/gui/qml/chatsortmodel.h \
+    src/gui/qml/timeout.h \
+    src/gui/qml/gamemodel.h
 
 SOURCES += \
     src/core/common/loghelper_client.cpp \
@@ -189,7 +191,9 @@ SOURCES += \
     src/gui/qml/sortfilterproxymodel.cpp \
     src/gui/qml/qmlenums.cpp \
     src/gui/qml/gamesortmodel.cpp \
-    src/gui/qml/chatsortmodel.cpp
+    src/gui/qml/chatsortmodel.cpp \
+    src/gui/qml/timeout.cpp \
+    src/gui/qml/gamemodel.cpp
 
 TRANSLATIONS = ts/pokerth_af.ts \
 	ts/pokerth_bg.ts \

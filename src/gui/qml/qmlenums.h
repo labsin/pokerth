@@ -16,20 +16,51 @@ public:
 
     static void registerType();
 
+    // used as data(GameDataRole + DataGameType)
+    enum DataEntry {
+        DataGameType = 1,
+        DataAllowSpectators,
+        DataMaxNumberOfPlayers,
+        DataStartMoney,
+        DataFirstSmallBlind,
+        DataRaiseIntervalMode,
+        DataRaiseSmallBlindEveryHandsValue,
+        DataRaiseSmallBlindEveryMinutesValue,
+        DataRaiseMode,
+        DataManualBlindsList,
+        DataAfterManualBlindsMode,
+        DataAfterMBAlwaysRaiseValue,
+        DataGuiSpeed,
+        DataDelayBetweenHandsSec,
+        DataPlayerActionTimeoutSec,
+        DataDefaultBlinds,
+        DataGameName
+    };
+
+    enum InfoEntry {
+        InfoGameName = 1,
+        InfoGameData,
+        InfoGameMode,
+        InfoAdmin,
+        InfoIsPwProt
+    };
+
     enum GameEntry  {
         GameIdRole = Qt::UserRole + 1,
         GameNameRole,
         GameMeInThisGameRole,
-        GameInfoRole,
         GamePlayerModelRole,
         GameSpectatorModelRole,
 
-        //Used by sort filter
-        GameSortPlayers = 0x1000,
-        GameSortStatus,
-        GameSortGameType,
-        GameSortPwProtect,
-        GameSortActionTimeout
+        //Not set directly, used in table/sort
+        GamePlayersStringRole,
+        GameStatusRole,
+        GameTypeRole,
+        GamePwProtectRole,
+        GameTimeoutRole,
+
+        GameInfoRole = 0x0300,
+        GameDataRole = 0x0400
     };
 
     enum ServerEntry {

@@ -29,9 +29,12 @@ public:
 
     Q_INVOKABLE int role(QString roleName);
 
+public slots:
+
 signals:
     void rowCountChanged();
     void columnCountChanged();
+    void invalidate();
 
 protected:
     QHash<int, QByteArray> roleNames() const;
@@ -41,6 +44,7 @@ private:
 
     QHash<int, QByteArray> m_roleNames;
 
+    Qt::SortOrder m_sortOrder;
 };
 
 #endif // ROLEITEMMODEL_H

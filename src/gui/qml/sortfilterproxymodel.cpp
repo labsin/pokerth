@@ -1,4 +1,5 @@
 #include "sortfilterproxymodel.h"
+#include "roleitemmodel.h"
 #include <QtQml>
 
 SortFilterProxyModel::SortFilterProxyModel(QObject *parent) :
@@ -20,8 +21,14 @@ void SortFilterProxyModel::setsourceModel(QObject *arg)
 {
     if (QSortFilterProxyModel::sourceModel() != arg) {
         if(QAbstractItemModel* model = qobject_cast<QAbstractItemModel*>(arg)) {
+            if(QSortFilterProxyModel::sourceModel())
+                if(RoleItemModel* tmp = qobject_cast<RoleItemModel*>(QSortFilterProxyModel::sourceModel()))
+                    disconnect(tmp,SIGNAL(invalidate()), this, SLOT(invalidate()));
             QSortFilterProxyModel::setSourceModel(model);
-            sort();
+            if(RoleItemModel* tmp = qobject_cast<RoleItemModel*>(arg)) {
+                connect(tmp,SIGNAL(invalidate()), this, SLOT(invalidate()));
+            }
+            sort(sortColumn(), sortOrder());
             emit sourceModelChanged(arg);
         }
     }
@@ -29,5 +36,6 @@ void SortFilterProxyModel::setsourceModel(QObject *arg)
 
 void SortFilterProxyModel::sort(int column, Qt::SortOrder order)
 {
-    QSortFilterProxyModel::sort(column, order);
+    int tmp_column = column < 0 ? 0 : column;
+    QSortFilterProxyModel::sort(tmp_column, order);
 }

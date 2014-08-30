@@ -4,6 +4,7 @@
 #include <QDebug>
 #include "configfile.h"
 #include "manager.h"
+#include "qmlplayer.h"
 
 GameDataClass::GameDataClass(QObject *parent) :
     QObject(parent)
@@ -282,11 +283,45 @@ StartDataClass::StartDataClass(StartData startData, QObject *parent) :
 }
 
 VoteKickDataClass::VoteKickDataClass(QObject *parent) :
-    QObject(parent)
+    QObject(parent), m_player(NULL), m_voteStarterPlayer(NULL)
+  , m_numberVotesNeeded(0), m_currentVotes(0), m_timeOut(0), m_shown(false)
 {
 }
 
-VoteKickDataClass::VoteKickDataClass(VoteKickData voteKickData, QObject *parent) :
-    QObject(parent), vd(voteKickData)
+void VoteKickDataClass::reset()
 {
+    setplayer(NULL);
+    setvoteStarterPlayer(NULL);
+    setNumberVotesNeeded(0);
+    setCurrentVotes(0);
+    setTimeOut(0);
+    setShown(false);
+}
+
+void VoteKickDataClass::setplayer(QmlPlayer *arg)
+{
+    if (m_player != arg) {
+        if(m_player) {
+            m_player->settoBeKicked(false);
+        }
+        m_player = arg;
+        m_player->settoBeKicked(true);
+        emit playerChanged(arg);
+    } else if(m_player) {
+        m_player->settoBeKicked(true);
+    }
+}
+
+void VoteKickDataClass::setvoteStarterPlayer(QmlPlayer *arg)
+{
+    if (m_voteStarterPlayer != arg) {
+        if(m_voteStarterPlayer) {
+            m_voteStarterPlayer->setvoteStarter(false);
+        }
+        m_voteStarterPlayer = arg;
+        m_voteStarterPlayer->setvoteStarter(true);
+        emit voteStarterPlayerChanged(arg);
+    } else if(m_voteStarterPlayer) {
+        m_voteStarterPlayer->setvoteStarter(true);
+    }
 }

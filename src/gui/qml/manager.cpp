@@ -43,21 +43,23 @@ void Manager::Init(ConfigFile *c, Log *l)
 {
     myConfig = c;
     myLog = l;
-    myGame = new QmlGame(this);
-    myServer = new QmlServer(this);
 
     QHash<int, QByteArray> serverRoleNames;
     serverRoleNames[QmlEnums::ServerNameRole] =  "name";
     serverRoleNames[QmlEnums::ServerCountryRole] =  "country";
     serverRoleNames[QmlEnums::ServerIdRole] =  "id";
     myServerModel = new RoleItemModel(serverRoleNames, this);
+
     myGuiInterface.reset(new GuiWrapper());
     {
         mySession.reset(new Session(myGuiInterface.get(), myConfig, myLog));
         mySession->init(); // TODO handle error
         myLog->init();
-        // 		myGuiInterface->setSession(session);
     }
+
+    myGame = new QmlGame(this);
+    myServer = new QmlServer(this);
+
     ConfigWrapper::registerType();
     GameDataClass::registerType();
     QmlPlayer::registerType();
@@ -69,6 +71,8 @@ void Manager::Init(ConfigFile *c, Log *l)
     GameSortModel::registerType();
     ChatSortModel::registerType();
     QmlEnums::registerType();
+
+    emit afterInit();
 }
 
 void Manager::startGame(QObject* obj)

@@ -39,6 +39,8 @@ class QmlPlayer : public QObject
     Q_PROPERTY(bool sessionActive READ isSessionActive NOTIFY sessionActive)
     Q_PROPERTY(bool kicked READ isKicked NOTIFY kicked)
     Q_PROPERTY(bool muted READ isMuted NOTIFY muted)
+    Q_PROPERTY(bool toBeKicked READ toBeKicked WRITE settoBeKicked NOTIFY toBeKickedChanged)
+    Q_PROPERTY(bool voteStarter READ voteStarter WRITE setvoteStarter NOTIFY voteStarterChanged)
 
 public:
     enum Action {
@@ -297,6 +299,16 @@ public:
 
     void initCards();
 
+    bool toBeKicked() const
+    {
+        return m_toBeKicked;
+    }
+
+    bool voteStarter() const
+    {
+        return m_voteStarter;
+    }
+
 signals:
 
     void guidChanged(QString arg);
@@ -322,11 +334,34 @@ signals:
 
     void idChanged(int arg);
 
+    void startTimeoutAnimation(int timeoutSec);
+    void stopTimeoutAnimation();
+
+    void toBeKickedChanged(bool arg);
+
+    void voteStarterChanged(bool arg);
+
 public slots:
 
     void setFlip(bool flipped);
 
     void setcardsDealt(bool arg);
+
+    void settoBeKicked(bool arg)
+    {
+        if (m_toBeKicked != arg) {
+            m_toBeKicked = arg;
+            emit toBeKickedChanged(arg);
+        }
+    }
+
+    void setvoteStarter(bool arg)
+    {
+        if (m_voteStarter != arg) {
+            m_voteStarter = arg;
+            emit voteStarterChanged(arg);
+        }
+    }
 
 private:
 
@@ -365,6 +400,8 @@ private:
     bool m_isKicked;
     bool m_isMuted;
     bool m_cardsDealt;
+    bool m_toBeKicked;
+    bool m_voteStarter;
 };
 
 #endif // QMLPLAYER_H

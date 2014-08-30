@@ -10,10 +10,15 @@
 #include "qmlenums.h"
 #include "gamedataclass.h"
 #include <net/socket_msg.h>
+#include "timeout.h"
+#include "gamemodel.h"
 
 QmlServer::QmlServer(QObject *parent) :
     QObject(parent), m_connectAction(ConnectActionNone), m_playerId(0), m_isAdmin(false) , m_inGame(false)
 {
+    m_manager = ManagerSingleton::Instance();
+    m_session = m_manager->getSession();
+
     connect(this,SIGNAL(networkError(int, int)),this,SLOT(processError(int)));
     connect(this,SIGNAL(networkNotification(int)),this,SLOT(processNotification(int)));
     m_connectToServerTimeout = new QTimer(this);
@@ -26,8 +31,13 @@ QmlServer::QmlServer(QObject *parent) :
     gameRoleNames[QmlEnums::GameInfoRole] = "info";
     gameRoleNames[QmlEnums::GamePlayerModelRole] = "players";
     gameRoleNames[QmlEnums::GameSpectatorModelRole] = "spectators";
+    gameRoleNames[QmlEnums::GamePlayersStringRole] = "playersString";
+    gameRoleNames[QmlEnums::GameStatusRole] = "gameStatus";
+    gameRoleNames[QmlEnums::GameTypeRole] = "gameType";
+    gameRoleNames[QmlEnums::GamePwProtectRole] = "pwProtect";
+    gameRoleNames[QmlEnums::GameTimeoutRole] = "timeout";
 
-    m_gameModel = new RoleItemModel(gameRoleNames, this);
+    m_gameModel = new GameModel(gameRoleNames, this);
     gamesChanged(m_gameModel);
 
     playerRoleNames[QmlEnums::NickNameRole] =  "name";
@@ -43,6 +53,8 @@ QmlServer::QmlServer(QObject *parent) :
     lobbyPlayersChanged(m_lobbyPlayerModel);
     connectedPlayersChanged(m_connectedPlayerModel);
     connectedSpectatorsChanged(m_connectedSpectatorModel);
+
+    m_timeout = new Timeout(this);
 
     QHash<int, QByteArray> chatRoleNames;
     chatRoleNames[QmlEnums::ChatPlayerName] = "playerName";
@@ -87,6 +99,9 @@ QmlServer::QmlServer(QObject *parent) :
     connect(this, SIGNAL(SignalNetClientGameChatMsg(QString,QString)), this, SLOT(gameChatMsg(QString,QString)));
     connect(this, SIGNAL(SignalNetClientLobbyChatMsg(QString,QString)), this, SLOT(lobbyChatMsg(QString,QString)));
     connect(this, SIGNAL(SignalNetClientPrivateChatMsg(QString,QString)), this, SLOT(pmChatMsg(QString,QString)));
+
+    connect(this, SIGNAL(SignalSetTimeout(int,uint)), this, SLOT(setTimeout(int,uint)));
+    connect(this, SIGNAL(SignalSetPing(uint,uint,uint)), this, SLOT(setPing(uint,uint,uint)));
 }
 
 QmlServer::~QmlServer()
@@ -121,47 +136,93 @@ void QmlServer::registerType()
     qRegisterMetaType<QmlServer::NetworkNotification>("NetworkNotification");
 }
 
-QString QmlServer::checkForEmotes(QString msg)
+void QmlServer::sendMessage(QString msg, bool inGame)
+{
+    if(msg.size() && m_session) {
+        if(inGame) {
+            m_session->sendGameChatMessage(msg.toUtf8().constData());
+        } else {
+            // Parse user name for private messages.
+            if(msg.indexOf(QString("/msg ")) == 0) {
+                msg.remove(0, 5);
+                unsigned playerId = parsePrivateMessageTarget(msg);
+                if (playerId) {
+                    m_session->sendPrivateChatMessage(playerId, msg.toUtf8().constData());
+                    QString tmp = tr("private message sent to player: %1");
+                    addChatMessage(2,myNick,"<i>"+tmp.arg(QString::fromUtf8(m_session->getClientPlayerInfo(playerId).playerName.c_str()))+"</i>");
+                }
+            } else {
+                m_session->sendLobbyChatMessage(msg.toUtf8().constData());
+            }
+        }
+    }
+}
+
+QObject *QmlServer::getTimeout() const
+{
+    if(m_timeout)
+        return qobject_cast<QObject*>(m_timeout);
+    return NULL;
+}
+
+void QmlServer::invitePlayer(unsigned playerID)
+{
+    m_session->invitePlayerToCurrentGame(playerID);
+}
+
+bool QmlServer::playerIsOnIgnoreList(unsigned playerID)
+{
+    return playerIsOnIgnoreList(QString::fromUtf8(m_session->getClientPlayerInfo(playerID).playerName.c_str()));
+}
+
+bool QmlServer::playerIsOnIgnoreList(QString playerName, QString message)
+{
+    bool isBot = playerName == "(chat bot)";
+    bool found = false;
+    std::list<std::string>::iterator it1;
+    for(it1=ignoreList.begin(); it1 != ignoreList.end(); ++it1) {
+        if(playerName == QString::fromUtf8(it1->c_str())) {
+            found = true;
+            break;
+        }
+        if(isBot && message.startsWith(QString::fromUtf8(it1->c_str()))) {
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
+void QmlServer::ignorePlayer(unsigned playerID)
+{
+    ConfigFile *config = m_manager->getConfig();
+    if(!playerIsOnIgnoreList(playerID)) {
+        std::list<std::string> playerIgnoreList = config->readConfigStringList("PlayerIgnoreList");
+        QString tmp = QString::fromUtf8(m_session->getClientPlayerInfo(playerID).playerName.c_str());
+        if(!tmp.compare("")==0) {
+            playerIgnoreList.push_back(tmp.toUtf8().constData());
+            config->writeConfigStringList("PlayerIgnoreList", playerIgnoreList);
+            config->writeBuffer();
+        }
+        emit m_chatModel->invalidate();
+    }
+}
+
+void QmlServer::unIgnorePlayer(unsigned playerID)
 {
 
-    //prevent links from beeing broken by :/ emoticon
-    if(!msg.contains("http://") && !msg.contains("https://")) {
-        msg.replace(":/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
-    }
-
-    msg.replace("0:-)", "<img src=\"qrc:/emotes/emotes/face-angel.png\" />");
-    msg.replace("X-(", "<img src=\"qrc:/emotes/emotes/face-angry.png\" />");
-    msg.replace("B-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
-    msg.replace("8-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
-    msg.replace(":'(", "<img src=\"qrc:/emotes/emotes/face-crying.png\" />");
-    msg.replace("&gt;:-)", "<img src=\"qrc:/emotes/emotes/face-devilish.png\" />");
-    msg.replace(":-[", "<img src=\"qrc:/emotes/emotes/face-embarrassed.png\" />");
-    msg.replace(":-*", "<img src=\"qrc:/emotes/emotes/face-kiss.png\" />");
-    msg.replace(":-))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
-    msg.replace(":))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
-    msg.replace(":-|", "<img src=\"qrc:/emotes/emotes/face-plain.png\" />");
-    msg.replace(":-P", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
-    msg.replace(":-p", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
-    msg.replace(":-(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
-    msg.replace(":(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
-    msg.replace(":-&", "<img src=\"qrc:/emotes/emotes/face-sick.png\" />");
-    msg.replace(":-D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
-    msg.replace(":D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
-    msg.replace(":-!", "<img src=\"qrc:/emotes/emotes/face-smirk.png\" />");
-    msg.replace(":-0", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
-    msg.replace(":-O", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
-    msg.replace(":-o", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
-    msg.replace(":-/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
-
-    msg.replace(";-)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
-    msg.replace(";)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
-    msg.replace(":-S", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
-    msg.replace(":-s", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
-    msg.replace(":-)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
-    msg.replace(":)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
-
-    return msg;
 }
+
+void QmlServer::reportGameName(unsigned gameID)
+{
+
+}
+
+void QmlServer::closeGame(unsigned gameID)
+{
+
+}
+
 
 QObject *QmlServer::getLobbyPlayers() const
 {
@@ -190,33 +251,34 @@ QObject *QmlServer::getChatModel() const
 
 void QmlServer::setLoginData(bool regUser, QString userName, QString password, bool rememberPassword)
 {
+    ConfigFile* config = m_manager->getConfig();
     if(regUser) {
-        ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetLoginMode", 0);
-        ManagerSingleton::Instance()->getConfig()->writeConfigString("MyName", userName.toUtf8().constData());
+        config->writeConfigInt("InternetLoginMode", 0);
+        config->writeConfigString("MyName", userName.toUtf8().constData());
         if(rememberPassword) {
-            ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetSavePassword", 1);
-            ManagerSingleton::Instance()->getConfig()->writeConfigString("InternetLoginPassword", password.toUtf8().toBase64().constData());
+            config->writeConfigInt("InternetSavePassword", 1);
+            config->writeConfigString("InternetLoginPassword", password.toUtf8().toBase64().constData());
         } else {
-            ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetSavePassword", 0);
+            config->writeConfigInt("InternetSavePassword", 0);
         }
 
     } else {
-        ManagerSingleton::Instance()->getConfig()->writeConfigInt("InternetLoginMode", 1);
+        config->writeConfigInt("InternetLoginMode", 1);
         // Generate a valid guest name.
         QString guestName;
         int guestId;
         Tools::GetRand(1, 99999, 1, &guestId);
         guestName.sprintf("Guest%05d", guestId);
-        ManagerSingleton::Instance()->getConfig()->writeConfigString("MyName", guestName.toUtf8().constData());
+        config->writeConfigString("MyName", guestName.toUtf8().constData());
     }
 
-    ManagerSingleton::Instance()->getConfig()->writeBuffer();
+    config->writeBuffer();
 
-    ManagerSingleton::Instance()->getSession()->setLogin(
+    m_session->setLogin(
                 userName.toUtf8().constData(),
                 password.toUtf8().constData(),
                 !regUser);
-    ManagerSingleton::Instance()->getSession()->terminateNetworkServer();
+    m_session->terminateNetworkServer();
 }
 
 void QmlServer::connectedToServerTimeout()
@@ -228,7 +290,7 @@ void QmlServer::connectedToServerTimeout()
 void QmlServer::refresh(int actionID)
 {
 	if (actionID == MSG_NET_GAME_CLIENT_START) {
-		QTimer::singleShot(500, this, SLOT(accept()));
+//		QTimer::singleShot(500, this, SLOT(accept()));
 	}
 }
 
@@ -237,6 +299,7 @@ void QmlServer::joinedNetworkGame(unsigned playerId, QString playerName, bool is
     setInGame(true);
     setIsAdmin(isGameAdmin);
     m_playerId = playerId;
+    refreshMynick();
     addConnectedPlayer(playerId, playerName, isGameAdmin);
 }
 
@@ -333,7 +396,7 @@ void QmlServer::newGameAdmin(unsigned playerId, QString playerName)
 
 void QmlServer::updatePlayerItem(QStandardItem* item, unsigned playerId)
 {
-    PlayerInfo playerInfo(ManagerSingleton::Instance()->getSession()->getClientPlayerInfo(playerId));
+    PlayerInfo playerInfo(m_session->getClientPlayerInfo(playerId));
 
     item->setData(QString::fromUtf8(playerInfo.playerName.c_str()), QmlEnums::NickNameRole);
     item->setData(QString::fromUtf8(playerInfo.countryCode.c_str()), QmlEnums::NickCountryRole);
@@ -377,7 +440,7 @@ void QmlServer::addChatMessage(int type, QString playerName, QString message)
     //doing the links
     message = message.replace(QRegExp("((?:https?)://\\S+)"), "<a href=\"\\1\">\\1</a>");
 
-    if(!ManagerSingleton::Instance()->getConfig()->readConfigInt("DisableChatEmoticons")) {
+    if(!m_manager->getConfig()->readConfigInt("DisableChatEmoticons")) {
         message = checkForEmotes(message);
     }
     item->setData(QVariant::fromValue(message),QmlEnums::ChatMessage);
@@ -404,28 +467,58 @@ void QmlServer::addChatMessage(int type, QString playerName, QString message)
         item->setData(QVariant::fromValue(false),QmlEnums::ChatBot);
     }
 
-    bool found = false;
-    std::list<std::string>::iterator it1;
-    for(it1=ignoreList.begin(); it1 != ignoreList.end(); ++it1) {
-        if(playerName == QString::fromUtf8(it1->c_str())) {
-            found = true;
-            break;
-        }
-        if(isBot && message.startsWith(QString::fromUtf8(it1->c_str()))) {
-            found = true;
-            break;
-        }
-    }
-    if(found)
+    if(playerIsOnIgnoreList(playerName, message))
         item->setData(QVariant::fromValue(true),QmlEnums::ChatOnIgnoreList);
     else
         item->setData(QVariant::fromValue(false),QmlEnums::ChatOnIgnoreList);
     m_chatModel->appendRow(item);
 }
 
+QString QmlServer::checkForEmotes(QString msg)
+{
+
+    //prevent links from beeing broken by :/ emoticon
+    if(!msg.contains("http://") && !msg.contains("https://")) {
+        msg.replace(":/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
+    }
+
+    msg.replace("0:-)", "<img src=\"qrc:/emotes/emotes/face-angel.png\" />");
+    msg.replace("X-(", "<img src=\"qrc:/emotes/emotes/face-angry.png\" />");
+    msg.replace("B-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
+    msg.replace("8-)", "<img src=\"qrc:/emotes/emotes/face-cool.png\" />");
+    msg.replace(":'(", "<img src=\"qrc:/emotes/emotes/face-crying.png\" />");
+    msg.replace("&gt;:-)", "<img src=\"qrc:/emotes/emotes/face-devilish.png\" />");
+    msg.replace(":-[", "<img src=\"qrc:/emotes/emotes/face-embarrassed.png\" />");
+    msg.replace(":-*", "<img src=\"qrc:/emotes/emotes/face-kiss.png\" />");
+    msg.replace(":-))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
+    msg.replace(":))", "<img src=\"qrc:/emotes/emotes/face-laugh.png\" />");
+    msg.replace(":-|", "<img src=\"qrc:/emotes/emotes/face-plain.png\" />");
+    msg.replace(":-P", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
+    msg.replace(":-p", "<img src=\"qrc:/emotes/emotes/face-raspberry.png\" />");
+    msg.replace(":-(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
+    msg.replace(":(", "<img src=\"qrc:/emotes/emotes/face-sad.png\" />");
+    msg.replace(":-&", "<img src=\"qrc:/emotes/emotes/face-sick.png\" />");
+    msg.replace(":-D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
+    msg.replace(":D", "<img src=\"qrc:/emotes/emotes/face-smile-big.png\" />");
+    msg.replace(":-!", "<img src=\"qrc:/emotes/emotes/face-smirk.png\" />");
+    msg.replace(":-0", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-O", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-o", "<img src=\"qrc:/emotes/emotes/face-surprise.png\" />");
+    msg.replace(":-/", "<img src=\"qrc:/emotes/emotes/face-uncertain.png\" />");
+
+    msg.replace(";-)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
+    msg.replace(";)", "<img src=\"qrc:/emotes/emotes/face-wink.png\" />");
+    msg.replace(":-S", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
+    msg.replace(":-s", "<img src=\"qrc:/emotes/emotes/face-worried.png\" />");
+    msg.replace(":-)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
+    msg.replace(":)", "<img src=\"qrc:/emotes/emotes/face-smile.png\" />");
+
+    return msg;
+}
+
 void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
 {
-    GameInfo info(ManagerSingleton::Instance()->getSession()->getClientGameInfo(gameId));
+    GameInfo info(m_session->getClientGameInfo(gameId));
     QVariant gi;
     QObject* giClass = new GameInfoClass(info, this);
     gi.setValue(dynamic_cast<QObject*>(giClass));
@@ -434,7 +527,7 @@ void QmlServer::updateGameItemData(QStandardItem* item, unsigned gameId)
 
 void QmlServer::updateGameItem(QStandardItem* item, unsigned gameId)
 {
-    GameInfo info(ManagerSingleton::Instance()->getSession()->getClientGameInfo(gameId));
+    GameInfo info(m_session->getClientGameInfo(gameId));
     item->setData(gameId, QmlEnums::GameIdRole);
     item->setData(QString::fromUtf8(info.name.c_str()), QmlEnums::GameNameRole);
     updateGameItemData(item,gameId);
@@ -684,7 +777,7 @@ void QmlServer::processError(int error)
     case NetErrPlayerBanned:
     case NetErrPlayerBlocked:
     case NetErrSessionTimedOut:
-        ManagerSingleton::Instance()->getSession()->terminateNetworkClient();
+        m_session->terminateNetworkClient();
         break;
     }
 }
@@ -698,11 +791,82 @@ void QmlServer::processNotification(int notification)
 
 void QmlServer::refreshIgnoreList()
 {
-    ignoreList = ManagerSingleton::Instance()->getConfig()->readConfigStringList("PlayerIgnoreList");
+    ignoreList = m_manager->getConfig()->readConfigStringList("PlayerIgnoreList");
 }
 
 void QmlServer::refreshMynick()
 {
     //refresh myNick if it was changed during runtime
-    myNick = QString::fromUtf8(ManagerSingleton::Instance()->getConfig()->readConfigString("MyName").c_str());
+    if(m_playerId) {
+        PlayerInfo playerInfo(m_session->getClientPlayerInfo(m_playerId));
+        myNick = QString::fromUtf8(playerInfo.playerName.c_str());
+    } else {
+        myNick = QString::fromUtf8(m_manager->getConfig()->readConfigString("MyName").c_str());
+    }
+}
+
+void QmlServer::setTimeout(int reason, unsigned remainingSec)
+{
+    m_timeout->setMsgID(reason);
+    m_timeout->startTimeout(remainingSec);
+}
+
+void QmlServer::setPing(unsigned minPing, unsigned avgPing, unsigned maxPing)
+{
+    m_minPing = minPing;
+    m_avgPing = avgPing;
+    m_maxPing = maxPing;
+    emit minPingChanged(m_minPing);
+    emit avgPingChanged(m_avgPing);
+    emit maxPingChanged(m_maxPing);
+}
+
+void QmlServer::playerGameInvitation(unsigned gameId, unsigned playerIdWho, unsigned playerIdFrom)
+{
+    lobbyChatMsg("(chat bot)",tr(
+                     "<span style='color:blue;'>%1 has been invited to %2 by %3.</span>"
+                     ).arg(QString::fromUtf8(m_session->getClientPlayerInfo(playerIdWho).playerName.c_str()))
+                 .arg(QString::fromUtf8(m_session->getClientGameInfo(gameId).name.c_str()))
+                 .arg(QString::fromUtf8(m_session->getClientPlayerInfo(playerIdFrom).playerName.c_str())));
+}
+
+void QmlServer::rejectedGameInvitation(unsigned gameId, unsigned playerIdWho, DenyGameInvitationReason reason)
+{
+    QString string;
+    if(reason == DENY_GAME_INVITATION_NO)
+        string = tr("%1 has rejected the invitation to %2.");
+
+    if(reason == DENY_GAME_INVITATION_BUSY)
+        string = tr("%1 cannot join %2 because he is busy.");
+
+    lobbyChatMsg("(chat bot)",string.arg(QString::fromUtf8(m_session->getClientPlayerInfo(playerIdWho).playerName.c_str()))
+                 .arg(QString::fromUtf8(m_session->getClientGameInfo(gameId).name.c_str())));
+}
+
+unsigned QmlServer::parsePrivateMessageTarget(QString &chatText)
+{
+    QString playerName;
+    int endPosName = -1;
+    // Target player is either in the format "this is a user" or singlename.
+    if (chatText.startsWith('"')) {
+        chatText.remove(0, 1);
+        endPosName = chatText.indexOf('"');
+    } else {
+        endPosName = chatText.indexOf(' ');
+    }
+    if (endPosName > 0) {
+        playerName = chatText.left(endPosName);
+        chatText.remove(0, endPosName + 1);
+    }
+    chatText = chatText.trimmed();
+    unsigned playerId = 0;
+    if (!playerName.isEmpty() && !chatText.isEmpty()) {
+        if(m_lobbyPlayerModel) {
+            QModelIndexList indexes = m_lobbyPlayerModel->match(m_lobbyPlayerModel->index(0,0),QmlEnums::NickNameRole,playerName,1,Qt::MatchExactly);
+            if(indexes.size()>0) {
+                playerId = m_lobbyPlayerModel->itemFromIndex(indexes.at(0))->data(QmlEnums::NickIdRole).toUInt();
+            }
+        }
+    }
+    return playerId;
 }

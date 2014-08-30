@@ -47,6 +47,7 @@ class QmlGame : public QObject
     Q_PROPERTY(bool showMyCardsButton READ showMyCardsButton NOTIFY showMyCardsButtonChanged)
     Q_PROPERTY(CheckCallRule checkCallRule READ checkCallRule WRITE setCheckCallRule NOTIFY checkCallRuleChanged)
     Q_PROPERTY(BetRaiseRule betRaiseRule READ betRaiseRule WRITE setBetRaiseRule NOTIFY betRaiseRuleChanged)
+    Q_PROPERTY(VoteKickDataClass* voteKickData READ voteKickData)
 
 public:
     explicit QmlGame(QObject *parent = 0);
@@ -270,6 +271,11 @@ public:
         return m_betRaiseRule;
     }
 
+    VoteKickDataClass* voteKickData() const
+    {
+        return m_voteKickData;
+    }
+
 public slots:
 
     void dealBeRoCards(int myBeRoID);
@@ -334,6 +340,15 @@ public slots:
     void flipHolecardsAllIn();
 
     void nextRoundCleanGui();
+
+    void startTimeoutAnimation(int playerId, int timeoutSec);
+
+    void stopTimeoutAnimation(int playerId);
+
+    void startVoteOnKick(unsigned playerId, unsigned voteStarterPlayerId, int timeoutSec, int numVotesNeededToKick);
+    void refreshVotesMonitor(int currentVotes, int numVotesNeededToKick);
+    void changeVoteOnKickButtonsState(bool showHide);
+    void endVoteOnKick();
 
     void setbets(int arg)
     {
@@ -598,6 +613,12 @@ signals:
     void signalMeInAction();
     void signalUpdateMyButtonsState();
     void signalDisableMyButtons();
+    void signalStartTimeoutAnimation(int playerId, int timeoutSec);
+    void signalStopTimeoutAnimation(int playerId);
+    void signalStartVoteOnKick(unsigned playerId, unsigned voteStarterPlayerId, int timeoutSec, int numVotesNeededToKick);
+    void signalChangeVoteOnKickButtonsState(bool showHide);
+    void signalRefreshVotesMonitor(int currentVotes, int numVotesNeededToKick);
+    void signalEndVoteOnKick();
 
     void signalGuiUpdateDone();
     void signalWaitForGuiUpdateDone();
@@ -699,6 +720,7 @@ private:
     bool m_showMyCardsButton;
     CheckCallRule m_checkCallRule;
     BetRaiseRule m_betRaiseRule;
+    VoteKickDataClass* m_voteKickData;
 };
 
 #endif // QMLGAME_H

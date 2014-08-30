@@ -36,6 +36,8 @@ QmlGame::QmlGame(QObject *parent) :
     m_turnCard = new QmlCard(this);
     m_riverCard = new QmlCard(this);
 
+    m_voteKickData = new VoteKickDataClass(this);
+
     //Timer Objekt erstellen
     dealFlopCards0Timer = new QTimer(this);
     dealFlopCards1Timer = new QTimer(this);
@@ -185,6 +187,12 @@ QmlGame::QmlGame(QObject *parent) :
     connect(this, SIGNAL(signalMeInAction()), this, SLOT(meInAction()));
     connect(this, SIGNAL(signalUpdateMyButtonsState()), this, SLOT(updateMyButtonsState()));
     connect(this, SIGNAL(signalDisableMyButtons()), this, SLOT(disableMyButtons()));
+    connect(this, SIGNAL(signalStartTimeoutAnimation(int, int)), this, SLOT(startTimeoutAnimation(int, int)));
+    connect(this, SIGNAL(signalStopTimeoutAnimation(int)), this, SLOT(stopTimeoutAnimation(int)));
+    connect(this, SIGNAL(signalStartVoteOnKick(unsigned, unsigned, int, int)), this, SLOT(startVoteOnKick(unsigned, unsigned, int, int)));
+    connect(this, SIGNAL(signalRefreshVotesMonitor(int,int)), this, SLOT(refreshVotesMonitor(int,int)));
+    connect(this, SIGNAL(signalChangeVoteOnKickButtonsState(bool)), this, SLOT(changeVoteOnKickButtonsState(bool)));
+    connect(this, SIGNAL(signalEndVoteOnKick()), this, SLOT(endVoteOnKick()));
 
     connect(this, SIGNAL(signalGuiUpdateDone()), this, SLOT(guiUpdateDone()));
     connect(this, SIGNAL(signalWaitForGuiUpdateDone()), this, SLOT(waitForGuiUpdateDone()));
@@ -245,6 +253,41 @@ void QmlGame::nextRoundCleanGui()
 
     flipHolecardsAllInAlreadyDone = false;
     emit nextRound();
+}
+
+void QmlGame::startTimeoutAnimation(int playerId, int timeoutSec)
+{
+    emit myPlayerModel->at(playerId)->startTimeoutAnimation(timeoutSec);
+}
+
+void QmlGame::stopTimeoutAnimation(int playerId)
+{
+    emit myPlayerModel->at(playerId)->stopTimeoutAnimation();
+}
+
+void QmlGame::startVoteOnKick(unsigned playerId, unsigned voteStarterPlayerId, int timeoutSec, int numVotesNeededToKick)
+{
+    m_voteKickData->reset();
+    m_voteKickData->setNumberVotesNeeded(numVotesNeededToKick);
+    m_voteKickData->setTimeOut(timeoutSec);
+    m_voteKickData->setplayer(myPlayerModel->at(playerId));
+    m_voteKickData->setvoteStarterPlayer(myPlayerModel->at(voteStarterPlayerId));
+}
+
+void QmlGame::refreshVotesMonitor(int currentVotes, int numVotesNeededToKick)
+{
+    m_voteKickData->setCurrentVotes(currentVotes);
+    m_voteKickData->setNumberVotesNeeded(numVotesNeededToKick);
+}
+
+void QmlGame::changeVoteOnKickButtonsState(bool showHide)
+{
+    m_voteKickData->setShown(showHide);
+}
+
+void QmlGame::endVoteOnKick()
+{
+    m_voteKickData->reset();
 }
 
 void QmlGame::stopTimer()

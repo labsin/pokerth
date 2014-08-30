@@ -1,14 +1,20 @@
 #ifndef QMLSERVER_H
 #define QMLSERVER_H
 
+#include <boost/shared_ptr.hpp>
 #include <QObject>
 #include "socket_msg.h"
 #include "gamedata.h"
 #include "serverdata.h"
 #include <QStandardItem>
+#include "game_defs.h"
 
 class QTimer;
 class RoleItemModel;
+class GameModel;
+class Manager;
+class Session;
+class Timeout;
 
 class QmlServer : public QObject
 {
@@ -16,6 +22,7 @@ class QmlServer : public QObject
     Q_ENUMS(ConnectAction)
     Q_ENUMS(NetworkError)
     Q_ENUMS(NetworkNotification)
+    Q_ENUMS(NetworkMessage)
     Q_ENUMS(IdleRole)
     Q_PROPERTY(int connectAction READ connectAction WRITE setconnectAction NOTIFY connectActionChanged)
     Q_PROPERTY(float connectProgress READ connectProgress WRITE setconnectProgress NOTIFY connectProgressChanged)
@@ -26,6 +33,10 @@ class QmlServer : public QObject
     Q_PROPERTY(QObject* connectedSpectators READ getConnectedSpectators NOTIFY connectedSpectatorsChanged)
     Q_PROPERTY(QObject* games READ getGames NOTIFY gamesChanged)
     Q_PROPERTY(QObject* chat READ getChatModel NOTIFY chatModelChanged)
+    Q_PROPERTY(QObject* timeout READ getTimeout NOTIFY timeoutChanged)
+    Q_PROPERTY(unsigned minPing READ minPing NOTIFY minPingChanged)
+    Q_PROPERTY(unsigned maxPing READ maxPing NOTIFY maxPingChanged)
+    Q_PROPERTY(unsigned avgPing READ avgPing NOTIFY avgPingChanged)
 
 public:
     explicit QmlServer(QObject *parent = 0);
@@ -144,6 +155,22 @@ public:
         NetNotOutdatedBeta = NTF_NET_OUTDATED_BETA
     };
 
+    enum NetworkMessage {
+        NetMsgAvatarAccepted = MSG_NET_AVATAR_REPORT_ACCEPTED,
+        NetMsgAvatarDup = MSG_NET_AVATAR_REPORT_DUP,
+        NetMsgAvatarRejected = MSG_NET_AVATAR_REPORT_REJECTED,
+        NetMsgGameNameAccepted = MSG_NET_GAMENAME_REPORT_ACCEPTED,
+        NetMsgGameNameDup = MSG_NET_GAMENAME_REPORT_DUP,
+        NetMsgGameNameRejected = MSG_NET_GAMENAME_REPORT_REJECTED,
+        NetMsgAdminRemoveGameAccepted = MSG_NET_ADMIN_REMOVE_GAME_ACCEPTED,
+        NetMsgAdminRemoveGameRejected = MSG_NET_ADMIN_REMOVE_GAME_REJECTED,
+        NetMsgAdminBanPlayerAccepted = MSG_NET_ADMIN_BAN_PLAYER_ACCEPTED,
+        NetMsgAdminBanPlayerPending = MSG_NET_ADMIN_BAN_PLAYER_PENDING,
+        NetMsgAdminBanPlayerNoDB = MSG_NET_ADMIN_BAN_PLAYER_NODB,
+        NetMsgAdminBanPlayerDBError = MSG_NET_ADMIN_BAN_PLAYER_DBERROR,
+        NetMsgAdminBanPlayerRejected = MSG_NET_ADMIN_BAN_PLAYER_REJECTED,
+    };
+
     int connectAction() const
     {
         return m_connectAction;
@@ -168,8 +195,33 @@ public:
         return m_isAdmin;
     }
 
-    QString checkForEmotes(QString msg);
+    Q_INVOKABLE void sendMessage(QString msg, bool inGame = false);
 
+    QObject* getTimeout() const;
+
+    unsigned minPing() const
+    {
+        return m_minPing;
+    }
+
+    unsigned maxPing() const
+    {
+        return m_maxPing;
+    }
+
+    unsigned avgPing() const
+    {
+        return m_avgPing;
+    }
+
+    Q_INVOKABLE void invitePlayer(unsigned playerID);
+    Q_INVOKABLE void ignorePlayer(unsigned playerID);
+    Q_INVOKABLE void unIgnorePlayer(unsigned playerID);
+    Q_INVOKABLE void reportGameName(unsigned gameID);
+    Q_INVOKABLE void closeGame(unsigned gameID);
+
+    bool playerIsOnIgnoreList(QString playerName, QString message = QString());
+    bool playerIsOnIgnoreList(unsigned playerID);
 signals:
     void connectingToServer();
     void connectedToServer();
@@ -181,6 +233,7 @@ signals:
     void connectProgressChanged(float arg);
     void networkError(int errorID, int osErrorID);
     void networkNotification(int notificationID);
+    void networkMessage(int msgID, QString msg = QString());
 
     void inGameChanged(bool inGame);
     void isAdminChanged(bool isAdmin);
@@ -189,6 +242,10 @@ signals:
     void connectedSpectatorsChanged(QObject* model);
     void gamesChanged(QObject* model);
     void chatModelChanged(QObject* model);
+
+    void rejoinPossible(unsigned gameId);
+
+    void timeout(int seconds, QString reason);
 
     //Fix thread affinity
     void SignalNetClientConnect(int actionID);
@@ -212,11 +269,27 @@ signals:
     void SignalNetClientGameListSpectatorLeft(unsigned gameId, unsigned playerId);
     void SignalLobbyPlayerJoined(unsigned playerId, QString nickName);
     void SignalLobbyPlayerLeft(unsigned playerId);
+    //Chat
     void SignalNetClientGameChatMsg(QString playerName, QString msg);
     void SignalNetClientLobbyChatMsg(QString playerName, QString msg);
     void SignalNetClientPrivateChatMsg(QString playerName, QString msg);
-    //Chat
 
+
+    void timeoutChanged(QObject* arg);
+    void SignalSetTimeout(int reason, unsigned remainingSec);
+    void SignalSetPing(unsigned minPing, unsigned avgPing, unsigned maxPing);
+
+    void minPingChanged(unsigned arg);
+
+    void maxPingChanged(unsigned arg);
+
+    void avgPingChanged(unsigned arg);
+
+    void gameInvitation(unsigned gameId, unsigned playerIdFrom);
+
+    void SignalPlayerGameInvitation(unsigned gameId, unsigned playerIdWho, unsigned playerIdFrom);
+    void SignalRejectedGameInvitation(unsigned gameId, unsigned playerIdWho, DenyGameInvitationReason reason);
+    void waitDialog();
 
 public slots:
 
@@ -279,6 +352,14 @@ public slots:
     void refreshIgnoreList();
     void refreshMynick();
 
+    void setTimeout(int reason, unsigned remainingSec);
+    void setPing(unsigned minPing, unsigned avgPing, unsigned maxPing);
+    void playerGameInvitation(unsigned gameId, unsigned playerIdWho, unsigned playerIdFrom);
+
+    void rejectedGameInvitation(unsigned gameId, unsigned playerIdWho, DenyGameInvitationReason reason);
+protected:
+    unsigned parsePrivateMessageTarget(QString &chatText);
+
 private:
     
     void setInGame(bool arg)
@@ -301,6 +382,10 @@ private:
     void updateGameItem(QStandardItem *item, unsigned gameId);
     void updatePlayerItem(QStandardItem *item, unsigned playerId);
     void addChatMessage(int type /*0 pm, 1 game, 2 lobby*/, QString playerName, QString message);
+    QString checkForEmotes(QString msg);
+
+    Manager *m_manager;
+    boost::shared_ptr<Session> m_session;
 
     int m_connectAction;
     float m_connectProgress;
@@ -310,7 +395,7 @@ private:
     bool m_isAdmin;
     bool m_inGame;
 
-    RoleItemModel* m_gameModel;
+    GameModel* m_gameModel;
     RoleItemModel* m_lobbyPlayerModel;
     RoleItemModel* m_connectedPlayerModel;
     RoleItemModel* m_connectedSpectatorModel;
@@ -320,6 +405,10 @@ private:
 
     std::list<std::string> ignoreList;
     QString myNick;
+    Timeout* m_timeout;
+    unsigned m_minPing;
+    unsigned m_maxPing;
+    unsigned m_avgPing;
 };
 
 #endif // QMLSERVER_H

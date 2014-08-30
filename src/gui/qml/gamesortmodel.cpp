@@ -10,6 +10,7 @@ GameSortModel::GameSortModel(QObject *parent) :
     setFilterCaseSensitivity(Qt::CaseInsensitive);
     setSortCaseSensitivity(Qt::CaseInsensitive);
     setFilterRole(QmlEnums::GameNameRole);
+    setSortRole(QmlEnums::GameNameRole);
     setFilterKeyColumn(0);
     setDynamicSortFilter(true);
 }
@@ -62,20 +63,20 @@ bool GameSortModel::lessThan(const QModelIndex &left, const QModelIndex &right) 
 
     switch((enum QmlEnums::GameEntry) sortRole())
     {
-    case QmlEnums::GameSortPlayers:
+    case QmlEnums::GamePlayersStringRole:
         if(gil->mode() == gir->mode()) {
             int pcl = qobject_cast<QAbstractItemModel*>(left.model()->data(left,QmlEnums::GamePlayerModelRole).value<QObject*>())->rowCount();
             int pcr = qobject_cast<QAbstractItemModel*>(right.model()->data(right,QmlEnums::GamePlayerModelRole).value<QObject*>())->rowCount();
-            return pcl/gdl->maxNumberOfPlayers() < pcr/gdr->maxNumberOfPlayers();
+            return (10*pcl)/gdl->maxNumberOfPlayers() < (10*pcr)/gdr->maxNumberOfPlayers();
         }
         return gil->mode() < gir->mode();
-    case QmlEnums::GameSortStatus:
+    case QmlEnums::GameStatusRole:
         return gil->mode() < gir->mode();
-    case QmlEnums::GameSortGameType:
+    case QmlEnums::GameTypeRole:
         return gdl->gameType() < gdr->gameType();
-    case QmlEnums::GameSortPwProtect:
+    case QmlEnums::GamePwProtectRole:
         return gil->isPasswordProtected() < gir->isPasswordProtected();
-    case QmlEnums::GameSortActionTimeout:
+    case QmlEnums::GameTimeoutRole:
         return gdl->playerActionTimeoutSec() < gdr->playerActionTimeoutSec();
     }
 

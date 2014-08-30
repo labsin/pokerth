@@ -195,6 +195,7 @@ public:
 	void SignalRejectedGameInvitation(unsigned gameId, unsigned playerIdWho, DenyGameInvitationReason reason);
 
 public slots:
+    void init();
 
 private:
     QmlGame *myGame;
