@@ -203,24 +203,34 @@ void QmlServer::ignorePlayer(unsigned playerID)
             playerIgnoreList.push_back(tmp.toUtf8().constData());
             config->writeConfigStringList("PlayerIgnoreList", playerIgnoreList);
             config->writeBuffer();
+            emit m_chatModel->invalidate();
         }
-        emit m_chatModel->invalidate();
     }
 }
 
 void QmlServer::unIgnorePlayer(unsigned playerID)
 {
-
+    ConfigFile *config = m_manager->getConfig();
+    if(playerIsOnIgnoreList(playerID)) {
+        std::list<std::string> playerIgnoreList = config->readConfigStringList("PlayerIgnoreList");
+        QString tmp = QString::fromUtf8(m_session->getClientPlayerInfo(playerID).playerName.c_str());
+        if(!tmp.compare("")==0) {
+            playerIgnoreList.remove(tmp.toUtf8().constData());
+            config->writeConfigStringList("PlayerIgnoreList", playerIgnoreList);
+            config->writeBuffer();
+            emit m_chatModel->invalidate();
+        }
+    }
 }
 
 void QmlServer::reportGameName(unsigned gameID)
 {
-
+    m_session->reportBadGameName(gameId);
 }
 
 void QmlServer::closeGame(unsigned gameID)
 {
-
+    m_session->adminActionCloseGame(gameId);
 }
 
 
