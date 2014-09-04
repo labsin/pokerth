@@ -17,6 +17,21 @@ QObject *SortFilterProxyModel::sourceModel() const
     return qobject_cast<QObject*>(QSortFilterProxyModel::sourceModel());
 }
 
+int SortFilterProxyModel::rowToSource(int row)
+{
+    return mapToSource(index(row,0)).row();
+}
+
+int SortFilterProxyModel::rowFromSource(int row)
+{
+    return mapFromSource(QSortFilterProxyModel::sourceModel()->index(row,0)).row();
+}
+
+QVariantMap SortFilterProxyModel::get(int row)
+{
+    return RoleItemModel::getModelData(this, row);
+}
+
 void SortFilterProxyModel::setsourceModel(QObject *arg)
 {
     if (QSortFilterProxyModel::sourceModel() != arg) {

@@ -22,6 +22,8 @@ public:
     explicit RoleItemModel(QObject * parent = 0);
     RoleItemModel (const QHash<int, QByteArray> &roleNames, QObject * parent = 0);
 
+    Q_INVOKABLE QVariantMap get(int row);
+
 
     // Extract data from items in model as variant map
     // e.g. { "bookTitle" : QVariant("Bible"), "year" : QVariant(-2000) }

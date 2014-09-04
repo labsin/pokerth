@@ -21,6 +21,10 @@ public:
         return m_wildcardExpression;
     }
 
+    Q_INVOKABLE int rowToSource(int row);
+    Q_INVOKABLE int rowFromSource(int row);
+    Q_INVOKABLE QVariantMap get(int row);
+
 public slots:
     void setsourceModel(QObject* arg);
     void sort(int column = 0, Qt::SortOrder order = Qt::AscendingOrder);

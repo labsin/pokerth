@@ -59,6 +59,11 @@ RoleItemModel::RoleItemModel(const QHash<int, QByteArray> &roleNames, QObject * 
     init();
 }
 
+QVariantMap RoleItemModel::get(int row)
+{
+    return getModelData(this, row);
+}
+
 QVariantMap RoleItemModel::getModelData(const QAbstractItemModel* mdl, int row)
 {
     QHash<int,QByteArray> names = mdl->roleNames();
