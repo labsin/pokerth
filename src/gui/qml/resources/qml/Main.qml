@@ -138,6 +138,12 @@ StartWindow {
             print("Login Needed")
             showLogin()
         }
+        onWaitDialog: {
+            hideGame()
+            showStart()
+            if(Manager.server.connectAction == PokerTH.Server.ConnectActionLast)
+                showLobby()
+        }
         onNetworkNotification: {
             print("Network Notificaion")
             var errorString = ""

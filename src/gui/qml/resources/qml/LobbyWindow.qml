@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.0
-import QtQuick.Layouts 1.0
+import QtQuick.Controls 1.1
+import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 import PokerTH 1.0 as PokerTH
 import PokerTH.GameData 1.0
@@ -117,6 +117,7 @@ Window {
                     role: "timeout"
                     title: "Time"
                 }
+                selectionMode: SelectionMode.SingleSelection
                 onSortIndicatorColumnChanged: {
                     switch(sortIndicatorColumn) {
                     case 0:
@@ -147,6 +148,25 @@ Window {
             ColumnLayout {
                 id: cl
                 height: window.height / 2
+                width: sv.width
+                Row {
+                    id: row
+                    Layout.alignment: Qt.AlignRight
+                    Button {
+                        id: join_button
+                        width: 50
+                        text: "join"
+                        enabled: gamesTable.selection.count > 0
+                        onClicked: {
+                            gamesTable.selection.forEach(function(row) {
+                                print(row)
+                                print(games.get(row).name, games.get(row).gameId)
+                                Manager.joinGame(games.get(row).gameId)
+                            })
+                        }
+                    }
+                }
+
                 Text {
                     id: chatLabel
                     text: "Chat"
